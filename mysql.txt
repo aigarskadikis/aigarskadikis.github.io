@@ -1,0 +1,30 @@
+#!/bin/bash
+echo =================================================================
+echo Purpose of this script is to determine a problem faster and
+echo prevent a human error. Never use it without a presence of author!
+echo =================================================================
+echo
+
+echo version of backend is $(zabbix_server -V | head -1 | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+")
+echo
+
+
+# if mysql server is connectable from backend
+if [ -f /etc/zabbix/zabbix_server.conf ]; then
+#grep ^DB /etc/zabbix/zabbix_server.conf
+DBNAME=$(grep -oP 'DBName=\K\w+' /etc/zabbix/zabbix_server.conf)
+fi
+echo
+
+echo database version:
+mysql $DBNAME -e "SELECT * FROM dbversion;"
+echo
+
+echo size of table events:
+mysql $DBNAME -e "SELECT source,COUNT(*) FROM events GROUP BY source;"
+echo
+
+echo count of user sessions
+mysql $DBNAME -e "SELECT COUNT(*) FROM sessions;"
+echo
+
