@@ -1,2 +1,0 @@
-# aigarskadikis.github.io
- 
