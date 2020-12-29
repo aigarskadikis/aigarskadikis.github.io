@@ -16,15 +16,70 @@ DBNAME=$(grep -oP 'DBName=\K\w+' /etc/zabbix/zabbix_server.conf)
 fi
 echo
 
+echo pick up variable. test database connection
+DBVESRION=$(
+mysql $DBNAME -B -N -e "
+SELECT mandatory FROM dbversion;
+"
+)
+echo $DBVESRION
+echo
+
+# detect if versioon is bigger than 2.0
+if [ $DBVESRION -gt 4000000 ]; then
+
 echo database version:
-mysql $DBNAME -e "SELECT * FROM dbversion;"
+mysql $DBNAME -e "
+SELECT * FROM dbversion;
+"
 echo
 
 echo size of table events:
-mysql $DBNAME -e "SELECT source,COUNT(*) FROM events GROUP BY source;"
+mysql $DBNAME -e "
+SELECT source,COUNT(*) FROM events GROUP BY source;
+"
+echo
+
+echo events generated in last 1 hour:
+mysql $DBNAME -e "
+SELECT COUNT(*) FROM events WHERE clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR);
+"
 echo
 
 echo count of user sessions
-mysql $DBNAME -e "SELECT COUNT(*) FROM sessions;"
+mysql $DBNAME -e "
+SELECT COUNT(*) FROM sessions;
+"
 echo
 
+echo alerts in last 7 days:
+mysql $DBNAME -e "
+SELECT COUNT(*),
+CASE alerts.status
+WHEN 0 THEN 'NOT_SENT'
+WHEN 1 THEN 'SENT'
+WHEN 2 THEN 'FAILED'
+WHEN 3 THEN 'NEW'
+END AS status
+FROM alerts
+WHERE alerts.clock > UNIX_TIMESTAMP (NOW()-INTERVAL 7 DAY)
+GROUP BY alerts.status;
+"
+echo
+
+echo alerts in last 8 hours:
+mysql $DBNAME -e "
+SELECT COUNT(*),
+CASE alerts.status
+WHEN 0 THEN 'NOT_SENT'
+WHEN 1 THEN 'SENT'
+WHEN 2 THEN 'FAILED'
+WHEN 3 THEN 'NEW'
+END AS status
+FROM alerts
+WHERE alerts.clock > UNIX_TIMESTAMP (NOW()-INTERVAL 8 HOUR)
+GROUP BY alerts.status;
+"
+echo
+
+fi
