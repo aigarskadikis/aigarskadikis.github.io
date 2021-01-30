@@ -46,9 +46,17 @@ fi
 # if second argument is explicitly mysql then ignore postgres
 [ "$2" == "mysql" ] && POSTGRES=0
 
-[ "$MYSQL" -eq "1" ] && SQL_CLIENT="mysql $DBNAME -B -N -e"
+if [ "$MYSQL" -eq "1" ];then
+SQL_CLIENT="mysql $DBNAME -B -N -e"
+NUMERIC=""
+EXPANDED=""
+fi
 
-[ "$POSTGRES" -eq "1" ] && SQL_CLIENT="psql $DBNAME --no-align -t -c"
+if [ "$POSTGRES" -eq "1" ];then
+SQL_CLIENT="psql $DBNAME --no-align -t -c"
+NUMERIC="::NUMERIC(10,2)"
+EXPANDED="--expanded"
+fi
 
 # test database connection
 $SQL_CLIENT "
@@ -93,6 +101,57 @@ SELECT COUNT(*) FROM hosts WHERE status=5;
 OPEN_PROBLEM_EVENTS=$($SQL_CLIENT "
 SELECT COUNT(*) FROM problem;
 ") && printf "%15d | open problem events\n" "$OPEN_PROBLEM_EVENTS"
+
+echo
+
+EVENTS=$($SQL_CLIENT "
+SELECT source,COUNT(*) FROM events GROUP BY source;
+") && echo -e "events:\n$EVENTS\n"
+
+LLD_FREQUENCY=$($SQL_CLIENT "
+SELECT COUNT(*),delay FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE items.flags=1 AND hosts.status=0 GROUP BY delay;
+") && echo -e "LLD frequency for monitored hosts:\n$LLD_FREQUENCY\n"
+
+BIG_HISTORY_LOG=$($SQL_CLIENT "
+SELECT hosts.host,history_log.itemid,items.key_,
+COUNT(history_log.itemid) AS \"count\", AVG(LENGTH(history_log.value))$NUMERIC AS \"avg size\",
+(COUNT(history_log.itemid) * AVG(LENGTH(history_log.value)))$NUMERIC AS \"Count x AVG\"
+FROM history_log 
+JOIN items ON (items.itemid=history_log.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE clock > $AGO30M
+GROUP BY hosts.host,history_log.itemid,items.key_
+ORDER BY 6 DESC
+LIMIT 1
+" $EXPANDED) && echo -e "Most consuming history_log item:\n$BIG_HISTORY_LOG\n"
+
+BIG_HISTORY_TEXT=$($SQL_CLIENT "
+SELECT hosts.host,history_text.itemid,items.key_,
+COUNT(history_text.itemid) AS \"count\", AVG(LENGTH(history_text.value))$NUMERIC AS \"avg size\",
+(COUNT(history_text.itemid) * AVG(LENGTH(history_text.value)))$NUMERIC AS \"Count x AVG\"
+FROM history_text 
+JOIN items ON (items.itemid=history_text.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE clock > $AGO1D
+GROUP BY hosts.host,history_text.itemid,items.key_
+ORDER BY 6 DESC
+LIMIT 1
+" $EXPANDED) && echo -e "Most consuming history_text item:\n$BIG_HISTORY_TEXT\n"
+
+BIG_HISTORY_STR=$($SQL_CLIENT "
+SELECT hosts.host,history_str.itemid,items.key_,
+COUNT(history_str.itemid) AS \"count\", AVG(LENGTH(history_str.value))$NUMERIC AS \"avg size\",
+(COUNT(history_str.itemid) * AVG(LENGTH(history_str.value)))$NUMERIC AS \"Count x AVG\"
+FROM history_str 
+JOIN items ON (items.itemid=history_str.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE clock > $AGO1D
+GROUP BY hosts.host,history_str.itemid,items.key_
+ORDER BY 6 DESC
+LIMIT 1
+" $EXPANDED) && echo -e "Most consuming history_str item:\n$BIG_HISTORY_STR\n"
 
 echo
 
