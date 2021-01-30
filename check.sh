@@ -4,6 +4,16 @@
 # prevent a human error. Never use it without a presence of author!
 # =================================================================
 
+# define variables suitable for different unixtime situations
+NOW=$(date "+%s")
+AGO5M=$((NOW-300))
+AGO10M=$((NOW-600))
+AGO30M=$((NOW-1800))
+AGO1H=$((NOW-3600))
+AGO1D=$((NOW-86400))
+AGO5D=$((NOW-432000))
+AGO7D=$((NOW-604800))
+AGO28D=$((NOW-2419200))
 
 
 echo $1 = DB name
