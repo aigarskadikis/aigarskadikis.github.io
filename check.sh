@@ -76,8 +76,23 @@ SELECT COUNT(*) FROM events WHERE clock > $AGO1H;
 
 ALL_EVENTS_1D=$($SQL_CLIENT "
 SELECT COUNT(*) FROM events WHERE clock > $AGO1D;
-") && printf "%15d | events from last 1d" "$ALL_EVENTS_1D"
+") && printf "%15d | events from last 1d\n" "$ALL_EVENTS_1D"
 
-echo
+COUNT_OF_ALL_EVENTS=$($SQL_CLIENT "
+SELECT COUNT(*) FROM events;
+") && printf "%15d | count of event records\n" "$COUNT_OF_ALL_EVENTS"
+
+COUNT_OF_SESSIONS=$($SQL_CLIENT "
+SELECT COUNT(*) FROM sessions;
+") && printf "%15d | count of sessions\n" "$COUNT_OF_SESSIONS"
+
+ACTIVE_PROXIES=$($SQL_CLIENT "
+SELECT COUNT(*) FROM hosts WHERE status=5;
+") && printf "%15d | active proxies\n" "$ACTIVE_PROXIES"
+
+OPEN_PROBLEM_EVENTS=$($SQL_CLIENT "
+SELECT COUNT(*) FROM problem;
+") && printf "%15d | open problem events\n" "$OPEN_PROBLEM_EVENTS"
+
 echo
 
