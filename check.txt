@@ -1,10 +1,12 @@
 #!/bin/bash
 # =================================================================
-# Purpose of this script is to determine a problem faster and
-# prevent a human error. Never use it without a presence of author!
+# Purpose of this script is to:
+# determine a problem faster;
+# prevent a human error!
 # =================================================================
 
-# define variables suitable for different unixtime situations
+# define variables suitable for different unixtime situations. this is required:
+# so the script can use the same SQL query for MySQL and PostgreSQL
 NOW=$(date "+%s")
 AGO5M=$((NOW-300))
 AGO10M=$((NOW-600))
@@ -152,6 +154,17 @@ GROUP BY hosts.host,history_str.itemid,items.key_
 ORDER BY 6 DESC
 LIMIT 1
 " $EXPANDED) && echo -e "Most consuming history_str item:\n$BIG_HISTORY_STR\n"
+
+UNREACHABLE_HOSTS=$($SQL_CLIENT "
+SELECT hosts.host, interface.ip, interface.dns, interface.useip,
+CASE interface.type WHEN 1 THEN 'ZBX' WHEN 2 THEN 'SNMP'
+WHEN 3 THEN 'IPMI' WHEN 4 THEN 'JMX' END AS \"type\",
+hosts.error FROM hosts
+JOIN interface ON interface.hostid=hosts.hostid
+WHERE hosts.available=2 AND interface.main=1 AND hosts.status=0
+LIMIT 1
+" $EXPANDED) && echo -e "Unreachable host:\n$UNREACHABLE_HOSTS\n"
+
 
 echo
 
