@@ -50,14 +50,18 @@ fi
 
 if [ "$MYSQL" -eq "1" ];then
 SQL_CLIENT="mysql $DBNAME -B -N -e"
+SQL_CLIENT_H="mysql $DBNAME -B -e"
 NUMERIC=""
-EXPANDED=""
+EXPANDED_PG=""
+EXPANDED_MY='\G'
 fi
 
 if [ "$POSTGRES" -eq "1" ];then
 SQL_CLIENT="psql $DBNAME --no-align -t -c"
+SQL_CLIENT_H="psql $DBNAME --no-align -t -c"
 NUMERIC="::NUMERIC(10,2)"
-EXPANDED="--expanded"
+EXPANDED_PG="--expanded"
+EXPANDED_MY=""
 fi
 
 # test database connection
@@ -74,6 +78,10 @@ clear
 
 #echo POSTGRES=$POSTGRES
 #echo MYSQL=$MYSQL
+
+DBENGINE=$($SQL_CLIENT "
+SELECT VERSION();
+") && echo "$DBENGINE"
 echo
 
 VERSION=$($SQL_CLIENT "
@@ -127,7 +135,8 @@ WHERE clock > $AGO30M
 GROUP BY hosts.host,history_log.itemid,items.key_
 ORDER BY 6 DESC
 LIMIT 1
-" $EXPANDED) && echo -e "Most consuming history_log item:\n$BIG_HISTORY_LOG\n"
+$EXPANDED_MY
+" $EXPANDED_PG) && echo -e "Most consuming history_log item:\n$BIG_HISTORY_LOG\n"
 
 BIG_HISTORY_TEXT=$($SQL_CLIENT "
 SELECT hosts.host,history_text.itemid,items.key_,
@@ -140,7 +149,8 @@ WHERE clock > $AGO1D
 GROUP BY hosts.host,history_text.itemid,items.key_
 ORDER BY 6 DESC
 LIMIT 1
-" $EXPANDED) && echo -e "Most consuming history_text item:\n$BIG_HISTORY_TEXT\n"
+$EXPANDED_MY
+" $EXPANDED_PG) && echo -e "Most consuming history_text item:\n$BIG_HISTORY_TEXT\n"
 
 BIG_HISTORY_STR=$($SQL_CLIENT "
 SELECT hosts.host,history_str.itemid,items.key_,
@@ -153,9 +163,10 @@ WHERE clock > $AGO1D
 GROUP BY hosts.host,history_str.itemid,items.key_
 ORDER BY 6 DESC
 LIMIT 1
-" $EXPANDED) && echo -e "Most consuming history_str item:\n$BIG_HISTORY_STR\n"
+$EXPANDED_MY
+" $EXPANDED_PG) && echo -e "Most consuming history_str item:\n$BIG_HISTORY_STR\n"
 
-UNREACHABLE_HOSTS=$($SQL_CLIENT "
+UNREACHABLE_HOSTS=$($SQL_CLIENT_H "
 SELECT hosts.host, interface.ip, interface.dns, interface.useip,
 CASE interface.type WHEN 1 THEN 'ZBX' WHEN 2 THEN 'SNMP'
 WHEN 3 THEN 'IPMI' WHEN 4 THEN 'JMX' END AS \"type\",
@@ -163,8 +174,22 @@ hosts.error FROM hosts
 JOIN interface ON interface.hostid=hosts.hostid
 WHERE hosts.available=2 AND interface.main=1 AND hosts.status=0
 LIMIT 1
-" $EXPANDED) && echo -e "Unreachable host:\n$UNREACHABLE_HOSTS\n"
+$EXPANDED_MY
+" $EXPANDED_PG) && [ ! -z "$UNREACHABLE_HOSTS" ] && echo -e "Unreachable host:\n$UNREACHABLE_HOSTS\n"
 
+STATUS_OF_ALERTS=$($SQL_CLIENT "
+SELECT COUNT(*),CASE alerts.status
+WHEN 0 THEN 'NOT_SENT'
+WHEN 1 THEN 'SENT'
+WHEN 2 THEN 'FAILED'
+WHEN 3 THEN 'NEW'
+END AS \"status\",
+actions.name
+FROM alerts
+JOIN actions ON (alerts.actionid=actions.actionid)
+WHERE alerts.clock > $AGO1H
+GROUP BY alerts.status,actions.name;
+" $EXPANDED_PG) && echo -e "Status of alerts in last 1h:\n$STATUS_OF_ALERTS\n"
 
 echo
 
