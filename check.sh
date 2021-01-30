@@ -15,9 +15,11 @@ AGO5D=$((NOW-432000))
 AGO7D=$((NOW-604800))
 AGO28D=$((NOW-2419200))
 
-echo $1 = DB name
-echo $2 = DB engine
-echo
+#echo $1 = DB name
+#echo $2 = DB engine
+#echo
+
+
 
 # if first argument is given then that will be database name
 if [ ! -z "$1" ]; then
@@ -46,7 +48,7 @@ fi
 
 [ "$MYSQL" -eq "1" ] && SQL_CLIENT="mysql $DBNAME -B -N -e"
 
-[ "$POSTGRES" -eq "1" ] && SQL_CLIENT="psql $DBNAME -t -c"
+[ "$POSTGRES" -eq "1" ] && SQL_CLIENT="psql $DBNAME --no-align -t -c"
 
 # test database connection
 $SQL_CLIENT "
@@ -58,13 +60,24 @@ echo $exit_code. cannot connect to DB engine or database does not exist
 exit $exit_code
 fi
 
-echo POSTGRES=$POSTGRES
-echo MYSQL=$MYSQL
+clear
+
+#echo POSTGRES=$POSTGRES
+#echo MYSQL=$MYSQL
 echo
 
-echo ######## VERSION OF ZABBIX DATABASE ########
-$SQL_CLIENT "
+VERSION=$($SQL_CLIENT "
 SELECT mandatory FROM dbversion;
-"
+") && printf "%15d | version of zabbix\n" "$VERSION"
+
+ALL_EVENTS_1H=$($SQL_CLIENT "
+SELECT COUNT(*) FROM events WHERE clock > $AGO1H;
+") && printf "%15d | events from last 1h\n" "$ALL_EVENTS_1H"
+
+ALL_EVENTS_1D=$($SQL_CLIENT "
+SELECT COUNT(*) FROM events WHERE clock > $AGO1D;
+") && printf "%15d | events from last 1d" "$ALL_EVENTS_1D"
 
 echo
+echo
+
