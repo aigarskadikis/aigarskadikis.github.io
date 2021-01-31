@@ -124,7 +124,7 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE items.flags=1 AND hosts.status=0 GROUP BY delay;
 ") && echo -e "LLD frequency for monitored hosts:\n$LLD_FREQUENCY\n"
 
-BIG_HISTORY_LOG=$($SQL_CLIENT "
+BIG_HISTORY_LOG=$($SQL_CLIENT_H "
 SELECT hosts.host,history_log.itemid,items.key_,
 COUNT(history_log.itemid) AS \"count\", AVG(LENGTH(history_log.value))$NUMERIC AS \"avg size\",
 (COUNT(history_log.itemid) * AVG(LENGTH(history_log.value)))$NUMERIC AS \"Count x AVG\"
@@ -136,9 +136,9 @@ GROUP BY hosts.host,history_log.itemid,items.key_
 ORDER BY 6 DESC
 LIMIT 1
 $EXPANDED_MY
-" $EXPANDED_PG) && echo -e "Most consuming history_log item:\n$BIG_HISTORY_LOG\n"
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_LOG" ] && echo -e "Most consuming history_log item:\n$BIG_HISTORY_LOG\n"
 
-BIG_HISTORY_TEXT=$($SQL_CLIENT "
+BIG_HISTORY_TEXT=$($SQL_CLIENT_H "
 SELECT hosts.host,history_text.itemid,items.key_,
 COUNT(history_text.itemid) AS \"count\", AVG(LENGTH(history_text.value))$NUMERIC AS \"avg size\",
 (COUNT(history_text.itemid) * AVG(LENGTH(history_text.value)))$NUMERIC AS \"Count x AVG\"
@@ -150,9 +150,9 @@ GROUP BY hosts.host,history_text.itemid,items.key_
 ORDER BY 6 DESC
 LIMIT 1
 $EXPANDED_MY
-" $EXPANDED_PG) && echo -e "Most consuming history_text item:\n$BIG_HISTORY_TEXT\n"
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_TEXT" ] && echo -e "Most consuming history_text item:\n$BIG_HISTORY_TEXT\n"
 
-BIG_HISTORY_STR=$($SQL_CLIENT "
+BIG_HISTORY_STR=$($SQL_CLIENT_H "
 SELECT hosts.host,history_str.itemid,items.key_,
 COUNT(history_str.itemid) AS \"count\", AVG(LENGTH(history_str.value))$NUMERIC AS \"avg size\",
 (COUNT(history_str.itemid) * AVG(LENGTH(history_str.value)))$NUMERIC AS \"Count x AVG\"
@@ -164,7 +164,7 @@ GROUP BY hosts.host,history_str.itemid,items.key_
 ORDER BY 6 DESC
 LIMIT 1
 $EXPANDED_MY
-" $EXPANDED_PG) && echo -e "Most consuming history_str item:\n$BIG_HISTORY_STR\n"
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_STR" ] && echo -e "Most consuming history_str item:\n$BIG_HISTORY_STR\n"
 
 UNREACHABLE_HOSTS=$($SQL_CLIENT_H "
 SELECT hosts.host, interface.ip, interface.dns, interface.useip,
@@ -177,7 +177,7 @@ LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$UNREACHABLE_HOSTS" ] && echo -e "Unreachable host:\n$UNREACHABLE_HOSTS\n"
 
-STATUS_OF_ALERTS=$($SQL_CLIENT "
+STATUS_OF_ALERTS=$($SQL_CLIENT_H "
 SELECT COUNT(*),CASE alerts.status
 WHEN 0 THEN 'NOT_SENT'
 WHEN 1 THEN 'SENT'
@@ -189,9 +189,9 @@ FROM alerts
 JOIN actions ON (alerts.actionid=actions.actionid)
 WHERE alerts.clock > $AGO1H
 GROUP BY alerts.status,actions.name;
-" $EXPANDED_PG) && echo -e "Status of alerts in last 1h:\n$STATUS_OF_ALERTS\n"
+" $EXPANDED_PG) && [ ! -z "$STATUS_OF_ALERTS" ] && echo -e "Status of alerts in last 1h:\n$STATUS_OF_ALERTS\n"
 
-TRIGGER_EVAL_PROBLEM=$($SQL_CLIENT "
+TRIGGER_EVAL_PROBLEM=$($SQL_CLIENT_H "
 SELECT DISTINCT hosts.name, COUNT(hosts.name) AS \"count\", items.key_ AS \"key\", triggers.error
 FROM events
 JOIN triggers ON (events.objectid=triggers.triggerid)
@@ -204,7 +204,7 @@ GROUP BY hosts.name,items.key_,triggers.error
 ORDER BY COUNT(hosts.name) ASC, hosts.name, items.key_, triggers.error
 LIMIT 1
 $EXPANDED_MY
-" $EXPANDED_PG) && echo -e "Top trigger eveluation problem in last 1d:\n$TRIGGER_EVAL_PROBLEM\n"
+" $EXPANDED_PG) && [ ! -z "$TRIGGER_EVAL_PROBLEM" ] && echo -e "Top trigger eveluation problem in last 1d:\n$TRIGGER_EVAL_PROBLEM\n"
 
 [ "$VERSION" -lt "4040000" ] && UNSUPPORTED_ITEMS=$($SQL_CLIENT "
 SELECT hosts.host AS \"host\",
