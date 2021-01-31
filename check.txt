@@ -191,5 +191,53 @@ WHERE alerts.clock > $AGO1H
 GROUP BY alerts.status,actions.name;
 " $EXPANDED_PG) && echo -e "Status of alerts in last 1h:\n$STATUS_OF_ALERTS\n"
 
+TRIGGER_EVAL_PROBLEM=$($SQL_CLIENT "
+SELECT DISTINCT hosts.name, COUNT(hosts.name) AS \"count\", items.key_ AS \"key\", triggers.error
+FROM events
+JOIN triggers ON (events.objectid=triggers.triggerid)
+JOIN functions ON (functions.triggerid = triggers.triggerid)
+JOIN items ON (items.itemid = functions.itemid)
+JOIN hosts ON (items.hostid = hosts.hostid)
+WHERE events.source=3 AND events.object=0 AND triggers.flags IN (0,4) AND triggers.state=1
+AND events.clock > $AGO1D
+GROUP BY hosts.name,items.key_,triggers.error
+ORDER BY COUNT(hosts.name) ASC, hosts.name, items.key_, triggers.error
+LIMIT 1
+$EXPANDED_MY
+" $EXPANDED_PG) && echo -e "Top trigger eveluation problem in last 1d:\n$TRIGGER_EVAL_PROBLEM\n"
+
+[ "$VERSION" -lt "4040000" ] && UNSUPPORTED_ITEMS=$($SQL_CLIENT "
+SELECT hosts.host AS \"host\",
+       events.objectid AS \"itemid\",
+       items.key_ AS \"key\",
+       events.name AS \"error\",
+       count(events.objectid) AS \"occurrence\"
+FROM events
+JOIN items ON (items.itemid=events.objectid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE events.source = 3
+  AND events.object = 4
+  AND LENGTH(events.name)>0
+GROUP BY hosts.host,
+events.objectid,
+items.key_,
+events.name
+ORDER BY COUNT(*) DESC
+LIMIT 1
+$EXPANDED_MY
+" $EXPANDED_PG) && echo -e "Top unsupported item:\n$UNSUPPORTED_ITEMS\n"
+
+[ "$VERSION" -gt "4020000" ] && UNSUPPORTED_ITEMS2=$($SQL_CLIENT "
+SELECT hosts.host,COUNT(*)
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
+JOIN item_rtdata ON (item_rtdata.itemid=items.itemid)
+WHERE hosts.status=0
+AND LENGTH(item_rtdata.error) > 0
+GROUP BY hosts.host
+ORDER BY COUNT(*) DESC
+LIMIT 1;
+") && echo -e "Top unsupported item:\n$UNSUPPORTED_ITEMS2\n"
+
 echo
 
