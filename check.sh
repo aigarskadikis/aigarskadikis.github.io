@@ -188,6 +188,35 @@ LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_STR" ] && echo -e "Most consuming history_str item:\n$BIG_HISTORY_STR\n"
 
+BIG_HISTORY_UINT=$($SQL_CLIENT_H "
+SELECT hosts.host,history_uint.itemid,items.key_,
+COUNT(history_uint.itemid) AS \"count\", AVG(LENGTH(history_uint.value))$NUMERIC AS \"avg size\",
+(COUNT(history_uint.itemid) * AVG(LENGTH(history_uint.value)))$NUMERIC AS \"Count x AVG\"
+FROM history_uint 
+JOIN items ON (items.itemid=history_uint.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE clock > $AGO1D
+GROUP BY hosts.host,history_uint.itemid,items.key_
+ORDER BY 6 DESC
+LIMIT 1
+$EXPANDED_MY
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_UINT" ] && echo -e "Most consuming history_uint item:\n$BIG_HISTORY_UINT\n"
+
+BIG_HISTORY=$($SQL_CLIENT_H "
+SELECT hosts.host,history.itemid,items.key_,
+COUNT(history.itemid) AS \"count\", AVG(LENGTH(history.value))$NUMERIC AS \"avg size\",
+(COUNT(history.itemid) * AVG(LENGTH(history.value)))$NUMERIC AS \"Count x AVG\"
+FROM history 
+JOIN items ON (items.itemid=history.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE clock > $AGO1D
+GROUP BY hosts.host,history.itemid,items.key_
+ORDER BY 6 DESC
+LIMIT 1
+$EXPANDED_MY
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY" ] && echo -e "Most consuming history item:\n$BIG_HISTORY\n"
+
+
 UNREACHABLE_HOSTS=$($SQL_CLIENT_H "
 SELECT hosts.host, interface.ip, interface.dns, interface.useip,
 CASE interface.type WHEN 1 THEN 'ZBX' WHEN 2 THEN 'SNMP'
