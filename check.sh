@@ -48,6 +48,7 @@ fi
 # if second argument is explicitly mysql then ignore postgres
 [ "$2" == "mysql" ] && POSTGRES=0
 
+# special syntax rules for MySQL
 if [ "$MYSQL" -eq "1" ];then
 SQL_CLIENT="mysql $DBNAME -B -N -e"
 SQL_CLIENT_H="mysql $DBNAME -B -e"
@@ -56,6 +57,7 @@ EXPANDED_PG=""
 EXPANDED_MY='\G'
 fi
 
+# special syntax rules for PostgrSQL
 if [ "$POSTGRES" -eq "1" ];then
 SQL_CLIENT="psql $DBNAME --no-align -t -c"
 SQL_CLIENT_H="psql $DBNAME --no-align -t -c"
@@ -75,9 +77,6 @@ exit $exit_code
 fi
 
 clear
-
-#echo POSTGRES=$POSTGRES
-#echo MYSQL=$MYSQL
 
 DBENGINE=$($SQL_CLIENT "
 SELECT VERSION();
