@@ -144,7 +144,7 @@ WHERE items.flags=1 AND hosts.status=0 GROUP BY delay;
 ") && echo -e "LLD frequency for monitored hosts:\n$LLD_FREQUENCY\n"
 
 BIG_HISTORY_LOG=$($SQL_CLIENT_H "
-SELECT hosts.host,history_log.itemid,items.key_,
+SELECT hosts.host,hosts.hostid,history_log.itemid,items.key_,
 COUNT(history_log.itemid) AS \"count\", AVG(LENGTH(history_log.value))$NUMERIC AS \"avg size\",
 (COUNT(history_log.itemid) * AVG(LENGTH(history_log.value)))$NUMERIC AS \"Count x AVG\"
 FROM history_log 
@@ -152,13 +152,13 @@ JOIN items ON (items.itemid=history_log.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO30M
 GROUP BY hosts.host,history_log.itemid,items.key_
-ORDER BY 6 DESC
+ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_LOG" ] && echo -e "Most consuming history_log item:\n$BIG_HISTORY_LOG\n"
 
 BIG_HISTORY_TEXT=$($SQL_CLIENT_H "
-SELECT hosts.host,history_text.itemid,items.key_,
+SELECT hosts.host,hosts.hostid,history_text.itemid,items.key_,
 COUNT(history_text.itemid) AS \"count\", AVG(LENGTH(history_text.value))$NUMERIC AS \"avg size\",
 (COUNT(history_text.itemid) * AVG(LENGTH(history_text.value)))$NUMERIC AS \"Count x AVG\"
 FROM history_text 
@@ -166,13 +166,13 @@ JOIN items ON (items.itemid=history_text.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,history_text.itemid,items.key_
-ORDER BY 6 DESC
+ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_TEXT" ] && echo -e "Most consuming history_text item:\n$BIG_HISTORY_TEXT\n"
 
 BIG_HISTORY_STR=$($SQL_CLIENT_H "
-SELECT hosts.host,history_str.itemid,items.key_,
+SELECT hosts.host,hosts.hostid,history_str.itemid,items.key_,
 COUNT(history_str.itemid) AS \"count\", AVG(LENGTH(history_str.value))$NUMERIC AS \"avg size\",
 (COUNT(history_str.itemid) * AVG(LENGTH(history_str.value)))$NUMERIC AS \"Count x AVG\"
 FROM history_str 
@@ -180,13 +180,13 @@ JOIN items ON (items.itemid=history_str.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,history_str.itemid,items.key_
-ORDER BY 6 DESC
+ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_STR" ] && echo -e "Most consuming history_str item:\n$BIG_HISTORY_STR\n"
 
 BIG_HISTORY_UINT=$($SQL_CLIENT_H "
-SELECT hosts.host,history_uint.itemid,items.key_,
+SELECT hosts.host,hosts.hostid,history_uint.itemid,items.key_,
 COUNT(history_uint.itemid) AS \"count\", AVG(LENGTH(history_uint.value))$NUMERIC AS \"avg size\",
 (COUNT(history_uint.itemid) * AVG(LENGTH(history_uint.value)))$NUMERIC AS \"Count x AVG\"
 FROM history_uint 
@@ -194,13 +194,13 @@ JOIN items ON (items.itemid=history_uint.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,history_uint.itemid,items.key_
-ORDER BY 6 DESC
+ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_UINT" ] && echo -e "Most consuming history_uint item:\n$BIG_HISTORY_UINT\n"
 
 BIG_HISTORY=$($SQL_CLIENT_H "
-SELECT hosts.host,history.itemid,items.key_,
+SELECT hosts.host,hosts.hostid,history.itemid,items.key_,
 COUNT(history.itemid) AS \"count\", AVG(LENGTH(history.value))$NUMERIC AS \"avg size\",
 (COUNT(history.itemid) * AVG(LENGTH(history.value)))$NUMERIC AS \"Count x AVG\"
 FROM history 
@@ -208,7 +208,7 @@ JOIN items ON (items.itemid=history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,history.itemid,items.key_
-ORDER BY 6 DESC
+ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY" ] && echo -e "Most consuming history item:\n$BIG_HISTORY\n"
