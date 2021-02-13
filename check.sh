@@ -113,7 +113,7 @@ SELECT COUNT(*) FROM problem;
 
 echo
 
-echo looking for orphaned data..
+echo -n "looking for orphaned data"
 
 # MySQL loves to enclose columns with `comlumn_name`, PostgreSQL don't like that
 if [ "$MYSQL" -eq "0" ]; then
@@ -128,7 +128,7 @@ echo -n "."
 OUT=$($SQL_CLIENT "
 $SQLSELECT
 ")
-[ ! -z "$OUT" ] && echo -e "possibly orphaned data:\n$SQLSELECT\n"
+[ ! -z "$OUT" ] && echo -e "\npossibly orphaned data:\n$SQLSELECT\n"
 } done
 echo -e "\n"
 
