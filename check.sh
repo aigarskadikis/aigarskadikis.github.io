@@ -117,23 +117,20 @@ echo looking for orphaned data..
 
 # MySQL loves to enclose columns with `comlumn_name`, PostgreSQL don't like that
 if [ "$MYSQL" -eq "0" ]; then
-echo this is postgres
 ORPHANED=$(sed "s|\`||g" $VERSION.sql)
 else
-echo this mysql
 ORPHANED=$(cat $VERSION.sql)
 fi
 
-echo "$ORPHANED"
-
 echo "$ORPHANED" | while IFS= read -r SQLSELECT
 do {
-echo $SQLSELECT
+echo -n "."
 OUT=$($SQL_CLIENT "
 $SQLSELECT
 ")
 [ ! -z "$OUT" ] && echo -e "possibly orphaned data:\n$SQLSELECT\n"
 } done
+echo -e "\n"
 
 
 EVENTS=$($SQL_CLIENT "
