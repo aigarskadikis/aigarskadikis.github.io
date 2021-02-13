@@ -143,6 +143,112 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE items.flags=1 AND hosts.status=0 GROUP BY delay;
 ") && echo -e "LLD frequency for monitored hosts:\n$LLD_FREQUENCY\n"
 
+# next 5 selects only for MySQL
+if [ "$POSTGRES" -eq "0" ]; then
+
+BIG_HISTORY_TEXT_HOST=$($SQL_CLIENT_H "
+SELECT ho.name, ho.hostid, count(*) AS records, 
+(count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
+WHERE TABLE_NAME = 'history_text' and TABLE_SCHEMA = 'zabbix')/1024/1024) AS 'Total size average (Mb)', 
+sum(length(history_text.value))/1024/1024 + 
+sum(length(history_text.clock))/1024/1024 +
+sum(length(history_text.ns))/1024/1024 + 
+sum(length(history_text.itemid))/1024/1024 AS 'history_text Column Size (Mb)'
+FROM history_text
+LEFT OUTER JOIN items i on history_text.itemid = i.itemid 
+LEFT OUTER JOIN hosts ho on i.hostid = ho.hostid 
+WHERE ho.status IN (0,1)
+AND history_text.clock > $AGO1D
+GROUP BY ho.hostid
+ORDER BY 4 DESC
+LIMIT 1
+$EXPANDED_MY
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_TEXT_HOST" ] && \
+echo -e "HOST consuming history_text table most:\n$BIG_HISTORY_TEXT_HOST\n"
+
+BIG_HISTORY_LOG_HOST=$($SQL_CLIENT_H "
+SELECT ho.name, ho.hostid, count(*) AS records, 
+(count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
+WHERE TABLE_NAME = 'history_log' and TABLE_SCHEMA = 'zabbix')/1024/1024) AS 'Total size average (Mb)', 
+sum(length(history_log.value))/1024/1024 + 
+sum(length(history_log.clock))/1024/1024 +
+sum(length(history_log.ns))/1024/1024 + 
+sum(length(history_log.itemid))/1024/1024 AS 'history_log Column Size (Mb)'
+FROM history_log
+LEFT OUTER JOIN items i on history_log.itemid = i.itemid 
+LEFT OUTER JOIN hosts ho on i.hostid = ho.hostid 
+WHERE ho.status IN (0,1)
+AND history_log.clock > $AGO1D
+GROUP BY ho.hostid
+ORDER BY 4 DESC
+LIMIT 1
+$EXPANDED_MY
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_LOG_HOST" ] && \
+echo -e "HOST consuming history_log table most:\n$BIG_HISTORY_LOG_HOST\n"
+
+BIG_HISTORY_STR_HOST=$($SQL_CLIENT_H "
+SELECT ho.name, ho.hostid, count(*) AS records, 
+(count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
+WHERE TABLE_NAME = 'history_str' and TABLE_SCHEMA = 'zabbix')/1024/1024) AS 'Total size average (Mb)', 
+sum(length(history_str.value))/1024/1024 + 
+sum(length(history_str.clock))/1024/1024 +
+sum(length(history_str.ns))/1024/1024 + 
+sum(length(history_str.itemid))/1024/1024 AS 'history_str Column Size (Mb)'
+FROM history_str
+LEFT OUTER JOIN items i on history_str.itemid = i.itemid 
+LEFT OUTER JOIN hosts ho on i.hostid = ho.hostid 
+WHERE ho.status IN (0,1)
+AND history_str.clock > $AGO1D
+GROUP BY ho.hostid
+ORDER BY 4 DESC
+LIMIT 1
+$EXPANDED_MY
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_STR_HOST" ] && \
+echo -e "HOST consuming history_str table most:\n$BIG_HISTORY_STR_HOST\n"
+
+BIG_HISTORY_UINT_HOST=$($SQL_CLIENT_H "
+SELECT ho.name, ho.hostid, count(*) AS records, 
+(count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
+WHERE TABLE_NAME = 'history_uint' and TABLE_SCHEMA = 'zabbix')/1024/1024) AS 'Total size average (Mb)', 
+sum(length(history_uint.value))/1024/1024 + 
+sum(length(history_uint.clock))/1024/1024 +
+sum(length(history_uint.ns))/1024/1024 + 
+sum(length(history_uint.itemid))/1024/1024 AS 'history_uint Column Size (Mb)'
+FROM history_uint
+LEFT OUTER JOIN items i on history_uint.itemid = i.itemid 
+LEFT OUTER JOIN hosts ho on i.hostid = ho.hostid 
+WHERE ho.status IN (0,1)
+AND history_uint.clock > $AGO1D
+GROUP BY ho.hostid
+ORDER BY 4 DESC
+LIMIT 1
+$EXPANDED_MY
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_UINT_HOST" ] && \
+echo -e "HOST consuming history_uint table most:\n$BIG_HISTORY_UINT_HOST\n"
+
+BIG_HISTORY_HOST=$($SQL_CLIENT_H "
+SELECT ho.name, ho.hostid, count(*) AS records, 
+(count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
+WHERE TABLE_NAME = 'history' and TABLE_SCHEMA = 'zabbix')/1024/1024) AS 'Total size average (Mb)', 
+sum(length(history.value))/1024/1024 + 
+sum(length(history.clock))/1024/1024 +
+sum(length(history.ns))/1024/1024 + 
+sum(length(history.itemid))/1024/1024 AS 'history Column Size (Mb)'
+FROM history
+LEFT OUTER JOIN items i on history.itemid = i.itemid 
+LEFT OUTER JOIN hosts ho on i.hostid = ho.hostid 
+WHERE ho.status IN (0,1)
+AND history.clock > $AGO1D
+GROUP BY ho.hostid
+ORDER BY 4 DESC
+LIMIT 1
+$EXPANDED_MY
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_HOST" ] && \
+echo -e "HOST consuming history table most:\n$BIG_HISTORY_HOST\n"
+
+fi
+
+
 BIG_HISTORY_LOG=$($SQL_CLIENT_H "
 SELECT hosts.host,hosts.hostid,history_log.itemid,items.key_,
 COUNT(history_log.itemid) AS \"count\", AVG(LENGTH(history_log.value))$NUMERIC AS \"avg size\",
@@ -155,7 +261,7 @@ GROUP BY hosts.host,hosts.hostid,history_log.itemid,items.key_
 ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
-" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_LOG" ] && echo -e "Most consuming history_log item:\n$BIG_HISTORY_LOG\n"
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_LOG" ] && echo -e "ITEM consuming history_log table most:\n$BIG_HISTORY_LOG\n"
 
 BIG_HISTORY_TEXT=$($SQL_CLIENT_H "
 SELECT hosts.host,hosts.hostid,history_text.itemid,items.key_,
@@ -169,7 +275,7 @@ GROUP BY hosts.host,hosts.hostid,history_text.itemid,items.key_
 ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
-" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_TEXT" ] && echo -e "Most consuming history_text item:\n$BIG_HISTORY_TEXT\n"
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_TEXT" ] && echo -e "ITEM consuming history_text table most:\n$BIG_HISTORY_TEXT\n"
 
 BIG_HISTORY_STR=$($SQL_CLIENT_H "
 SELECT hosts.host,hosts.hostid,history_str.itemid,items.key_,
@@ -183,7 +289,7 @@ GROUP BY hosts.host,hosts.hostid,history_str.itemid,items.key_
 ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
-" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_STR" ] && echo -e "Most consuming history_str item:\n$BIG_HISTORY_STR\n"
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_STR" ] && echo -e "ITEM consuming history_str table most:\n$BIG_HISTORY_STR\n"
 
 BIG_HISTORY_UINT=$($SQL_CLIENT_H "
 SELECT hosts.host,hosts.hostid,history_uint.itemid,items.key_,
@@ -197,7 +303,7 @@ GROUP BY hosts.host,hosts.hostid,history_uint.itemid,items.key_
 ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
-" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_UINT" ] && echo -e "Most consuming history_uint item:\n$BIG_HISTORY_UINT\n"
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_UINT" ] && echo -e "ITEM consuming history_uint table most:\n$BIG_HISTORY_UINT\n"
 
 BIG_HISTORY=$($SQL_CLIENT_H "
 SELECT hosts.host,hosts.hostid,history.itemid,items.key_,
@@ -211,7 +317,7 @@ GROUP BY hosts.host,hosts.hostid,history.itemid,items.key_
 ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
-" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY" ] && echo -e "Most consuming history item:\n$BIG_HISTORY\n"
+" $EXPANDED_PG) && [ ! -z "$BIG_HISTORY" ] && echo -e "ITEM consuming history table most:\n$BIG_HISTORY\n"
 
 
 UNREACHABLE_HOSTS=$($SQL_CLIENT_H "
