@@ -151,7 +151,7 @@ FROM history_log
 JOIN items ON (items.itemid=history_log.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO30M
-GROUP BY hosts.host,history_log.itemid,items.key_
+GROUP BY hosts.host,hosts.hostid,history_log.itemid,items.key_
 ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
@@ -165,7 +165,7 @@ FROM history_text
 JOIN items ON (items.itemid=history_text.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
-GROUP BY hosts.host,history_text.itemid,items.key_
+GROUP BY hosts.host,hosts.hostid,history_text.itemid,items.key_
 ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
@@ -179,7 +179,7 @@ FROM history_str
 JOIN items ON (items.itemid=history_str.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
-GROUP BY hosts.host,history_str.itemid,items.key_
+GROUP BY hosts.host,hosts.hostid,history_str.itemid,items.key_
 ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
@@ -193,7 +193,7 @@ FROM history_uint
 JOIN items ON (items.itemid=history_uint.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
-GROUP BY hosts.host,history_uint.itemid,items.key_
+GROUP BY hosts.host,hosts.hostid,history_uint.itemid,items.key_
 ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
@@ -207,7 +207,7 @@ FROM history
 JOIN items ON (items.itemid=history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
-GROUP BY hosts.host,history.itemid,items.key_
+GROUP BY hosts.host,hosts.hostid,history.itemid,items.key_
 ORDER BY 7 DESC
 LIMIT 1
 $EXPANDED_MY
