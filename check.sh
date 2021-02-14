@@ -5,6 +5,22 @@
 # prevent a human error!
 # =================================================================
 
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    cat <<EOF
+
+PREREQUESITES:
+This script requires access credentials located at:
+~/.my.cnf
+~/.pgpass
+
+SAMPLE USAGE:
+./check.sh z44 postgres "'http://z44.catonrug.net:144/'"
+./check.sh zabbix mysql "'https://zbx.catonrug.net/'"
+   
+EOF
+    exit 1
+fi
+
 # define variables suitable for different unixtime situations. this is required:
 # so the script can use the same SQL query for MySQL and PostgreSQL
 NOW=$(date "+%s")
