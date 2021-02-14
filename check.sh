@@ -320,6 +320,22 @@ $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY" ] && echo -e "ITEM consuming history table most:\n$BIG_HISTORY\n"
 
 
+PLAIN_ITEMS_AT_HOST_LEVEL=$($SQL_CLIENT_H "
+SELECT hosts.host,
+items.key_,
+CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', items.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', items.itemid ) AS \"open item\"
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status=0
+AND items.templateid IS NULL
+AND items.flags NOT IN (4,1)
+AND items.status=0
+LIMIT 1
+$EXPANDED_MY
+" $EXPANDED_PG) && [ ! -z "$PLAIN_ITEMS_AT_HOST_LEVEL" ] && echo -e "Plain items at host level:\n$PLAIN_ITEMS_AT_HOST_LEVEL\n"
+
+
 UNREACHABLE_HOSTS=$($SQL_CLIENT_H "
 SELECT hosts.host, interface.ip, interface.dns, interface.useip,
 CASE interface.type WHEN 1 THEN 'ZBX' WHEN 2 THEN 'SNMP'
