@@ -5,21 +5,46 @@
 # prevent a human error!
 # =================================================================
 
-if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+if [[ "$1" == "--help" || "$1" == "-h" || -z "$1" ]]; then
+clear
     cat <<EOF
 
 PREREQUESITES:
+
 This script requires access credentials located at:
 ~/.my.cnf
 ~/.pgpass
 
+OPTIONS:
+
+  -d DATABASENAME
+  -e DBENGINE
+  -l URLGUI
+
 SAMPLE USAGE:
-./check.sh z44 postgres "'http://z44.catonrug.net:144/'"
-./check.sh zabbix mysql "'https://zbx.catonrug.net/'"
+
+./check.sh -d z44 -e postgres -l "'http://z44.catonrug.net:144/'"
+./check.sh -d zabbix -e mysql "'https://zbx.catonrug.net/'"
    
 EOF
     exit 1
 fi
+
+
+while getopts ":d:e:l:0qx" opt; do
+    case $opt in
+        d)  DBNAME="$OPTARG" ;;
+        e)  DBENGINE="$OPTARG" ;;
+        l)  URL="$OPTARG" ;;
+        0)  BOOLEAN1="1" ;;
+        q)  BOOLEAN2="0" ;;
+        x)  BOOLEAN3="1" ;;
+        \?) echo "Invalid option: -$OPTARG" >&2; exit 1 ;;
+        :)  echo "Option -$OPTARG requires an argument" >&2; exit 1 ;;
+    esac
+done
+
+
 
 # define variables suitable for different unixtime situations. this is required:
 # so the script can use the same SQL query for MySQL and PostgreSQL
@@ -33,24 +58,6 @@ AGO5D=$((NOW-432000))
 AGO7D=$((NOW-604800))
 AGO28D=$((NOW-2419200))
 
-#echo $1 = DB name
-#echo $2 = DB engine
-#echo
-
-
-
-# if first argument is given then that will be database name
-if [ ! -z "$1" ]; then
-DBNAME=$1
-else
-
-# if argument is not given then pick up database variable from backend configuration file
-if [ -f /etc/zabbix/zabbix_server.conf ]; then
-DBNAME=$(grep -oP 'DBName=\K\w+' /etc/zabbix/zabbix_server.conf)
-fi
-
-# end of first argument
-fi
 
 # detect MySQL passwordless file
 [ -f ~/.my.cnf ] && MYSQL=1
@@ -59,12 +66,12 @@ fi
 [ -f ~/.pgpass ] && POSTGRES=1
 
 # if second argument is explicitly postgres then ignore mysql
-[ "$2" == "postgres" ] && MYSQL=0
+[ "$DBENGINE" == "postgres" ] && MYSQL=0
 
 # if second argument is explicitly mysql then ignore postgres
-[ "$2" == "mysql" ] && POSTGRES=0
+[ "$DBENGINE" == "mysql" ] && POSTGRES=0
 
-URL="$3"
+#URL="$3"
 
 # special syntax rules for MySQL
 if [ "$MYSQL" -eq "1" ];then
