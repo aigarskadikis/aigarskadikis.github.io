@@ -63,7 +63,7 @@ fi
 if [ "$POSTGRES" -eq "1" ];then
 SQL_CLIENT="psql $DBNAME --no-align -t -c"
 SQL_CLIENT_H="psql $DBNAME --no-align -t -c"
-NUMERIC="::NUMERIC(10,2)"
+#NUMERIC="::NUMERIC(12,10)"
 EXPANDED_PG="--expanded"
 EXPANDED_MY=""
 fi
@@ -253,8 +253,8 @@ fi
 
 BIG_HISTORY_LOG=$($SQL_CLIENT_H "
 SELECT
-CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', history_log.itemid, '&action=showlatest' ) AS \"check data\",
-CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_log.itemid ) AS \"open item\",
+CONCAT( $URL, 'history.php?itemids%5B0%5D=', history_log.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_log.itemid ) AS \"open item\",
 hosts.host,
 hosts.hostid,
 history_log.itemid,
@@ -273,8 +273,8 @@ $EXPANDED_MY
 
 BIG_HISTORY_TEXT=$($SQL_CLIENT_H "
 SELECT
-CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', history_text.itemid, '&action=showlatest' ) AS \"check data\",
-CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_text.itemid ) AS \"open item\",
+CONCAT( $URL, 'history.php?itemids%5B0%5D=', history_text.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_text.itemid ) AS \"open item\",
 hosts.host,
 hosts.hostid,
 history_text.itemid,
@@ -293,8 +293,8 @@ $EXPANDED_MY
 
 BIG_HISTORY_STR=$($SQL_CLIENT_H "
 SELECT
-CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', history_str.itemid, '&action=showlatest' ) AS \"check data\",
-CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_str.itemid ) AS \"open item\",
+CONCAT( $URL, 'history.php?itemids%5B0%5D=', history_str.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_str.itemid ) AS \"open item\",
 hosts.host,
 hosts.hostid,
 history_str.itemid,
@@ -313,14 +313,14 @@ $EXPANDED_MY
 
 BIG_HISTORY_UINT=$($SQL_CLIENT_H "
 SELECT
-CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', history_uint.itemid, '&action=showlatest' ) AS \"check data\",
-CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_uint.itemid ) AS \"open item\",
+CONCAT( $URL, 'history.php?itemids%5B0%5D=', history_uint.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_uint.itemid ) AS \"open item\",
 hosts.host,
 hosts.hostid,
 history_uint.itemid,
 items.key_,
-COUNT(history_uint.itemid) AS \"count\", AVG(LENGTH(history_uint.value))$NUMERIC AS \"avg size\",
-(COUNT(history_uint.itemid) * AVG(LENGTH(history_uint.value)))$NUMERIC AS \"Count x AVG\"
+COUNT(history_uint.itemid) AS \"count\", AVG(history_uint.value)$NUMERIC AS \"avg size\",
+(COUNT(history_uint.itemid) * AVG(history_uint.value))$NUMERIC AS \"Count x AVG\"
 FROM history_uint
 JOIN items ON (items.itemid=history_uint.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -333,14 +333,14 @@ $EXPANDED_MY
 
 BIG_HISTORY=$($SQL_CLIENT_H "
 SELECT
-CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', history.itemid, '&action=showlatest' ) AS \"check data\",
-CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history.itemid ) AS \"open item\",
+CONCAT( $URL, 'history.php?itemids%5B0%5D=', history.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history.itemid ) AS \"open item\",
 hosts.host,
 hosts.hostid,
 history.itemid,
 items.key_,
-COUNT(history.itemid) AS \"count\", AVG(LENGTH(history.value))$NUMERIC AS \"avg size\",
-(COUNT(history.itemid) * AVG(LENGTH(history.value)))$NUMERIC AS \"Count x AVG\"
+COUNT(history.itemid) AS \"count\", AVG(history.value)$NUMERIC AS \"avg size\",
+(COUNT(history.itemid) * AVG(history.value))$NUMERIC AS \"Count x AVG\"
 FROM history
 JOIN items ON (items.itemid=history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -355,8 +355,8 @@ $EXPANDED_MY
 PLAIN_ITEMS_AT_HOST_LEVEL=$($SQL_CLIENT_H "
 SELECT hosts.host,
 items.key_,
-CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', items.itemid, '&action=showlatest' ) AS \"check data\",
-CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', items.itemid ) AS \"open item\"
+CONCAT( $URL, 'history.php?itemids%5B0%5D=', items.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', items.itemid ) AS \"open item\"
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
