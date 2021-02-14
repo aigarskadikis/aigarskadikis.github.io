@@ -22,9 +22,17 @@ OPTIONS:
   -l URLGUI
 
 SAMPLE USAGE:
-
+./check.sh -d z24 -e postgres -l "'http://z24.catonrug.net:124/'"
+./check.sh -d z30 -e postgres -l "'http://z30.catonrug.net:130/'"
+./check.sh -d z32 -e postgres -l "'http://z32.catonrug.net:132/'"
+./check.sh -d z34 -e postgres -l "'http://z34.catonrug.net:134/'"
+./check.sh -d z40 -e postgres -l "'http://z40.catonrug.net:140/'"
+./check.sh -d z42 -e postgres -l "'http://z42.catonrug.net:142/'"
 ./check.sh -d z44 -e postgres -l "'http://z44.catonrug.net:144/'"
-./check.sh -d zabbix -e mysql "'https://zbx.catonrug.net/'"
+./check.sh -d z50 -e postgres -l "'http://z50.catonrug.net:150/'"
+./check.sh -d z52 -e postgres -l "'http://z52.catonrug.net:152/'"
+./check.sh -d z54 -e postgres -l "'http://z54.catonrug.net:154/'"
+./check.sh -d zabbix -e mysql -l "'https://zbx.catonrug.net/'"
    
 EOF
     exit 1
@@ -44,7 +52,8 @@ while getopts ":d:e:l:0qx" opt; do
     esac
 done
 
-
+# if URL argument was not specified then set it to localhost
+[ -z "$URL" ] && URL="'http://127.0.0.1/'"
 
 # define variables suitable for different unixtime situations. this is required:
 # so the script can use the same SQL query for MySQL and PostgreSQL
@@ -174,7 +183,7 @@ if [ "$POSTGRES" -eq "0" ]; then
 BIG_HISTORY_TEXT_HOST=$($SQL_CLIENT_H "
 SELECT ho.name, ho.hostid, count(*) AS records, 
 (count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
-WHERE TABLE_NAME = 'history_text' and TABLE_SCHEMA = 'zabbix')/1024/1024) AS 'Total size average (Mb)', 
+WHERE TABLE_NAME = 'history_text' and TABLE_SCHEMA = \"$DBNAME\")/1024/1024) AS 'Total size average (Mb)', 
 sum(length(history_text.value))/1024/1024 + 
 sum(length(history_text.clock))/1024/1024 +
 sum(length(history_text.ns))/1024/1024 + 
@@ -194,7 +203,7 @@ echo -e "HOST consuming history_text table most:\n$BIG_HISTORY_TEXT_HOST\n"
 BIG_HISTORY_LOG_HOST=$($SQL_CLIENT_H "
 SELECT ho.name, ho.hostid, count(*) AS records, 
 (count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
-WHERE TABLE_NAME = 'history_log' and TABLE_SCHEMA = 'zabbix')/1024/1024) AS 'Total size average (Mb)', 
+WHERE TABLE_NAME = 'history_log' and TABLE_SCHEMA = \"$DBNAME\")/1024/1024) AS 'Total size average (Mb)', 
 sum(length(history_log.value))/1024/1024 + 
 sum(length(history_log.clock))/1024/1024 +
 sum(length(history_log.ns))/1024/1024 + 
@@ -214,7 +223,7 @@ echo -e "HOST consuming history_log table most:\n$BIG_HISTORY_LOG_HOST\n"
 BIG_HISTORY_STR_HOST=$($SQL_CLIENT_H "
 SELECT ho.name, ho.hostid, count(*) AS records, 
 (count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
-WHERE TABLE_NAME = 'history_str' and TABLE_SCHEMA = 'zabbix')/1024/1024) AS 'Total size average (Mb)', 
+WHERE TABLE_NAME = 'history_str' and TABLE_SCHEMA = \"$DBNAME\")/1024/1024) AS 'Total size average (Mb)', 
 sum(length(history_str.value))/1024/1024 + 
 sum(length(history_str.clock))/1024/1024 +
 sum(length(history_str.ns))/1024/1024 + 
@@ -234,7 +243,7 @@ echo -e "HOST consuming history_str table most:\n$BIG_HISTORY_STR_HOST\n"
 BIG_HISTORY_UINT_HOST=$($SQL_CLIENT_H "
 SELECT ho.name, ho.hostid, count(*) AS records, 
 (count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
-WHERE TABLE_NAME = 'history_uint' and TABLE_SCHEMA = 'zabbix')/1024/1024) AS 'Total size average (Mb)', 
+WHERE TABLE_NAME = 'history_uint' and TABLE_SCHEMA = \"$DBNAME\")/1024/1024) AS 'Total size average (Mb)', 
 sum(length(history_uint.value))/1024/1024 + 
 sum(length(history_uint.clock))/1024/1024 +
 sum(length(history_uint.ns))/1024/1024 + 
@@ -254,7 +263,7 @@ echo -e "HOST consuming history_uint table most:\n$BIG_HISTORY_UINT_HOST\n"
 BIG_HISTORY_HOST=$($SQL_CLIENT_H "
 SELECT ho.name, ho.hostid, count(*) AS records, 
 (count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
-WHERE TABLE_NAME = 'history' and TABLE_SCHEMA = 'zabbix')/1024/1024) AS 'Total size average (Mb)', 
+WHERE TABLE_NAME = 'history' and TABLE_SCHEMA = \"$DBNAME\")/1024/1024) AS 'Total size average (Mb)', 
 sum(length(history.value))/1024/1024 + 
 sum(length(history.clock))/1024/1024 +
 sum(length(history.ns))/1024/1024 + 
