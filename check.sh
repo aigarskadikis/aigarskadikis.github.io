@@ -48,6 +48,8 @@ fi
 # if second argument is explicitly mysql then ignore postgres
 [ "$2" == "mysql" ] && POSTGRES=0
 
+URL="$3"
+
 # special syntax rules for MySQL
 if [ "$MYSQL" -eq "1" ];then
 SQL_CLIENT="mysql $DBNAME -B -N -e"
@@ -250,71 +252,101 @@ fi
 
 
 BIG_HISTORY_LOG=$($SQL_CLIENT_H "
-SELECT hosts.host,hosts.hostid,history_log.itemid,items.key_,
+SELECT
+CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', history_log.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_log.itemid ) AS \"open item\",
+hosts.host,
+hosts.hostid,
+history_log.itemid,
+items.key_,
 COUNT(history_log.itemid) AS \"count\", AVG(LENGTH(history_log.value))$NUMERIC AS \"avg size\",
 (COUNT(history_log.itemid) * AVG(LENGTH(history_log.value)))$NUMERIC AS \"Count x AVG\"
-FROM history_log 
+FROM history_log
 JOIN items ON (items.itemid=history_log.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE clock > $AGO30M
+WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history_log.itemid,items.key_
-ORDER BY 7 DESC
+ORDER BY \"Count x AVG\" DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_LOG" ] && echo -e "ITEM consuming history_log table most:\n$BIG_HISTORY_LOG\n"
 
 BIG_HISTORY_TEXT=$($SQL_CLIENT_H "
-SELECT hosts.host,hosts.hostid,history_text.itemid,items.key_,
+SELECT
+CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', history_text.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_text.itemid ) AS \"open item\",
+hosts.host,
+hosts.hostid,
+history_text.itemid,
+items.key_,
 COUNT(history_text.itemid) AS \"count\", AVG(LENGTH(history_text.value))$NUMERIC AS \"avg size\",
 (COUNT(history_text.itemid) * AVG(LENGTH(history_text.value)))$NUMERIC AS \"Count x AVG\"
-FROM history_text 
+FROM history_text
 JOIN items ON (items.itemid=history_text.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history_text.itemid,items.key_
-ORDER BY 7 DESC
+ORDER BY \"Count x AVG\" DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_TEXT" ] && echo -e "ITEM consuming history_text table most:\n$BIG_HISTORY_TEXT\n"
 
 BIG_HISTORY_STR=$($SQL_CLIENT_H "
-SELECT hosts.host,hosts.hostid,history_str.itemid,items.key_,
+SELECT
+CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', history_str.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_str.itemid ) AS \"open item\",
+hosts.host,
+hosts.hostid,
+history_str.itemid,
+items.key_,
 COUNT(history_str.itemid) AS \"count\", AVG(LENGTH(history_str.value))$NUMERIC AS \"avg size\",
 (COUNT(history_str.itemid) * AVG(LENGTH(history_str.value)))$NUMERIC AS \"Count x AVG\"
-FROM history_str 
+FROM history_str
 JOIN items ON (items.itemid=history_str.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history_str.itemid,items.key_
-ORDER BY 7 DESC
+ORDER BY \"Count x AVG\" DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_STR" ] && echo -e "ITEM consuming history_str table most:\n$BIG_HISTORY_STR\n"
 
 BIG_HISTORY_UINT=$($SQL_CLIENT_H "
-SELECT hosts.host,hosts.hostid,history_uint.itemid,items.key_,
+SELECT
+CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', history_uint.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_uint.itemid ) AS \"open item\",
+hosts.host,
+hosts.hostid,
+history_uint.itemid,
+items.key_,
 COUNT(history_uint.itemid) AS \"count\", AVG(LENGTH(history_uint.value))$NUMERIC AS \"avg size\",
 (COUNT(history_uint.itemid) * AVG(LENGTH(history_uint.value)))$NUMERIC AS \"Count x AVG\"
-FROM history_uint 
+FROM history_uint
 JOIN items ON (items.itemid=history_uint.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history_uint.itemid,items.key_
-ORDER BY 7 DESC
+ORDER BY \"Count x AVG\" DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_UINT" ] && echo -e "ITEM consuming history_uint table most:\n$BIG_HISTORY_UINT\n"
 
 BIG_HISTORY=$($SQL_CLIENT_H "
-SELECT hosts.host,hosts.hostid,history.itemid,items.key_,
+SELECT
+CONCAT( \"$URL\", 'history.php?itemids%5B0%5D=', history.itemid, '&action=showlatest' ) AS \"check data\",
+CONCAT( \"$URL\", 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history.itemid ) AS \"open item\",
+hosts.host,
+hosts.hostid,
+history.itemid,
+items.key_,
 COUNT(history.itemid) AS \"count\", AVG(LENGTH(history.value))$NUMERIC AS \"avg size\",
 (COUNT(history.itemid) * AVG(LENGTH(history.value)))$NUMERIC AS \"Count x AVG\"
-FROM history 
+FROM history
 JOIN items ON (items.itemid=history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history.itemid,items.key_
-ORDER BY 7 DESC
+ORDER BY \"Count x AVG\" DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY" ] && echo -e "ITEM consuming history table most:\n$BIG_HISTORY\n"
