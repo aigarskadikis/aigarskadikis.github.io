@@ -287,6 +287,7 @@ BIG_HISTORY_LOG=$($SQL_CLIENT_H "
 SELECT
 CONCAT( $URL, 'history.php?itemids%5B0%5D=', history_log.itemid, '&action=showlatest' ) AS \"check data\",
 CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_log.itemid ) AS \"open item\",
+CONCAT( 'DELETE FROM history_log WHERE itemid=', history_log.itemid ,';' ) AS \"clear DB:\",
 hosts.host,
 hosts.hostid,
 history_log.itemid,
@@ -307,6 +308,7 @@ BIG_HISTORY_TEXT=$($SQL_CLIENT_H "
 SELECT
 CONCAT( $URL, 'history.php?itemids%5B0%5D=', history_text.itemid, '&action=showlatest' ) AS \"check data\",
 CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_text.itemid ) AS \"open item\",
+CONCAT( 'DELETE FROM history_text WHERE itemid=', history_text.itemid ,';' ) AS \"clear DB\",
 hosts.host,
 hosts.hostid,
 history_text.itemid,
@@ -327,6 +329,7 @@ BIG_HISTORY_STR=$($SQL_CLIENT_H "
 SELECT
 CONCAT( $URL, 'history.php?itemids%5B0%5D=', history_str.itemid, '&action=showlatest' ) AS \"check data\",
 CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_str.itemid ) AS \"open item\",
+CONCAT( 'DELETE FROM history_str WHERE itemid=', history_str.itemid , ';' ) AS \"clear DB\",
 hosts.host,
 hosts.hostid,
 history_str.itemid,
@@ -347,6 +350,7 @@ BIG_HISTORY_UINT=$($SQL_CLIENT_H "
 SELECT
 CONCAT( $URL, 'history.php?itemids%5B0%5D=', history_uint.itemid, '&action=showlatest' ) AS \"check data\",
 CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history_uint.itemid ) AS \"open item\",
+CONCAT( 'DELETE FROM history_uint WHERE itemid=', history_uint.itemid ,';' ) AS \"clear DB\",
 hosts.host,
 hosts.hostid,
 history_uint.itemid,
@@ -367,6 +371,7 @@ BIG_HISTORY=$($SQL_CLIENT_H "
 SELECT
 CONCAT( $URL, 'history.php?itemids%5B0%5D=', history.itemid, '&action=showlatest' ) AS \"check data\",
 CONCAT( $URL, 'items.php?form=update&hostid=', hosts.hostid, '&itemid=', history.itemid ) AS \"open item\",
+CONCAT( 'DELETE FROM history WHERE itemid=', history.itemid , ';' ) AS \"clear DB\",
 hosts.host,
 hosts.hostid,
 history.itemid,
