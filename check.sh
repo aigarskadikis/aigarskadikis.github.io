@@ -241,7 +241,9 @@ $EXPANDED_MY
 echo -e "HOST consuming history_str table most:\n$BIG_HISTORY_STR_HOST\n"
 
 BIG_HISTORY_UINT_HOST=$($SQL_CLIENT_H "
-SELECT ho.name, ho.hostid, count(*) AS records, 
+SELECT 
+CONCAT( $URL, 'items.php?filter_hostids%5B%5D=', ho.hostid, '&filter_application=&filter_name=&filter_key=&filter_type=-1&filter_delay=&filter_snmp_oid=&filter_value_type=-1&filter_history=&filter_trends=&filter_state=-1&filter_status=-1&filter_with_triggers=-1&filter_templated_items=-1&filter_discovery=-1&subfilter_set=1&subfilter_value_types%5B3%5D=3' ) AS \"all uint items\",
+ho.name, ho.hostid, count(*) AS records, 
 (count(*)* (SELECT AVG_ROW_LENGTH FROM information_schema.tables 
 WHERE TABLE_NAME = 'history_uint' and TABLE_SCHEMA = \"$DBNAME\")/1024/1024) AS 'Total size average (Mb)', 
 sum(length(history_uint.value))/1024/1024 + 
@@ -355,14 +357,14 @@ hosts.host,
 hosts.hostid,
 history_uint.itemid,
 items.key_,
-COUNT(history_uint.itemid) AS \"count\", AVG(history_uint.value)$NUMERIC AS \"avg size\",
-(COUNT(history_uint.itemid) * AVG(history_uint.value))$NUMERIC AS \"Count x AVG\"
+COUNT(history_uint.itemid) AS \"count\", AVG(LENGTH(history_uint.value))$NUMERIC AS \"avg size\",
+(COUNT(history_uint.itemid) * AVG(LENGTH(history_uint.value)))$NUMERIC AS \"Count x AVG\"
 FROM history_uint
 JOIN items ON (items.itemid=history_uint.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history_uint.itemid,items.key_
-ORDER BY \"Count x AVG\" DESC
+ORDER BY 10 DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_UINT" ] && echo -e "ITEM consuming history_uint table most:\n$BIG_HISTORY_UINT\n"
@@ -376,14 +378,14 @@ hosts.host,
 hosts.hostid,
 history.itemid,
 items.key_,
-COUNT(history.itemid) AS \"count\", AVG(history.value)$NUMERIC AS \"avg size\",
-(COUNT(history.itemid) * AVG(history.value))$NUMERIC AS \"Count x AVG\"
+COUNT(history.itemid) AS \"count\", AVG(LENGTH(history.value))$NUMERIC AS \"avg size\",
+(COUNT(history.itemid) * AVG(LENGTH(history.value)))$NUMERIC AS \"Count x AVG\"
 FROM history
 JOIN items ON (items.itemid=history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history.itemid,items.key_
-ORDER BY \"Count x AVG\" DESC
+ORDER BY 10 DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY" ] && echo -e "ITEM consuming history table most:\n$BIG_HISTORY\n"
