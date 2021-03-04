@@ -301,7 +301,7 @@ JOIN items ON (items.itemid=history_log.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history_log.itemid,items.key_
-ORDER BY \"Count x AVG\" DESC
+ORDER BY (COUNT(history_log.itemid) * AVG(LENGTH(history_log.value))) DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_LOG" ] && echo -e "ITEM consuming history_log table most:\n$BIG_HISTORY_LOG\n"
@@ -322,7 +322,7 @@ JOIN items ON (items.itemid=history_text.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history_text.itemid,items.key_
-ORDER BY \"Count x AVG\" DESC
+ORDER BY (COUNT(history_text.itemid) * AVG(LENGTH(history_text.value))) DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_TEXT" ] && echo -e "ITEM consuming history_text table most:\n$BIG_HISTORY_TEXT\n"
@@ -343,7 +343,7 @@ JOIN items ON (items.itemid=history_str.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history_str.itemid,items.key_
-ORDER BY \"Count x AVG\" DESC
+ORDER BY (COUNT(history_str.itemid) * AVG(LENGTH(history_str.value))) DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_STR" ] && echo -e "ITEM consuming history_str table most:\n$BIG_HISTORY_STR\n"
@@ -364,7 +364,7 @@ JOIN items ON (items.itemid=history_uint.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history_uint.itemid,items.key_
-ORDER BY 10 DESC
+ORDER BY (COUNT(history_uint.itemid) * AVG(LENGTH(history_uint.value))) DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY_UINT" ] && echo -e "ITEM consuming history_uint table most:\n$BIG_HISTORY_UINT\n"
@@ -385,7 +385,7 @@ JOIN items ON (items.itemid=history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE clock > $AGO1D
 GROUP BY hosts.host,hosts.hostid,history.itemid,items.key_
-ORDER BY 10 DESC
+ORDER BY (COUNT(history.itemid) * AVG(LENGTH(history.value))) DESC
 LIMIT 1
 $EXPANDED_MY
 " $EXPANDED_PG) && [ ! -z "$BIG_HISTORY" ] && echo -e "ITEM consuming history table most:\n$BIG_HISTORY\n"
