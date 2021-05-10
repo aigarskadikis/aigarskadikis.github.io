@@ -7,10 +7,14 @@ List version
 ------------
 
 ::
-SELECT VERSION();
+
+    SELECT VERSION();
 
 Group events by source
 ----------------------
 
 ::
-SELECT COUNT(*),source FROM events;
+
+    SELECT COUNT(*),source FROM events;
+
+
