@@ -10,6 +10,8 @@ Welcome to Aigars Kadikis's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   mysql
+
 
 
 Indices and tables
