@@ -1,6 +1,6 @@
-.. _mysql:
+.. _sql:
 
-MySQL
+SQL
 =====
 
 List version
