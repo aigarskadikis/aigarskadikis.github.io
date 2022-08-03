@@ -178,16 +178,14 @@ cd /usr/lib/zabbix &amp;&amp; mkdir -p ~/backup${PWD} &amp;&amp; cp -a * ~/backu
 
 
 <input type="radio" name="tabs" id="sedi"><label for="sedi">sedi</label><div class="tab">
-# Backup zabbix binaries, frontend, externalscripts
-<pre><code>cd /usr/share/zabbix &amp;&amp; mkdir -p ~/backup${PWD} &amp;&amp; cp -a * ~/backup${PWD}
-cd /etc/zabbix &amp;&amp; mkdir -p ~/backup${PWD} &amp;&amp; cp -a * ~/backup${PWD}
-cd /usr/lib/zabbix &amp;&amp; mkdir -p ~/backup${PWD} &amp;&amp; cp -a * ~/backup${PWD}</code></pre>
-# Backup and compress zabbix server config with a purpose to restore it on other machine
-<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
-# Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine
-<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
-# Backup and compress partitioning script and configuration files
-<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+# Reinstall values which have been already customized
+<pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
+sed -i 's|^ValueCacheSize=.*|ValueCacheSize=768M|' /etc/zabbix/zabbix_server.conf && grep ^ValueCacheSize /etc/zabbix/zabbix_server.conf
+sed -i 's|^TrendCacheSize=.*|TrendCacheSize=256M|' /etc/zabbix/zabbix_server.conf && grep ^TrendCacheSize /etc/zabbix/zabbix_server.conf</code></pre>
+# Summarize configuration file
+<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
+# Restart and follow log
+<pre><code>systemctl restart zabbix-server && tail -f /var/log/zabbix/zabbix_server.log</code></pre>
 </div>
 
 
