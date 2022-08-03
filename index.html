@@ -1,1 +1,8 @@
-Install new ConfigCache:<pre><code>sed blah</code></pre>
+# backup zabbix server config
+<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+# backup agent config
+<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+# backup partitioning script and configs
+<pre><code>
+GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+
