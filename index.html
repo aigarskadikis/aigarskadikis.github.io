@@ -1,10 +1,9 @@
 # Backup zabbix server config
 <pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
-# Backup agent config
+# Backup Zabbix agent 2 config
 <pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
 # Backup partitioning script and configs
-<pre><code>
-GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
 # How much data is generated daily
 <pre><code>du -lah /var/lib/mysql/zabbix | grep "$(date '+p%Y_%m_%d')"</code></pre>
 # Zabbix server configuration file
@@ -13,4 +12,15 @@ GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_part
 <pre><code>ss --tcp --listen --numeric</code></pre>
 # Listening TCP ports with process identification
 <pre><code>ss --tcp --listen --numeric --process</code></pre>
-
+# Differences between backend nodes
+<pre><code>grep -r '=' /etc/zabbix/zabbix_server.d/*</code></pre>
+# Allow to reload cache from Zabbix frontend
+<pre><code>cd /etc/sudoers.d
+echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/zabbix_server -R config_cache_reload' | sudo tee zabbix_server_config_cache_reload
+chmod 0440 zabbix_server_config_cache_reload</code></pre>
+# Sumarize DB permissions
+<pre><code>SELECT CONCAT("'",user,"'@'",host,"'") FROM mysql.user;</code></pre>
+# SNMPWalk dump:
+<pre><code>mkdir ~/snmpwalk &amp;&amp; cd ~/snmpwalk
+snmpwalk -v 2c -c public -ObentU 192.168.88.1 . &gt; 192.168.88.1.raw.snmpwalk
+snmpwalk -v 2c -c public 192.168.88.1 . &gt; 192.168.88.1.translated.snmpwalk</code></pre>
