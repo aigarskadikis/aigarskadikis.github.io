@@ -61,8 +61,6 @@ pre {padding:0;margin:0 0 1em 0}
 
 
 <input type="radio" name="tabs" id="tab01" checked="checked"><label for="tab01">bash</label><div class="tab">
-# How much data is generated daily
-<pre><code>du -lah /var/lib/mysql/zabbix | grep "$(date '+p%Y_%m_%d')"</code></pre>
 # Zabbix server configuration file
 <pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
 # Listening TCP ports
@@ -100,6 +98,8 @@ chmod 0440 zabbix_server_config_cache_reload</code></pre>
 # List of MySQL tables by size
 <pre><code>du -ab /var/lib/mysql > /tmp/size.of.tables.txt
 du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt</code></pre>
+# How much data is generated daily
+<pre><code>du -lah /var/lib/mysql/zabbix | grep "$(date '+p%Y_%m_%d')"</code></pre>
 </div>
 
 
