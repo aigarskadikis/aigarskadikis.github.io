@@ -1,8 +1,16 @@
-# backup zabbix server config
+# Backup zabbix server config
 <pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
-# backup agent config
+# Backup agent config
 <pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
-# backup partitioning script and configs
+# Backup partitioning script and configs
 <pre><code>
 GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+# How much data is generated daily
+<pre><code>du -lah /var/lib/mysql/zabbix | grep "$(date '+p%Y_%m_%d')"</code></pre>
+# Zabbix server configuration file
+<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
+# Listening TCP ports
+<pre><code>ss --tcp --listen --numeric</code></pre>
+# Listening TCP ports with process identification
+<pre><code>ss --tcp --listen --numeric --process</code></pre>
 
