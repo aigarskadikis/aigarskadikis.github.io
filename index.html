@@ -1,9 +1,68 @@
-# Backup zabbix server config
-<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
-# Backup Zabbix agent 2 config
-<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
-# Backup partitioning script and configs
-<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+<html>
+<style type='text/css'>
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+ 
+.tabs label {
+  order: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 2rem;
+  margin-right: 0.2rem;
+  cursor: pointer;
+  background-color: gainsboro;
+  font-weight: bold;
+}
+ 
+.tabs .tab {
+  order: 9;
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  display: none;
+  padding: 1rem;
+  background: #fff;
+  padding: 20px;
+}
+ 
+.tabs input[type="radio"] {
+  display: none;
+}
+ 
+.tabs input[type="radio"]:checked + label {
+  background: #fff;
+}
+ 
+.tabs input[type="radio"]:checked + label + .tab {
+  display: block;
+}
+  
+body {
+  background: gainsboro;
+  min-height: 100vh;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-weight: 300;
+  line-height: 1.5;
+  font-size: 110%;
+  display: flex;
+}
+
+pre {padding:0;margin:0 0 1em 0}
+
+</style>
+
+<body>
+
+  <div class="tabs">
+
+    <input type="radio" name="tabs" id="tabone" checked="checked">
+    <label for="tabone">bash</label>
+    <div class="tab">
 # How much data is generated daily
 <pre><code>du -lah /var/lib/mysql/zabbix | grep "$(date '+p%Y_%m_%d')"</code></pre>
 # Zabbix server configuration file
@@ -18,9 +77,32 @@
 <pre><code>cd /etc/sudoers.d
 echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/zabbix_server -R config_cache_reload' | sudo tee zabbix_server_config_cache_reload
 chmod 0440 zabbix_server_config_cache_reload</code></pre>
+
+    </div>
+
+    
+    <input type="radio" name="tabs" id="tabthree">
+    <label for="tabthree">base64</label>
+<div class="tab">
+
+# Backup zabbix server config
+<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+# Backup Zabbix agent 2 config
+<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+# Backup partitioning script and configs
+<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+
+</div>
+    
+    <input type="radio" name="tabs" id="tabtwo">
+    <label for="tabtwo">SQL</label>
+    <div class="tab">
 # Sumarize DB permissions
 <pre><code>SELECT CONCAT("'",user,"'@'",host,"'") FROM mysql.user;</code></pre>
-# SNMPWalk dump:
-<pre><code>mkdir ~/snmpwalk &amp;&amp; cd ~/snmpwalk
-snmpwalk -v 2c -c public -ObentU 192.168.88.1 . &gt; 192.168.88.1.raw.snmpwalk
-snmpwalk -v 2c -c public 192.168.88.1 . &gt; 192.168.88.1.translated.snmpwalk</code></pre>
+</div>
+   
+    
+  </div>
+
+</body>
+</html>
