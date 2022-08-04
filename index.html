@@ -63,17 +63,24 @@ pre {padding:0;margin:0 0 1em 0}
 <input type="radio" name="tabs" id="tab01" checked="checked"><label for="tab01">bash</label><div class="tab">
 # Zabbix server configuration file
 <pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
-# Listening TCP ports
-<pre><code>ss --tcp --listen --numeric</code></pre>
-# Listening TCP ports with process identification
-<pre><code>ss --tcp --listen --numeric --process</code></pre>
-# Differences between backend nodes
+# differences between backend nodes
 <pre><code>grep -r '=' /etc/zabbix/zabbix_server.d/*</code></pre>
-# Allow to reload cache from Zabbix frontend
+# allow to reload cache from Zabbix frontend
 <pre><code>cd /etc/sudoers.d
 echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/zabbix_server -R config_cache_reload' | sudo tee zabbix_server_config_cache_reload
 chmod 0440 zabbix_server_config_cache_reload</code></pre>
+# disk long term throughput, how fast we can create 64GB file
+<pre><code>time dd if=/dev/urandom of=/var/lib/mysql/64GB.file bs=1M count=65536 oflag=direct</code></pre>
+# activity for each block device, pretty-print  device  names, report task creation and system switching activity.
+<pre><code>sar -d -p -w 1</code></pre>
+# listening TCP ports
+<pre><code>ss --tcp --listen --numeric</code></pre>
+# listening TCP ports with process identification
+<pre><code>ss --tcp --listen --numeric --process</code></pre>
+# check if tcp port listens. make sure it really listens on destination server before checking
+<pre><code>nc -v servername 3306</code></pre>
 </div>
+
 
 
  
@@ -107,18 +114,85 @@ GROUP BY host_inventory.macaddress_a\G</code></pre>
 
 <input type="radio" name="tabs" id="MySQL"><label for="MySQL">MySQL</label><div class="tab">
 # Backup data directory. Fastest way time-wise
-<pre><code>systemctl stop mysqld &amp;&amp; GZIP=--fast tar cvzf /tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
+<pre><code>systemctl stop mysqld && GZIP=--fast tar cvzf /tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
 # Observe credentials how zabbix-server-mysql connects to database
 <pre><code>grep ^DB /etc/zabbix/zabbix_server.conf</code></pre>
 # Authorize in MySQL
 <pre><code>mysql --host=127.0.0.1 --database=zabbixDB --user=zbx_srv --password='zabbix' --port=3306</code></pre>
 # Track how DB table partitions grow
-<pre><code>cd /var/lib/mysql/zabbix &amp;&amp; watch -n1 'ls -Rltr | tail -10'</code></pre>
+<pre><code>cd /var/lib/mysql/zabbix && watch -n1 'ls -Rltr | tail -10'</code></pre>
 # List of MySQL tables by size
 <pre><code>du -ab /var/lib/mysql > /tmp/size.of.tables.txt
 du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt</code></pre>
 # How much data is generated daily
 <pre><code>du -lah /var/lib/mysql/zabbix | grep "$(date '+p%Y_%m_%d')"</code></pre>
+# schema backup for MySQL 8. useful for scripts
+<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--flush-logs \
+--single-transaction \
+--set-gtid-purged=OFF \
+--create-options \
+--no-data \
+zabbix | gzip --fast > schema.sql.gz</code></pre>
+# data backup. gz compression
+<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--no-create-info \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix > data.sql && \
+gzip data.sql</code></pre>
+
+# data backup. xz compression
+<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--no-create-info \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix > data.sql && \
+xz data.sql</code></pre>
+# on-the-fly configuration backup. check if this is not the node holding the Virtaul IP address. Do a backup on slave
+<pre><code>ip a | grep "192.168.88.55" || mysqldump \
+--defaults-file=/root/.my.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix | gzip > quick.restore.sql.gz</code></pre>
+# schema backup for MySQL 8. credentials in the command
+<pre><code>mysqldump \
+--host=127.0.0.1 \
+--user=root \
+--password='zabbix' \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+zabbix | gzip --fast > schema.sql.gz</code></pre>
 </div>
 
 
@@ -183,16 +257,20 @@ tail -1000000 /var/log/zabbix/zabbix_server.log | xz > /tmp/zabbix_server.$(date
 
 
 <input type="radio" name="tabs" id="backup"><label for="backup">backup</label><div class="tab">
-# Backup zabbix binaries, frontend, externalscripts
-<pre><code>cd /usr/share/zabbix &amp;&amp; mkdir -p ~/backup${PWD} &amp;&amp; cp -a * ~/backup${PWD}
-cd /etc/zabbix &amp;&amp; mkdir -p ~/backup${PWD} &amp;&amp; cp -a * ~/backup${PWD}
-cd /usr/lib/zabbix &amp;&amp; mkdir -p ~/backup${PWD} &amp;&amp; cp -a * ~/backup${PWD}</code></pre>
+# Backup directories which can be related to Zabbix
+<pre><code>cd /usr/share/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
+cd /etc/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
+cd /usr/lib/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
+cd /etc/cron.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
+cd /usr/local/bin && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
+cd /etc/nginx/conf.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
+cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
 # Backup and compress zabbix server config with a purpose to restore it on other machine
-<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 # Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine
-<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&amp;\&amp; echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 # Backup and compress partitioning script and configuration files
-<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' &amp;&amp; echo</code></pre>
+<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 </div>
 
 
@@ -200,11 +278,21 @@ cd /usr/lib/zabbix &amp;&amp; mkdir -p ~/backup${PWD} &amp;&amp; cp -a * ~/backu
 # Reinstall values which have been already customized
 <pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
 sed -i 's|^ValueCacheSize=.*|ValueCacheSize=768M|' /etc/zabbix/zabbix_server.conf && grep ^ValueCacheSize /etc/zabbix/zabbix_server.conf
-sed -i 's|^TrendCacheSize=.*|TrendCacheSize=256M|' /etc/zabbix/zabbix_server.conf && grep ^TrendCacheSize /etc/zabbix/zabbix_server.conf</code></pre>
+sed -i 's|^TrendCacheSize=.*|TrendCacheSize=256M|' /etc/zabbix/zabbix_server.conf && grep ^TrendCacheSize /etc/zabbix/zabbix_server.conf
+sed -i 's|^StartDiscoverers=.*|StartDiscoverers=20|' /etc/zabbix/zabbix_server.conf && grep ^StartDiscoverers /etc/zabbix/zabbix_server.conf</code></pre>
 # Summarize configuration file
 <pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
 # Restart and follow log
 <pre><code>systemctl restart zabbix-server && tail -f /var/log/zabbix/zabbix_server.log</code></pre>
+</div>
+
+
+
+<input type="radio" name="tabs" id="el8"><label for="el8">el8</label><div class="tab">
+# familiar utilities
+dnf -y install strace vim tmux jq git
+# install snmptrap(net-snmp-utils), snmpwalk(net-snmp-utils), snmptrapd(net-snmp)
+<pre><code>dnf -y install net-snmp-utils net-snmp-perl net-snmp</code></pre>
 </div>
 
 
