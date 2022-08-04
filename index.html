@@ -77,6 +77,18 @@ chmod 0440 zabbix_server_config_cache_reload</code></pre>
 
 
  
+<input type="radio" name="tabs" id="loop"><label for="loop">loop</label><div class="tab">
+# rotate between values
+<pre><code>echo "
+one
+two
+" | grep -v "^$" | while IFS= read -r LINE
+do {
+echo $LINE
+} done</code></pre>
+</div>
+
+
 
 
 <input type="radio" name="tabs" id="tab03"><label for="tab03">SQL</label><div class="tab">
