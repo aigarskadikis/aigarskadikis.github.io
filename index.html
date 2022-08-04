@@ -82,6 +82,13 @@ chmod 0440 zabbix_server_config_cache_reload</code></pre>
 <input type="radio" name="tabs" id="tab03"><label for="tab03">SQL</label><div class="tab">
 # Sumarize DB permissions
 <pre><code>SELECT CONCAT("'",user,"'@'",host,"'") FROM mysql.user;</code></pre>
+
+
+# catter host inventory
+<pre><code>SELECT host_inventory.macaddress_a,GROUP_CONCAT(hosts.host) FROM host_inventory
+JOIN hosts ON (hosts.hostid=host_inventory.hostid)
+WHERE hosts.status=0 AND host_inventory.macaddress_a LIKE '%enterprises%'
+GROUP BY host_inventory.macaddress_a\G</code></pre>
 </div>
 
 
