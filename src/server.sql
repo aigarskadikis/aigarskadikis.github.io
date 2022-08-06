@@ -1,3 +1,43 @@
+--how many user groups has debug mode 1. The must be only one user group called "Debug"
+SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
+
+--active problems, including Zabbix internal problems (item unsupported, trigger unsupported). works on Zabbix 4.0, 5.0, 6.0, 6,2
+SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
+
+--hosts having problems. Zabbix 4.0 till 5.2.
+SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;
+
+--show items by proxy. works from Zabbix 3.0 till 6.2 (including)
+SELECT COUNT(*),proxy.host AS proxy,items.type
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status = 0
+AND items.status = 0
+AND proxy.status IN (5,6)
+GROUP BY 2,3
+ORDER BY 2,3;
+
+--devices and it's status. Works from Zabbix 3.0 till 5.2 (including)
+SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+CASE hosts.available
+WHEN 0 THEN 'unknown' 
+WHEN 1 THEN 'available'
+WHEN 2 THEN 'down'
+END AS "status",
+CASE interface.type
+WHEN 1 THEN 'ZBX'
+WHEN 2 THEN 'SNMP'
+WHEN 3 THEN 'IPMI'
+WHEN 4 THEN 'JMX'
+END AS "type",
+hosts.error
+FROM hosts
+JOIN interface ON interface.hostid=hosts.hostid
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
+WHERE hosts.status=0
+AND interface.main=1;
+
 --items in use
 SELECT CASE items.type
 WHEN 0 THEN 'Zabbix agent'
@@ -56,15 +96,30 @@ AND triggers.status=0
 GROUP BY 1,2
 ORDER BY 1;
 
---Sumarize DB permissions
-SELECT CONCAT("'",user,"'@'",host,"'") FROM mysql.user;
+--owner of LLD dependent item. What is interval for owner. Zabbix 4.0 => 6.2
+SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18
+GROUP BY 1,2 ORDER BY 3 DESC;
 
---session concat limit
-SET SESSION group_concat_max_len = 1000000;
+--frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts. Zabbix 4.0 => 6.2
+SELECT type,delay,COUNT(*) FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0
+GROUP BY 1,2 ORDER BY 1,2;
 
---catter host inventory
+--host inventory
 SELECT host_inventory.macaddress_a,GROUP_CONCAT(hosts.host) FROM host_inventory
 JOIN hosts ON (hosts.hostid=host_inventory.hostid)
 WHERE hosts.status=0 AND host_inventory.macaddress_a LIKE '%enterprises%'
 GROUP BY host_inventory.macaddress_a;
+
+--remove metrics where there are no item definition anymore
+DELETE FROM trends WHERE itemid NOT IN (SELECT itemid FROM items);
+DELETE FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items);
+DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items);
+DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items);
+DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items);
+DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);
 
