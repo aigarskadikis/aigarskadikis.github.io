@@ -4,10 +4,10 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 --active problems, including Zabbix internal problems (item unsupported, trigger unsupported). works on Zabbix 4.0, 5.0, 6.0, 6,2
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
---hosts having problems. Zabbix 4.0 till 5.2.
+--hosts having problems with passive checks. Zabbix 4.0 till 5.2
 SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;
 
---show items by proxy. works from Zabbix 3.0 till 6.2 (including)
+--show items by proxy. works from Zabbix 3.0 till 6.2
 SELECT COUNT(*),proxy.host AS proxy,items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
@@ -18,7 +18,7 @@ AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;
 
---devices and it's status. Works from Zabbix 3.0 till 5.2 (including)
+--devices and it's status. Works from Zabbix 3.0 till 5.2
 SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown' 
