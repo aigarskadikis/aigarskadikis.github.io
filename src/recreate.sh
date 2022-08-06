@@ -6,18 +6,23 @@ clear
 
 # put header
 echo "<html><head><style type='text/css'>" >> ../index.html
+
+# install css
 cat css.css >> ../index.html
+
+# start body and all tabs
 echo "</style></head><body><div class='tabs'>" >> ../index.html
 
 ########
 # bash #
 ########
 
-# list all files with extension 'sh' exclude this program. extract only filename without extension
+# list all files with extension 'sh' and exclude this program
 ls -1 | grep -E "\.sh$" |grep -v "recreate.sh" | while IFS= read -r FILE
 do {
 
-NAME=$(echo "$FILE" | sed 's|.sh$||;s|.sql$||')
+# filename without extension
+NAME=$(echo "$FILE" | sed 's|.sh$||')
 
 echo -e "\n##### $FILE #####"
 
@@ -64,7 +69,6 @@ fi
 # end of "TAB"
 echo "</div>" >> $NAME.inc
 
-
 # save some new line characters for '<pre><code></code></pre>'
 cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "H;1h;\${g;s|\n</code></pre>|</code></pre>|g;p}" >> ../index.html
 
@@ -74,24 +78,15 @@ cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "
 
 
 
-
-
-
-
-
-
-
-
-
 #######
 # SQL #
 #######
 
-# list all files with extension 'sh' exclude this program. extract only filename without extension
+# list all files with extension 'sh' exclude this program
 ls -1 | grep -E "\.sql$" | while IFS= read -r FILE
 do {
 
-# remove extension
+# extract name without extension
 NAME=$(echo "$FILE" | sed 's|.sql$||')
 
 echo -e "\n##### $FILE #####"
@@ -152,8 +147,10 @@ sed -i 's|input type="radio" name="tabs" id="backup"|input type="radio" name="ta
 # remove unnecessarry space
 sed -i 's| </code></pre>|</code></pre>|' ../index.html
 
+# remove includes (a source for tabs)
 rm -rf *inc
 
+# test page imediatelly
 # firefox ../index.html
 
 echo
