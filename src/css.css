@@ -1,0 +1,52 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+ 
+.tabs label {
+  order: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: .1rem .2rem;
+  margin-right: 0.2rem;
+  cursor: pointer;
+  background-color: gainsboro;
+  font-weight: bold;
+}
+ 
+.tabs .tab {
+  order: 9;
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  display: none;
+  background: #fff;
+  padding: .4rem;
+}
+ 
+.tabs input[type="radio"] {
+  display: none;
+}
+ 
+.tabs input[type="radio"]:checked + label {
+  background: #fff;
+}
+ 
+.tabs input[type="radio"]:checked + label + .tab {
+  display: block;
+}
+  
+body {
+  background: gainsboro;
+  min-height: 100vh;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-weight: 300;
+  line-height: 1.5;
+  font-size: 110%;
+  display: flex;
+}
+
+pre {padding:0;margin:0 0 1em 0}
