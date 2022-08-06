@@ -39,7 +39,7 @@ else
 echo "$LINE" | grep "^#" > /dev/null
 if [ $? -eq 0 ]; then
 echo comment
-echo -e "$LINE\n<pre><code>" >> $NAME.inc
+echo -e "$(echo "$LINE" | sed 's|^# ||')\n<pre><code>" >> $NAME.inc
 else
 # blindly assume this is line having useful code
 echo -n "code"
@@ -103,11 +103,11 @@ else
 echo "$LINE" | grep "^--" > /dev/null
 if [ $? -eq 0 ]; then
 echo comment
-echo -e "$LINE\n<pre><code>" >> $NAME.inc
+echo -e "$(echo "$LINE" | sed 's|^--||')\n<pre><code>" >> $NAME.inc
 else
 # blindly assume this is line having useful code
 echo -n "code"
-echo "$LINE" >> $NAME.inc
+echo -n "$LINE " >> $NAME.inc
 
 fi
 

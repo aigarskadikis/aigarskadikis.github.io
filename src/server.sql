@@ -1,4 +1,4 @@
---how many user groups has debug mode 1. The must be only one user group called "Debug"
+--how many user groups has debug mode 1
 SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 
 --active problems, including Zabbix internal problems (item unsupported, trigger unsupported). works on Zabbix 4.0, 5.0, 6.0, 6,2

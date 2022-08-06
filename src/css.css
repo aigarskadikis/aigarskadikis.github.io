@@ -42,7 +42,7 @@ body {
   background: gainsboro;
   min-height: 100vh;
   box-sizing: border-box;
-  font-family: monospace;
+/*  font-family: monospace;*/
   font-weight: 300;
   line-height: 1.5;
   font-size: 110%;

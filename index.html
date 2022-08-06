@@ -43,7 +43,7 @@ body {
   background: gainsboro;
   min-height: 100vh;
   box-sizing: border-box;
-  font-family: monospace;
+/*  font-family: monospace;*/
   font-weight: 300;
   line-height: 1.5;
   font-size: 110%;
@@ -53,34 +53,34 @@ body {
 pre {padding:0;margin:0 0 1em 0}
 </style></head><body><div class='tabs'>
 <input type="radio" name="tabs" id="backup"><label for="backup">backup</label><div class="tab">
-# Backup directories which can be related to Zabbix<pre><code>cd /usr/share/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
+Backup directories which can be related to Zabbix<pre><code>cd /usr/share/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /usr/lib/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/cron.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /usr/local/bin && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/nginx/conf.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
-# Backup and compress zabbix server config with a purpose to restore it on other machine<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
-# Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
-# Backup and compress partitioning script and configuration files<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
+Backup and compress zabbix server config with a purpose to restore it on other machine<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
+Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
+Backup and compress partitioning script and configuration files<pre><code>GZIP=-9 tar -zcv /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 </div>
 <input type="radio" name="tabs" id="bash" checked="checked"><label for="bash">bash</label><div class="tab">
-# Zabbix server configuration file<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
-# differences between backend nodes<pre><code>grep -r '=' /etc/zabbix/zabbix_server.d/*</code></pre>
-# listening TCP ports<pre><code>ss --tcp --listen --numeric</code></pre>
-# listening TCP ports with process identification<pre><code>ss --tcp --listen --numeric --process</code></pre>
-# check if tcp port listens. make sure it really listens on destination server before checking<pre><code>nc -v servername 3306</code></pre>
+Zabbix server configuration file<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
+differences between backend nodes<pre><code>grep -r '=' /etc/zabbix/zabbix_server.d/*</code></pre>
+listening TCP ports<pre><code>ss --tcp --listen --numeric</code></pre>
+listening TCP ports with process identification<pre><code>ss --tcp --listen --numeric --process</code></pre>
+check if tcp port listens. make sure it really listens on destination server before checking<pre><code>nc -v servername 3306</code></pre>
 </div>
 <input type="radio" name="tabs" id="el8"><label for="el8">el8</label><div class="tab">
-# familiar utilities<pre><code>dnf -y install strace vim tmux jq git</code></pre>
-# install snmptrap(net-snmp-utils), snmpwalk(net-snmp-utils), snmptrapd(net-snmp)<pre><code>dnf -y install net-snmp-utils net-snmp-perl net-snmp</code></pre>
+familiar utilities<pre><code>dnf -y install strace vim tmux jq git</code></pre>
+install snmptrap(net-snmp-utils), snmpwalk(net-snmp-utils), snmptrapd(net-snmp)<pre><code>dnf -y install net-snmp-utils net-snmp-perl net-snmp</code></pre>
 </div>
 <input type="radio" name="tabs" id="hw"><label for="hw">hw</label><div class="tab">
-# disk long term throughput, how fast we can create 64GB file<pre><code>time dd if=/dev/urandom of=/var/lib/mysql/64GB.file bs=1M count=65536 oflag=direct</code></pre>
-# activity for each block device, pretty-print  device  names, report task creation and system switching activity.<pre><code>sar -d -p -w 1</code></pre>
+disk long term throughput, how fast we can create 64GB file<pre><code>time dd if=/dev/urandom of=/var/lib/mysql/64GB.file bs=1M count=65536 oflag=direct</code></pre>
+activity for each block device, pretty-print  device  names, report task creation and system switching activity.<pre><code>sar -d -p -w 1</code></pre>
 </div>
 <input type="radio" name="tabs" id="loop"><label for="loop">loop</label><div class="tab">
-# rotate between values<pre><code>echo "
+rotate between values<pre><code>echo "
 one
 two
 " | grep -v "^$" | while IFS= read -r LINE
@@ -89,14 +89,14 @@ echo $LINE
 } done</code></pre>
 </div>
 <input type="radio" name="tabs" id="my.sh"><label for="my.sh">my.sh</label><div class="tab">
-# Backup data directory. Fastest way time-wise<pre><code>systemctl stop mysqld && GZIP=--fast tar cvzf /tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
-# Observe credentials how zabbix-server-mysql connects to database<pre><code>grep ^DB /etc/zabbix/zabbix_server.conf</code></pre>
-# Authorize in MySQL<pre><code>mysql --host=127.0.0.1 --database=zabbixDB --user=zbx_srv --password='zabbix' --port=3306</code></pre>
-# Track how DB table partitions grow<pre><code>cd /var/lib/mysql/zabbix && watch -n1 'ls -Rltr | tail -10'</code></pre>
-# List of MySQL tables by size<pre><code>du -ab /var/lib/mysql > /tmp/size.of.tables.txt
+Backup data directory. Fastest way time-wise<pre><code>systemctl stop mysqld && GZIP=--fast tar cvzf /tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
+Observe credentials how zabbix-server-mysql connects to database<pre><code>grep ^DB /etc/zabbix/zabbix_server.conf</code></pre>
+Authorize in MySQL<pre><code>mysql --host=127.0.0.1 --database=zabbixDB --user=zbx_srv --password='zabbix' --port=3306</code></pre>
+Track how DB table partitions grow<pre><code>cd /var/lib/mysql/zabbix && watch -n1 'ls -Rltr | tail -10'</code></pre>
+List of MySQL tables by size<pre><code>du -ab /var/lib/mysql > /tmp/size.of.tables.txt
 du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt</code></pre>
-# How much data is generated daily<pre><code>du -lah /var/lib/mysql/zabbix | grep "$(date '+p%Y_%m_%d')"</code></pre>
-# schema backup for MySQL 8. useful for scripts<pre><code>mysqldump \
+How much data is generated daily<pre><code>du -lah /var/lib/mysql/zabbix | grep "$(date '+p%Y_%m_%d')"</code></pre>
+schema backup for MySQL 8. useful for scripts<pre><code>mysqldump \
 --defaults-file=/root/.my.cnf \
 --flush-logs \
 --single-transaction \
@@ -104,7 +104,7 @@ du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt</code></pre>
 --create-options \
 --no-data \
 zabbix | gzip --fast > schema.sql.gz</code></pre>
-# data backup. gz compression<pre><code>mysqldump \
+data backup. gz compression<pre><code>mysqldump \
 --defaults-file=/root/.my.cnf \
 --set-gtid-purged=OFF \
 --flush-logs \
@@ -119,7 +119,7 @@ zabbix | gzip --fast > schema.sql.gz</code></pre>
 --ignore-table=zabbix.trends_uint \
 zabbix > data.sql && \
 gzip data.sql</code></pre>
-# data backup. xz compression<pre><code>mysqldump \
+data backup. xz compression<pre><code>mysqldump \
 --defaults-file=/root/.my.cnf \
 --set-gtid-purged=OFF \
 --flush-logs \
@@ -134,7 +134,7 @@ gzip data.sql</code></pre>
 --ignore-table=zabbix.trends_uint \
 zabbix > data.sql && \
 xz data.sql</code></pre>
-# on-the-fly configuration backup. check if this is not the node holding the Virtaul IP address. Do a backup on slave<pre><code>ip a | grep "192.168.88.55" || mysqldump \
+on-the-fly configuration backup. check if this is not the node holding the Virtaul IP address. Do a backup on slave<pre><code>ip a | grep "192.168.88.55" || mysqldump \
 --defaults-file=/root/.my.cnf \
 --set-gtid-purged=OFF \
 --flush-logs \
@@ -147,7 +147,7 @@ xz data.sql</code></pre>
 --ignore-table=zabbix.trends \
 --ignore-table=zabbix.trends_uint \
 zabbix | gzip > quick.restore.sql.gz</code></pre>
-# schema backup for MySQL 8. credentials in the command<pre><code>mysqldump \
+schema backup for MySQL 8. credentials in the command<pre><code>mysqldump \
 --host=127.0.0.1 \
 --user=root \
 --password='zabbix' \
@@ -159,15 +159,15 @@ zabbix | gzip > quick.restore.sql.gz</code></pre>
 zabbix | gzip --fast > schema.sql.gz</code></pre>
 </div>
 <input type="radio" name="tabs" id="sedi"><label for="sedi">sedi</label><div class="tab">
-# reinstall values which have been already customized<pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
+reinstall values which have been already customized<pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
 sed -i 's|^ValueCacheSize=.*|ValueCacheSize=768M|' /etc/zabbix/zabbix_server.conf && grep ^ValueCacheSize /etc/zabbix/zabbix_server.conf
 sed -i 's|^TrendCacheSize=.*|TrendCacheSize=256M|' /etc/zabbix/zabbix_server.conf && grep ^TrendCacheSize /etc/zabbix/zabbix_server.conf
 sed -i 's|^StartDiscoverers=.*|StartDiscoverers=20|' /etc/zabbix/zabbix_server.conf && grep ^StartDiscoverers /etc/zabbix/zabbix_server.conf</code></pre>
-# summarize configuration file<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
-# restart and follow log<pre><code>systemctl restart zabbix-server && tail -f /var/log/zabbix/zabbix_server.log</code></pre>
+summarize configuration file<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
+restart and follow log<pre><code>systemctl restart zabbix-server && tail -f /var/log/zabbix/zabbix_server.log</code></pre>
 </div>
 <input type="radio" name="tabs" id="sql2tsv"><label for="sql2tsv">sql2tsv</label><div class="tab">
-# MySQL<pre><code>echo "SELECT alias,
+MySQL<pre><code>echo "SELECT alias,
 attempt_failed,
 attempt_ip,
 FROM_UNIXTIME(attempt_clock)
@@ -181,119 +181,30 @@ FROM users" | mysql \
 --batch > /tmp/queue.tsv</code></pre>
 </div>
 <input type="radio" name="tabs" id="sudoers"><label for="sudoers">sudoers</label><div class="tab">
-# allow to reload cache from Zabbix frontend<pre><code>cd /etc/sudoers.d
+allow to reload cache from Zabbix frontend<pre><code>cd /etc/sudoers.d
 echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/zabbix_server -R config_cache_reload' | sudo tee zabbix_server_config_cache_reload
 chmod 0440 zabbix_server_config_cache_reload</code></pre>
 </div>
 <input type="radio" name="tabs" id="watch"><label for="watch">watch</label><div class="tab">
-# zabbix_server trapper processes<pre><code>watch -n1 "ps auxww|grep '[z]abbix_server: trapper'"</code></pre>
-# zabbix_server history syncer<pre><code>watch -n1 "ps auxww|grep '[z]abbix_server: history syncer'"</code></pre>
-# What is progress of OPTIMIZE TABLE<pre><code>watch -n1 "ls -Rltr /var/lib/mysql/zabbix | grep '#sql'"</code></pre>
+zabbix_server trapper processes<pre><code>watch -n1 "ps auxww|grep '[z]abbix_server: trapper'"</code></pre>
+zabbix_server history syncer<pre><code>watch -n1 "ps auxww|grep '[z]abbix_server: history syncer'"</code></pre>
+What is progress of OPTIMIZE TABLE<pre><code>watch -n1 "ls -Rltr /var/lib/mysql/zabbix | grep '#sql'"</code></pre>
 </div>
 <input type="radio" name="tabs" id="web"><label for="web">web</label><div class="tab">
-# Check all variables under /etc<pre><code><pre><code>grep -Er "memory_limit|max_execution_time" /etc</code></pre></code></pre>
+Check all variables under /etc<pre><code><pre><code>grep -Er "memory_limit|max_execution_time" /etc</code></pre></code></pre>
 </div>
 <input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab">
---how many user groups has debug mode 1. The must be only one user group called "Debug"<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
---active problems, including Zabbix internal problems (item unsupported, trigger unsupported). works on Zabbix 4.0, 5.0, 6.0, 6,2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
---hosts having problems. Zabbix 4.0 till 5.2.<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
---show items by proxy. works from Zabbix 3.0 till 6.2 (including)<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
-FROM items
-JOIN hosts ON (items.hostid=hosts.hostid)
-JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE hosts.status = 0
-AND items.status = 0
-AND proxy.status IN (5,6)
-GROUP BY 2,3
-ORDER BY 2,3;</code></pre>
---devices and it's status. Works from Zabbix 3.0 till 5.2 (including)<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
-CASE hosts.available
-WHEN 0 THEN 'unknown' 
-WHEN 1 THEN 'available'
-WHEN 2 THEN 'down'
-END AS "status",
-CASE interface.type
-WHEN 1 THEN 'ZBX'
-WHEN 2 THEN 'SNMP'
-WHEN 3 THEN 'IPMI'
-WHEN 4 THEN 'JMX'
-END AS "type",
-hosts.error
-FROM hosts
-JOIN interface ON interface.hostid=hosts.hostid
-LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
-WHERE hosts.status=0
-AND interface.main=1;</code></pre>
---items in use<pre><code>SELECT CASE items.type
-WHEN 0 THEN 'Zabbix agent'
-WHEN 2 THEN 'Zabbix trapper'
-WHEN 3 THEN 'Simple check'
-WHEN 5 THEN 'Zabbix internal'
-WHEN 7 THEN 'Zabbix agent (active) check'
-WHEN 8 THEN 'Aggregate'
-WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
-WHEN 10 THEN 'External check'
-WHEN 11 THEN 'Database monitor'
-WHEN 12 THEN 'IPMI agent'
-WHEN 13 THEN 'SSH agent'
-WHEN 14 THEN 'TELNET agent'
-WHEN 15 THEN 'Calculated'
-WHEN 16 THEN 'JMX agent'
-WHEN 17 THEN 'SNMP trap'
-WHEN 18 THEN 'Dependent item'
-WHEN 19 THEN 'HTTP agent'
-WHEN 20 THEN 'SNMP agent'
-END as type,COUNT(*)
-FROM items
-JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE hosts.status=0
-AND items.status=0
-GROUP BY items.type
-ORDER BY COUNT(*) DESC;</code></pre>
---determine which items report unsupported state:<pre><code>SELECT COUNT(items.key_),
-hosts.host,
-items.key_,
-item_rtdata.error
-FROM events
-JOIN items ON (items.itemid=events.objectid)
-JOIN hosts ON (hosts.hostid=items.hostid)
-JOIN item_rtdata ON (item_rtdata.itemid=items.itemid)
-WHERE source=3
-AND object=4
-AND items.status=0
-AND items.flags IN (0,1,4)
-AND LENGTH(item_rtdata.error)>0
-GROUP BY hosts.host,items.key_,
-item_rtdata.error
-ORDER BY COUNT(items.key_);</code></pre>
---list all function names together with arguments<pre><code>SELECT functions.name, functions.parameter, COUNT(*)
-FROM functions
-JOIN items ON (items.itemid = functions.itemid)
-JOIN hosts ON (items.hostid = hosts.hostid)
-JOIN triggers ON (triggers.triggerid=functions.triggerid)
-WHERE hosts.status=0
-AND items.status=0
-AND triggers.status=0
-GROUP BY 1,2
-ORDER BY 1;</code></pre>
---owner of LLD dependent item. What is interval for owner. Zabbix 4.0 => 6.2<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items
-JOIN hosts ON (hosts.hostid=items.hostid)
-JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18
-GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
---frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts. Zabbix 4.0 => 6.2<pre><code>SELECT type,delay,COUNT(*) FROM items
-JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0
-GROUP BY 1,2 ORDER BY 1,2;</code></pre>
---host inventory<pre><code>SELECT host_inventory.macaddress_a,GROUP_CONCAT(hosts.host) FROM host_inventory
-JOIN hosts ON (hosts.hostid=host_inventory.hostid)
-WHERE hosts.status=0 AND host_inventory.macaddress_a LIKE '%enterprises%'
-GROUP BY host_inventory.macaddress_a;</code></pre>
---remove metrics where there are no item definition anymore<pre><code>DELETE FROM trends WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);</code></pre>
+how many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1; </code></pre>
+active problems, including Zabbix internal problems (item unsupported, trigger unsupported). works on Zabbix 4.0, 5.0, 6.0, 6,2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity; </code></pre>
+hosts having problems. Zabbix 4.0 till 5.2.<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0; </code></pre>
+show items by proxy. works from Zabbix 3.0 till 6.2 (including)<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type FROM items JOIN hosts ON (items.hostid=hosts.hostid) JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE hosts.status = 0 AND items.status = 0 AND proxy.status IN (5,6) GROUP BY 2,3 ORDER BY 2,3; </code></pre>
+devices and it's status. Works from Zabbix 3.0 till 5.2 (including)<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, CASE hosts.available WHEN 0 THEN 'unknown'  WHEN 1 THEN 'available' WHEN 2 THEN 'down' END AS "status", CASE interface.type WHEN 1 THEN 'ZBX' WHEN 2 THEN 'SNMP' WHEN 3 THEN 'IPMI' WHEN 4 THEN 'JMX' END AS "type", hosts.error FROM hosts JOIN interface ON interface.hostid=hosts.hostid LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid WHERE hosts.status=0 AND interface.main=1; </code></pre>
+items in use<pre><code>SELECT CASE items.type WHEN 0 THEN 'Zabbix agent' WHEN 2 THEN 'Zabbix trapper' WHEN 3 THEN 'Simple check' WHEN 5 THEN 'Zabbix internal' WHEN 7 THEN 'Zabbix agent (active) check' WHEN 8 THEN 'Aggregate' WHEN 9 THEN 'HTTP test (web monitoring scenario step)' WHEN 10 THEN 'External check' WHEN 11 THEN 'Database monitor' WHEN 12 THEN 'IPMI agent' WHEN 13 THEN 'SSH agent' WHEN 14 THEN 'TELNET agent' WHEN 15 THEN 'Calculated' WHEN 16 THEN 'JMX agent' WHEN 17 THEN 'SNMP trap' WHEN 18 THEN 'Dependent item' WHEN 19 THEN 'HTTP agent' WHEN 20 THEN 'SNMP agent' END as type,COUNT(*) FROM items JOIN hosts ON (hosts.hostid=items.hostid) WHERE hosts.status=0 AND items.status=0 GROUP BY items.type ORDER BY COUNT(*) DESC; </code></pre>
+determine which items report unsupported state:<pre><code>SELECT COUNT(items.key_), hosts.host, items.key_, item_rtdata.error FROM events JOIN items ON (items.itemid=events.objectid) JOIN hosts ON (hosts.hostid=items.hostid) JOIN item_rtdata ON (item_rtdata.itemid=items.itemid) WHERE source=3 AND object=4 AND items.status=0 AND items.flags IN (0,1,4) AND LENGTH(item_rtdata.error)>0 GROUP BY hosts.host,items.key_, item_rtdata.error ORDER BY COUNT(items.key_); </code></pre>
+list all function names together with arguments<pre><code>SELECT functions.name, functions.parameter, COUNT(*) FROM functions JOIN items ON (items.itemid = functions.itemid) JOIN hosts ON (items.hostid = hosts.hostid) JOIN triggers ON (triggers.triggerid=functions.triggerid) WHERE hosts.status=0 AND items.status=0 AND triggers.status=0 GROUP BY 1,2 ORDER BY 1; </code></pre>
+owner of LLD dependent item. What is interval for owner. Zabbix 4.0 => 6.2<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items JOIN hosts ON (hosts.hostid=items.hostid) JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 GROUP BY 1,2 ORDER BY 3 DESC; </code></pre>
+frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts. Zabbix 4.0 => 6.2<pre><code>SELECT type,delay,COUNT(*) FROM items JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 AND items.status=0 GROUP BY 1,2 ORDER BY 1,2; </code></pre>
+host inventory<pre><code>SELECT host_inventory.macaddress_a,GROUP_CONCAT(hosts.host) FROM host_inventory JOIN hosts ON (hosts.hostid=host_inventory.hostid) WHERE hosts.status=0 AND host_inventory.macaddress_a LIKE '%enterprises%' GROUP BY host_inventory.macaddress_a; </code></pre>
+remove metrics where there are no item definition anymore<pre><code>DELETE FROM trends WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items); </code></pre>
 </div>
 </div></body></html>
