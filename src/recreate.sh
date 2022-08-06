@@ -66,7 +66,7 @@ fi
 
 } done
 
-echo "<p>Download this section: <a href=\"src/$FILE\" target=\"_blank\">https://aigarskadikis.github.io/src/$FILE</a><br />" >> $NAME.inc
+echo "<p>Download this section: <a href=\"src/$FILE\">https://aigarskadikis.github.io/src/$FILE</a><br />" >> $NAME.inc
 echo "Code on GitHub: <a href=\"https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/$FILE\" target=\"_blank\">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/$FILE</a></p>" >> $NAME.inc
 
 # end of "TAB"
@@ -127,7 +127,7 @@ fi
 
 } done
 
-echo "<p>Download this section: <a href=\"src/$FILE\" target=\"_blank\">https://aigarskadikis.github.io/src/$FILE</a><br />" >> $NAME.inc
+echo "<p>Download this section: <a href=\"src/$FILE\">https://aigarskadikis.github.io/src/$FILE</a><br />" >> $NAME.inc
 echo "Code on GitHub: <a href=\"https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/$FILE\" target=\"_blank\">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/$FILE</a></p>" >> $NAME.inc
 
 # end of "TAB"
