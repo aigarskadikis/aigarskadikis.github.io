@@ -66,6 +66,31 @@ AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;
 
+--all events closed by global correlation rule. Zabbix 4.0, 5.0, 6.0
+SELECT
+repercussion.clock,
+repercussion.name,
+rootCause.clock,
+rootCause.name
+FROM events repercussion
+JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid)
+JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
+WHERE event_recovery.c_eventid IS NOT NULL
+ORDER BY repercussion.clock ASC;
+
+--all active data collector items. Zabbix 3.0, 4.0, 5.0, 6.0
+SELECT
+hosts.host,
+items.name,
+items.type,
+items.key_,
+items.delay
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status=0
+AND items.status=0
+ORDER BY 1,2,3,4,5;
+
 --determine which items report unsupported state:
 SELECT COUNT(items.key_),
 hosts.host,

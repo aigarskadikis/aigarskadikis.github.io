@@ -1,8 +1,10 @@
-# Backup data directory. Fastest way time-wise
-systemctl stop mysqld && GZIP=--fast tar cvzf /tmp/var.lib.mysql.tar.gz /var/lib/mysql
+# List of MySQL tables/partitions by size
+du -ab /var/lib/mysql > /tmp/size.of.tables.txt
+du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt
 
-# Observe credentials how zabbix-server-mysql connects to database
-grep ^DB /etc/zabbix/zabbix_server.conf
+# Backup data directory. Fastest way time-wise
+systemctl stop mysqld
+tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql
 
 # Authorize in MySQL
 mysql --host=127.0.0.1 --database=zabbixDB --user=zbx_srv --password='zabbix' --port=3306
@@ -10,12 +12,15 @@ mysql --host=127.0.0.1 --database=zabbixDB --user=zbx_srv --password='zabbix' --
 # Track how DB table partitions grow
 cd /var/lib/mysql/zabbix && watch -n1 'ls -Rltr | tail -10'
 
-# List of MySQL tables by size
-du -ab /var/lib/mysql > /tmp/size.of.tables.txt
-du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt
+# list of open files per MySQL server. if tables has a lot of partitions it will be a lot of files
+lsof -p $(pidof mysqld) > /tmp/mysqld.list.open.files.txt
 
-# How much data is generated daily
-du -lah /var/lib/mysql/zabbix | grep "$(date '+p%Y_%m_%d')"
+# How much data is generated in 24h
+du -lah /var/lib/mysql/zabbix | grep "$(date --date='2 days ago' '+p%Y_%m_%d')"
+du -lah /var/lib/mysql/zabbix | grep "$(date --date='2 days ago' '+p%Y%m%d0000')"
+
+# Track progress of "OPTIMIZE TABLE" in MySQL
+watch -n1 "ls -Rltr /var/lib/mysql/zabbix | grep '#sql'"
 
 # schema backup for MySQL 8. useful for scripts
 mysqldump \
@@ -27,7 +32,7 @@ mysqldump \
 --no-data \
 zabbix | gzip --fast > schema.sql.gz
 
-# data backup. gz compression
+# data backup with gz compression
 mysqldump \
 --defaults-file=/root/.my.cnf \
 --set-gtid-purged=OFF \
@@ -44,7 +49,7 @@ mysqldump \
 zabbix > data.sql && \
 gzip data.sql
 
-# data backup. xz compression
+# data backup with xz compression
 mysqldump \
 --defaults-file=/root/.my.cnf \
 --set-gtid-purged=OFF \
@@ -61,6 +66,14 @@ mysqldump \
 zabbix > data.sql && \
 xz data.sql
 
+# passwordless access for read-only user
+cd && cat << 'EOF' > .my.cnf
+[client]
+host=192.168.88.101
+user=zbx_ro
+password=passwd_ro_zbx
+EOF
+
 # on-the-fly configuration backup. check if this is not the node holding the Virtaul IP address. Do a backup on slave
 ip a | grep "192.168.88.55" || mysqldump \
 --defaults-file=/root/.my.cnf \
@@ -76,7 +89,7 @@ ip a | grep "192.168.88.55" || mysqldump \
 --ignore-table=zabbix.trends_uint \
 zabbix | gzip > quick.restore.sql.gz
 
-# schema backup for MySQL 8. credentials in the command
+# schema backup for MySQL 8. credentials embeded in command
 mysqldump \
 --host=127.0.0.1 \
 --user=root \

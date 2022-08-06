@@ -39,11 +39,21 @@ else
 echo "$LINE" | grep "^#" > /dev/null
 if [ $? -eq 0 ]; then
 echo comment
-echo -e "$(echo "$LINE" | sed 's|^# ||')\n<pre><code>" >> $NAME.inc
+# If sentence endis with dot and space '. ', then uppercase the letter of next sentence
+OUT=$(echo "$LINE" | sed 's|^# ||' | sed 's/\. ./\U&/')
+# convert line first letter to uppercase
+echo -e "${OUT^}\n<pre><code>" >> $NAME.inc
 else
 # blindly assume this is line having useful code
 echo -n "code"
+
+# if lines ends with backslash then merge this line together with next line
+echo "$LINE" | grep " \\\\$" > /dev/null
+if [ $? -eq 0 ]; then
+echo -n "$LINE" | sed 's|.$||' >> $NAME.inc
+else
 echo "$LINE" >> $NAME.inc
+fi
 
 fi
 
@@ -53,6 +63,7 @@ fi
 
 # end of "TAB"
 echo "</div>" >> $NAME.inc
+
 
 # save some new line characters for '<pre><code></code></pre>'
 cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "H;1h;\${g;s|\n</code></pre>|</code></pre>|g;p}" >> ../index.html
@@ -103,7 +114,10 @@ else
 echo "$LINE" | grep "^--" > /dev/null
 if [ $? -eq 0 ]; then
 echo comment
-echo -e "$(echo "$LINE" | sed 's|^--||')\n<pre><code>" >> $NAME.inc
+# If sentence endis with dot and space '. ', then uppercase the letter of next sentence
+OUT=$(echo "$LINE" | sed 's|^--||' | sed 's/\. ./\U&/')
+# convert line first letter to uppercase
+echo -e "${OUT^}\n<pre><code>" >> $NAME.inc
 else
 # blindly assume this is line having useful code
 echo -n "code"
@@ -117,6 +131,7 @@ fi
 
 # end of "TAB"
 echo "</div>" >> $NAME.inc
+
 
 # save some new line characters for '<pre><code></code></pre>'
 cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "H;1h;\${g;s|\n</code></pre>|</code></pre>|g;p}" >> ../index.html
@@ -132,7 +147,10 @@ cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "
 echo "</div></body></html>" >> ../index.html
 
 # install default block
-sed -i 's|input type="radio" name="tabs" id="bash"|input type="radio" name="tabs" id="bash" checked="checked"|' ../index.html
+sed -i 's|input type="radio" name="tabs" id="backup"|input type="radio" name="tabs" id="backup" checked="checked"|' ../index.html
+
+# remove unnecessarry space
+sed -i 's| </code></pre>|</code></pre>|' ../index.html
 
 rm -rf *inc
 
