@@ -10,6 +10,9 @@ SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts pro
 --check Zabbix 6.0 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive
 SELECT * FROM ha_node;
 
+--count of events. All version of Zabbix
+SELECT COUNT(*),source FROM events GROUP BY source;
+
 --show items by proxy. works from Zabbix 3.0 till 6.2
 SELECT COUNT(*),proxy.host AS proxy,items.type
 FROM items
@@ -68,6 +71,21 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;
+
+--exceptions in update interval. when a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates
+SELECT h1.host AS exceptionInstalled,
+i1.name,
+i1.key_,
+i1.delay,
+h2.host AS differesFromTemplate,
+i2.name,
+i2.key_,
+i2.delay
+FROM items i1
+JOIN items i2 ON (i2.itemid=i1.templateid)
+JOIN hosts h1 ON (h1.hostid=i1.hostid)
+JOIN hosts h2 ON (h2.hostid=i2.hostid)
+WHERE i1.delay<>i2.delay;
 
 --all events closed by global correlation rule. Zabbix 4.0, 5.0, 6.0
 SELECT
