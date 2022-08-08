@@ -61,3 +61,11 @@ GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor
 CREATE USER 'zbx_monitor'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2PassiveMonitoring';
 GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.112';
 
+--backup user for 'mysqldump'
+CREATE USER 'zbx_backup'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PassfordForMySQLDUmp';
+GRANT SELECT, LOCK TABLES, SHOW VIEW, RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';
+
+--Read only user for reporting
+CREATE USER 'zbx_read_only'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyUser';
+GRANT SELECT ON zabbix.* TO 'zbx_backup'@'127.0.0.1';
+
