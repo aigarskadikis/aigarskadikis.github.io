@@ -69,3 +69,7 @@ GRANT SELECT, LOCK TABLES, SHOW VIEW, RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';
 CREATE USER 'zbx_read_only'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyUser';
 GRANT SELECT ON zabbix.* TO 'zbx_backup'@'127.0.0.1';
 
+--User for grafana which runs in docker
+CREATE USER 'grafana'@'%' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyGrafanaUser';
+GRANT SELECT ON zabbix.* TO 'grafana'@'%';
+
