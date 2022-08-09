@@ -1,54 +1,5 @@
 <html><head><style type='text/css'>
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-}
- 
-.tabs label {
-  order: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: .1rem .5rem;
-  margin:0;
-  cursor: pointer;
-}
- 
-.tabs .tab {
-  order: 9;
-  flex-grow: 1;
-  width: 100%;
-  height: 100rem;
-  display: none;
-  background: #fff;
-  padding: .4rem;
-}
- 
-.tabs input[type="radio"] {
-  display: none;
-}
- 
-.tabs input[type="radio"]:checked + label {
-  background: #fff;
-}
- 
-.tabs input[type="radio"]:checked + label + .tab {
-  display: block;
-}
-  
-body {
-  background: gainsboro;
-  min-height: 100vh;
-  box-sizing: border-box;
-  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;
-  font-weight: 300;
-  line-height: 1.5;
-  font-size: 100%;
-  display: flex;
-}
-
-pre {padding:0;margin:0 0 1em 0}
+.tabs{display:flex;flex-wrap:wrap;width:100%}.tabs label{order:1;display:flex;justify-content:center;align-items:center;padding:.1rem .5rem;margin:0;cursor:pointer}.tabs .tab{order:9;flex-grow:1;width:100%;height:100rem;display:none;background:#fff;padding:.4rem}.tabs input[type="radio"]{display:none}.tabs input[type="radio"]:checked + label{background:#fff}.tabs input[type="radio"]:checked + label + .tab{display:block}body{background:#dcdcdc;min-height:100vh;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-weight:300;line-height:1.5;font-size:100%;display:flex}pre{padding:0;margin:0 0 1em}
 </style></head><body><div class='tabs'>
 <input type="radio" name="tabs" id="backup" checked="checked"><label for="backup">backup</label><div class="tab">
 Backup directories which can be related to Zabbix<pre><code>cd /usr/share/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
@@ -60,9 +11,9 @@ cd /etc/nginx/conf.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
 Backup and compress zabbix server config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
-Backup and compress partitioning script and configuration files<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
+Backup and compress partitioning script and configuration files<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 <p>Download this section: <a href="src/backup.sh">https://aigarskadikis.github.io/src/backup.sh</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="el8"><label for="el8">el8</label><div class="tab">
 Zabbix 6.0 LTS repository<pre><code>rpm -Uvh https://repo.zabbix.com/zabbix/6.0/rhel/8/x86_64/zabbix-release-6.0-2.el8.noarch.rpm</code></pre>
@@ -72,7 +23,7 @@ Python 3 with YAML and MySQL connector support<pre><code>dnf -y install python3 
 Install MySQL server on Oracle Linux 8, RHEL 8, Rocky Linux 8<pre><code>dnf -y install mysql-server</code></pre>
 Work with Zabbix source<pre><code>dnf -y install git automake gcc</code></pre>
 <p>Download this section: <a href="src/el8.sh">https://aigarskadikis.github.io/src/el8.sh</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/el8.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/el8.sh</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/el8.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/el8.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="grep"><label for="grep">grep</label><div class="tab">
 Check if master processes is runnign from server, proxy or agent<pre><code>ps auxww | grep "[z]abbix.*conf"</code></pre>
@@ -88,7 +39,7 @@ Check slow queries<pre><code>grep "slow query" /var/log/zabbix/zabbix_server.log
 Differences between backend nodes<pre><code>grep -r '=' /etc/zabbix/zabbix_server.d/*</code></pre>
 How much time take for housekeeper process to complete<pre><code>grep housekeeper /var/log/zabbix/zabbix_server.log</code></pre>
 <p>Download this section: <a href="src/grep.sh">https://aigarskadikis.github.io/src/grep.sh</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/grep.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/grep.sh</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/grep.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/grep.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="loop"><label for="loop">loop</label><div class="tab">
 Rotate between values<pre><code>echo "
@@ -99,7 +50,7 @@ do {
 echo $LINE
 } done</code></pre>
 <p>Download this section: <a href="src/loop.sh">https://aigarskadikis.github.io/src/loop.sh</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/loop.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/loop.sh</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/loop.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/loop.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="my.sh"><label for="my.sh">my.sh</label><div class="tab">
 List of MySQL tables/partitions by size<pre><code>du -ab /var/lib/mysql > /tmp/size.of.tables.txt
@@ -124,7 +75,7 @@ EOF</code></pre>
 On-the-fly configuration backup. Check if this is not the node holding the Virtaul IP address. Do a backup on slave<pre><code>ip a | grep "192.168.88.55" || mysqldump --defaults-file=/root/.my.cnf --set-gtid-purged=OFF --flush-logs --single-transaction --ignore-table=zabbix.history --ignore-table=zabbix.history_log --ignore-table=zabbix.history_str --ignore-table=zabbix.history_text --ignore-table=zabbix.history_uint --ignore-table=zabbix.trends --ignore-table=zabbix.trends_uint zabbix | gzip > quick.restore.sql.gz</code></pre>
 Schema backup for MySQL 8. Credentials embeded in command<pre><code>mysqldump --host=127.0.0.1 --user=root --password='zabbix' --set-gtid-purged=OFF --flush-logs --single-transaction --create-options --no-data zabbix | gzip --fast > schema.sql.gz</code></pre>
 <p>Download this section: <a href="src/my.sh.sh">https://aigarskadikis.github.io/src/my.sh.sh</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh.sh</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="sedi"><label for="sedi">sedi</label><div class="tab">
 Reinstall values which have been already customized<pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
@@ -134,7 +85,7 @@ sed -i 's|^StartDiscoverers=.*|StartDiscoverers=20|' /etc/zabbix/zabbix_server.c
 Summarize configuration file<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
 Restart and follow log<pre><code>systemctl restart zabbix-server && tail -f /var/log/zabbix/zabbix_server.log</code></pre>
 <p>Download this section: <a href="src/sedi.sh">https://aigarskadikis.github.io/src/sedi.sh</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sedi.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sedi.sh</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sedi.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sedi.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="sql2tsv"><label for="sql2tsv">sql2tsv</label><div class="tab">
 MySQL<pre><code>echo "SELECT alias,
@@ -143,14 +94,14 @@ attempt_ip,
 FROM_UNIXTIME(attempt_clock)
 FROM users" | mysql --host='127.0.0.1' --user='zbx_web' --password='zabbix' --database='zabbix' --silent --skip-column-names --batch > /tmp/queue.tsv</code></pre>
 <p>Download this section: <a href="src/sql2tsv.sh">https://aigarskadikis.github.io/src/sql2tsv.sh</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sql2tsv.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sql2tsv.sh</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sql2tsv.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sql2tsv.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="sudoers"><label for="sudoers">sudoers</label><div class="tab">
 Allow to reload cache from Zabbix frontend<pre><code>cd /etc/sudoers.d
 echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/zabbix_server -R config_cache_reload' | sudo tee zabbix_server_config_cache_reload
 chmod 0440 zabbix_server_config_cache_reload</code></pre>
 <p>Download this section: <a href="src/sudoers.sh">https://aigarskadikis.github.io/src/sudoers.sh</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sudoers.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sudoers.sh</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sudoers.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sudoers.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="supply"><label for="supply">supply</label><div class="tab">
 Listening TCP ports<pre><code>ss --tcp --listen --numeric</code></pre>
@@ -179,27 +130,31 @@ Service not booting up<pre><code>journalctl -u sshd | tail -100 > /tmp/sshd.txt<
 List of open files:<pre><code>lsof > /tmp/list.open.files.txt</code></pre>
 Disk long term throughput, how fast we can create 64GB file<pre><code>time dd if=/dev/urandom of=/var/lib/mysql/64GB.file bs=1M count=65536 oflag=direct</code></pre>
 <p>Download this section: <a href="src/supply.sh">https://aigarskadikis.github.io/src/supply.sh</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/supply.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/supply.sh</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/supply.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/supply.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="web"><label for="web">web</label><div class="tab">
 Check all variables under /etc<pre><code><pre><code>grep -Er "memory_limit|max_execution_time" /etc</code></pre></code></pre>
 <p>Download this section: <a href="src/web.sh">https://aigarskadikis.github.io/src/web.sh</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="delete"><label for="delete">delete.sql</label><div class="tab">
 Discard all users which is using frontend<pre><code>SELECT FROM session;</code></pre>
 Delete all events comming from specific trigger id. Only execute if trigger is not in problem state<pre><code>DELETE FROM events WHERE events.source=0 AND events.object=0 AND events.objectid=987654321;</code></pre>
 Delete discovery, autoregistration and internal events<pre><code>DELETE FROM events WHERE source IN (1,2,3) LIMIT 1; DELETE FROM events WHERE source IN (1,2,3) LIMIT 10; DELETE FROM events WHERE source IN (1,2,3) LIMIT 100;</code></pre>
+Delete child events which was closed by global correlation<pre><code>DELETE e FROM events e LEFT JOIN event_recovery ON (event_recovery.eventid=e.eventid) WHERE event_recovery.c_eventid IS NOT NULL AND e.clock < 1234;</code></pre>
 <p>Download this section: <a href="src/delete.sql">https://aigarskadikis.github.io/src/delete.sql</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Works on Zabbix 4.0, 5.0, 6.0, 6,2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 Hosts having problems with passive checks. Zabbix 4.0 till 5.2<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Check Zabbix 6.0 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive<pre><code>SELECT * FROM ha_node;</code></pre>
+Count of events. All version of Zabbix<pre><code>SELECT COUNT(*),source FROM events GROUP BY source;</code></pre>
 Show items by proxy. Works from Zabbix 3.0 till 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type FROM items JOIN hosts ON (items.hostid=hosts.hostid) JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE hosts.status = 0 AND items.status = 0 AND proxy.status IN (5,6) GROUP BY 2,3 ORDER BY 2,3;</code></pre>
 Devices and it's status. Works from Zabbix 3.0 till 5.2<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, CASE hosts.available WHEN 0 THEN 'unknown'  WHEN 1 THEN 'available' WHEN 2 THEN 'down' END AS "status", CASE interface.type WHEN 1 THEN 'ZBX' WHEN 2 THEN 'SNMP' WHEN 3 THEN 'IPMI' WHEN 4 THEN 'JMX' END AS "type", hosts.error FROM hosts JOIN interface ON interface.hostid=hosts.hostid LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid WHERE hosts.status=0 AND interface.main=1;</code></pre>
 Items in use<pre><code>SELECT CASE items.type WHEN 0 THEN 'Zabbix agent' WHEN 2 THEN 'Zabbix trapper' WHEN 3 THEN 'Simple check' WHEN 5 THEN 'Zabbix internal' WHEN 7 THEN 'Zabbix agent (active) check' WHEN 8 THEN 'Aggregate' WHEN 9 THEN 'HTTP test (web monitoring scenario step)' WHEN 10 THEN 'External check' WHEN 11 THEN 'Database monitor' WHEN 12 THEN 'IPMI agent' WHEN 13 THEN 'SSH agent' WHEN 14 THEN 'TELNET agent' WHEN 15 THEN 'Calculated' WHEN 16 THEN 'JMX agent' WHEN 17 THEN 'SNMP trap' WHEN 18 THEN 'Dependent item' WHEN 19 THEN 'HTTP agent' WHEN 20 THEN 'SNMP agent' END as type,COUNT(*) FROM items JOIN hosts ON (hosts.hostid=items.hostid) WHERE hosts.status=0 AND items.status=0 GROUP BY items.type ORDER BY COUNT(*) DESC;</code></pre>
+Exceptions in update interval. When a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates<pre><code>SELECT h1.host AS exceptionInstalled, i1.name, i1.key_, i1.delay, h2.host AS differesFromTemplate, i2.name, i2.key_, i2.delay FROM items i1 JOIN items i2 ON (i2.itemid=i1.templateid) JOIN hosts h1 ON (h1.hostid=i1.hostid) JOIN hosts h2 ON (h2.hostid=i2.hostid) WHERE i1.delay<>i2.delay;</code></pre>
 All events closed by global correlation rule. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name FROM events repercussion JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) WHERE event_recovery.c_eventid IS NOT NULL ORDER BY repercussion.clock ASC;</code></pre>
 All active data collector items. Zabbix 3.0, 4.0, 5.0, 6.0<pre><code>SELECT hosts.host, items.name, items.type, items.key_, items.delay FROM items JOIN hosts ON (hosts.hostid=items.hostid) WHERE hosts.status=0 AND items.status=0 ORDER BY 1,2,3,4,5;</code></pre>
 Determine which items report unsupported state:<pre><code>SELECT COUNT(items.key_), hosts.host, items.key_, item_rtdata.error FROM events JOIN items ON (items.itemid=events.objectid) JOIN hosts ON (hosts.hostid=items.hostid) JOIN item_rtdata ON (item_rtdata.itemid=items.itemid) WHERE source=3 AND object=4 AND items.status=0 AND items.flags IN (0,1,4) AND LENGTH(item_rtdata.error)>0 GROUP BY hosts.host,items.key_, item_rtdata.error ORDER BY COUNT(items.key_);</code></pre>
@@ -209,7 +164,7 @@ Frequency of LLD rule for enabled hosts and enabled items discoveries for only m
 Host inventory<pre><code>SELECT host_inventory.macaddress_a,GROUP_CONCAT(hosts.host) FROM host_inventory JOIN hosts ON (hosts.hostid=host_inventory.hostid) WHERE hosts.status=0 AND host_inventory.macaddress_a LIKE '%enterprises%' GROUP BY host_inventory.macaddress_a;</code></pre>
 Remove metrics where there are no item definition anymore<pre><code>DELETE FROM trends WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab">
 Create an empty database with name 'zabbix'. Zabbix 6.0 LTS<pre><code>CREATE DATABASE zabbix CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</code></pre>
@@ -229,7 +184,10 @@ User for DB partitioning script<pre><code>CREATE USER 'zbx_part'@'127.0.0.1' IDE
 User to monitor the health of MySQL server via local Zabbix agent 2. Not suitable for RDS.<pre><code>CREATE USER 'zbx_monitor'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2ActiveMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'127.0.0.1';</code></pre>
 APP1. User to monitor RDS database<pre><code>CREATE USER 'zbx_monitor'@'192.168.88.111' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2PassiveMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.111';</code></pre>
 APP2. User to monitor RDS database<pre><code>CREATE USER 'zbx_monitor'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2PassiveMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.112';</code></pre>
+Backup user for 'mysqldump'<pre><code>CREATE USER 'zbx_backup'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PassfordForMySQLDUmp'; GRANT SELECT, LOCK TABLES, SHOW VIEW, RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';</code></pre>
+Read only user for reporting<pre><code>CREATE USER 'zbx_read_only'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyUser'; GRANT SELECT ON zabbix.* TO 'zbx_backup'@'127.0.0.1';</code></pre>
+User for grafana which runs in docker<pre><code>CREATE USER 'grafana'@'%' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyGrafanaUser'; GRANT SELECT ON zabbix.* TO 'grafana'@'%';</code></pre>
 <p>Download this section: <a href="src/users.sql">https://aigarskadikis.github.io/src/users.sql</a><br />
-Code on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/users.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/users.sql</a></p>
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/users.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/users.sql</a></p>
 </div>
 </div></body></html>
