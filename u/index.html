@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-    <body>
-        <pre id="output"></pre>
+<body>
 
-        <div id="config">
-            <label>IP:
-                <input class="output-replace" name="{DB_IP}" value="" data-default="***">
-            </label>
-            <label>User:
-                <input class="output-replace" name="{DB_USER}" value="">
-            </label>
-        </div>
+<div id="config">
+<label>Name of database:<input class="output-replace" name="{ZABBIX_DB_BANE}" value="zabbix" data-default=""></label>
+<label>DB1 IP:<input class="output-replace" name="{DB_NODE_1}" value="192.168.88.101" data-default=""></label>
+<label>DB2 IP:<input class="output-replace" name="{DB_NODE_2}" value="192.168.88.102"></label>
+<label>password for user 'repl':<input class="output-replace" name="{PSW_REPL}" value=""></label>
+</div>
+
+<pre id="output"></pre>
+
+
 <style>
 * { margin:0; padding:0; }
 #output { margin: 0 0 20px; min-height: 30vh; background-color: whitesmoke;  }
@@ -19,8 +20,16 @@
 <script>
 let dom = document.getElementById('output');
 let messages = [
-    "CREATE USER '{DB_USER}'@'{DB_IP}' IDENTIFIED BY 'password'",
-    '// this will create database user {DB_USER}'
+"--create an empty database with name '{ZABBIX_DB_BANE}'. Zabbix 6.0 LTS",
+"CREATE DATABASE {ZABBIX_DB_BANE} CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;",
+"",
+"--DB1. user for replication",
+"CREATE USER 'repl'@'{DB_NODE_1}' IDENTIFIED WITH mysql_native_password BY '{PSW_REPL}';",
+"GRANT REPLICATION SLAVE ON *.* TO 'repl'@'{DB_NODE_1}';",
+"",
+"--DB2. user for replication",
+"CREATE USER 'repl'@'{DB_NODE_2}' IDENTIFIED WITH mysql_native_password BY '{PSW_REPL}';",
+"GRANT REPLICATION SLAVE ON *.* TO 'repl'@'{DB_NODE_2}';"
 ];
 let placeholders = document.querySelectorAll('.output-replace');
 

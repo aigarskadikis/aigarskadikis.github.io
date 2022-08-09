@@ -52,7 +52,7 @@ echo $LINE
 <p>Download this section: <a href="src/loop.sh">https://aigarskadikis.github.io/src/loop.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/loop.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/loop.sh</a></p>
 </div>
-<input type="radio" name="tabs" id="my.sh"><label for="my.sh">my.sh</label><div class="tab">
+<input type="radio" name="tabs" id="my"><label for="my">my</label><div class="tab">
 List of MySQL tables/partitions by size<pre><code>du -ab /var/lib/mysql > /tmp/size.of.tables.txt
 du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt</code></pre>
 Backup data directory. Fastest way time-wise<pre><code>systemctl stop mysqld
@@ -74,18 +74,18 @@ password=passwd_ro_zbx
 EOF</code></pre>
 On-the-fly configuration backup. Check if this is not the node holding the Virtaul IP address. Do a backup on slave<pre><code>ip a | grep "192.168.88.55" || mysqldump --defaults-file=/root/.my.cnf --set-gtid-purged=OFF --flush-logs --single-transaction --ignore-table=zabbix.history --ignore-table=zabbix.history_log --ignore-table=zabbix.history_str --ignore-table=zabbix.history_text --ignore-table=zabbix.history_uint --ignore-table=zabbix.trends --ignore-table=zabbix.trends_uint zabbix | gzip > quick.restore.sql.gz</code></pre>
 Schema backup for MySQL 8. Credentials embeded in command<pre><code>mysqldump --host=127.0.0.1 --user=root --password='zabbix' --set-gtid-purged=OFF --flush-logs --single-transaction --create-options --no-data zabbix | gzip --fast > schema.sql.gz</code></pre>
-<p>Download this section: <a href="src/my.sh.sh">https://aigarskadikis.github.io/src/my.sh.sh</a><br />
-Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh.sh</a></p>
+<p>Download this section: <a href="src/my.sh">https://aigarskadikis.github.io/src/my.sh</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh</a></p>
 </div>
-<input type="radio" name="tabs" id="sedi"><label for="sedi">sedi</label><div class="tab">
+<input type="radio" name="tabs" id="sed"><label for="sed">sed</label><div class="tab">
 Reinstall values which have been already customized<pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
 sed -i 's|^ValueCacheSize=.*|ValueCacheSize=768M|' /etc/zabbix/zabbix_server.conf && grep ^ValueCacheSize /etc/zabbix/zabbix_server.conf
 sed -i 's|^TrendCacheSize=.*|TrendCacheSize=256M|' /etc/zabbix/zabbix_server.conf && grep ^TrendCacheSize /etc/zabbix/zabbix_server.conf
 sed -i 's|^StartDiscoverers=.*|StartDiscoverers=20|' /etc/zabbix/zabbix_server.conf && grep ^StartDiscoverers /etc/zabbix/zabbix_server.conf</code></pre>
 Summarize configuration file<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
 Restart and follow log<pre><code>systemctl restart zabbix-server && tail -f /var/log/zabbix/zabbix_server.log</code></pre>
-<p>Download this section: <a href="src/sedi.sh">https://aigarskadikis.github.io/src/sedi.sh</a><br />
-Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sedi.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sedi.sh</a></p>
+<p>Download this section: <a href="src/sed.sh">https://aigarskadikis.github.io/src/sed.sh</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sed.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sed.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="sql2tsv"><label for="sql2tsv">sql2tsv</label><div class="tab">
 MySQL<pre><code>echo "SELECT alias,
@@ -107,6 +107,7 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 Listening TCP ports<pre><code>ss --tcp --listen --numeric</code></pre>
 Listening TCP ports with process identification<pre><code>ss --tcp --listen --numeric --process</code></pre>
 Check if tcp port listens. Make sure it really listens on destination server before checking<pre><code>nc -v servername 3306</code></pre>
+Check if port is open without external tools. If it reports 0, the port is reachable and in the listening state<pre><code>{ echo >/dev/tcp/127.0.0.1/3306 ; } 2>/dev/null; echo $?</code></pre>
 Activity for each block device, pretty-print  device  names, report task creation and system switching activity.<pre><code>sar -d -p -w 1</code></pre>
 10 seconds of disk usage<pre><code>sar -d -wp 1 10 >> /tmp/disk.activity.txt</code></pre>
 Installed packages on EL7 or EL8 system<pre><code>rpm -qa > /tmp/installed.packages.txt</code></pre>
