@@ -31,8 +31,8 @@ document.getElementById('config').addEventListener('change', e => {
 
     updateOuput(dom, messages);
 });
-document.getElementById('config').addEventListener('keypress', e => {
-    console.log('keypress');
+document.getElementById('config').addEventListener('keyup', e => {
+    console.log('keyup');
     if (!e.target.classList.contains('output-replace')) {
         return;
     }
