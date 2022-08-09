@@ -9,9 +9,6 @@
             <label>User:
                 <input class="output-replace" name="{DB_USER}" value="">
             </label>
-            <label>Password:
-                <input class="output-replace" name="{DB_PASS}" value="">
-            </label>
         </div>
 <style>
 * { margin:0; padding:0; }
@@ -22,7 +19,7 @@
 <script>
 let dom = document.getElementById('output');
 let messages = [
-    "CREATE USER '{DB_USER}'@'{DB_IP}' IDENTIFIED BY '{DB_PASS}'";,
+    "CREATE USER '{DB_USER}'@'{DB_IP}' IDENTIFIED BY 'password'",
     '// this will create database user {DB_USER}'
 ];
 let placeholders = document.querySelectorAll('.output-replace');
@@ -34,8 +31,8 @@ document.getElementById('config').addEventListener('change', e => {
 
     updateOuput(dom, messages);
 });
-document.getElementById('config').addEventListener('keyup', e => {
-    console.log('keyup');
+document.getElementById('config').addEventListener('keypress', e => {
+    console.log('keypress');
     if (!e.target.classList.contains('output-replace')) {
         return;
     }
