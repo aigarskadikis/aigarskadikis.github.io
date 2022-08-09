@@ -1,9 +1,68 @@
-<html><body>
+<!DOCTYPE html>
+    <body>
+        <pre id="output"></pre>
 
-<pre><code>CREATE USER '<span id='zbx_srv_user'>zbx_srv</span>'@'<span id='zbx_srv_ip'>192.168.88.56</span>' IDENTIFIED BY 'password';</code></pre>
+        <div id="config">
+            <label>IP:
+                <input class="output-replace" name="{DB_IP}" value="" data-default="***">
+            </label>
+            <label>User:
+                <input class="output-replace" name="{DB_USER}" value="">
+            </label>
+            <label>Password:
+                <input class="output-replace" name="{DB_PASS}" value="">
+            </label>
+        </div>
+<style>
+* { margin:0; padding:0; }
+#output { margin: 0 0 20px; min-height: 30vh; background-color: whitesmoke;  }
+#config { padding: 10px; border: 1px solid silver; }
+#config label { display: block; margin-bottom: 3px; }
+</style>
+<script>
+let dom = document.getElementById('output');
+let messages = [
+    "CREATE USER '{DB_USER}'@'{DB_IP}' IDENTIFIED BY '{DB_PASS}'";,
+    '// this will create database user {DB_USER}'
+];
+let placeholders = document.querySelectorAll('.output-replace');
 
-<div style='width=400px;float:right'>
-ip for 'zabbix-server':<input type="text" id="input_zbx_srv_ip" name="zbx_srv_ip" value="" maxlength="255" autofocus="autofocus"><br />
-user for 'zabbix-server':<input type="text" id="input_zbx_srv_user" name="zbx_srv_user" value="" maxlength="255" autofocus="autofocus">
+document.getElementById('config').addEventListener('change', e => {
+    if (!e.target.classList.contains('output-replace')) {
+        return;
+    }
 
-</div></body></html>
+    updateOuput(dom, messages);
+});
+document.getElementById('config').addEventListener('keyup', e => {
+    console.log('keyup');
+    if (!e.target.classList.contains('output-replace')) {
+        return;
+    }
+
+    updateOuput(dom, messages)
+});
+updateOuput(dom, messages);
+
+function updateOuput(dom, messages) {
+    
+
+    let output = messages.join("\r\n");
+    let key, value;
+
+    for (let placeholder of placeholders) {
+        key = new RegExp(placeholder.getAttribute('name'), 'g');
+        value = placeholder.value;
+
+        if (value == '' && placeholder.hasAttribute('data-default')) {
+            value = placeholder.getAttribute('data-default');
+        }
+
+        output = output.replace(key, value);
+    }
+
+    dom.innerHTML = output;
+}
+</script>
+    </body>
+</html>
