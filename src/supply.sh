@@ -7,6 +7,9 @@ ss --tcp --listen --numeric --process
 # check if tcp port listens. make sure it really listens on destination server before checking
 nc -v servername 3306
 
+# check if port is open without external tools. if it reports 0, the port is reachable and in the listening state
+{ echo >/dev/tcp/127.0.0.1/3306 ; } 2>/dev/null; echo $?
+
 # activity for each block device, pretty-print  device  names, report task creation and system switching activity.
 sar -d -p -w 1
 
