@@ -18,7 +18,7 @@ cat << 'EOF' >> ../u/index.html
 </tr>
 <tr>
 <td><code>srv1</code></td><td><input class='output-replace' name='192.168.88.111' value='192.168.88.111' data-default=''></td>
-<td><code>srv1</code></td><td><input class='output-replace' name='192.168.88.112' value='192.168.88.112' data-default=''></td>
+<td><code>srv2</code></td><td><input class='output-replace' name='192.168.88.112' value='192.168.88.112' data-default=''></td>
 </tr>
 <tr>
 <td><code>web1</code></td><td><input class='output-replace' name='192.168.88.121' value='192.168.88.121' data-default=''></td>
@@ -50,7 +50,7 @@ cat << 'EOF' >> ../u/index.html
 
 <style>
 * { margin:0; padding:0; }
-#output { margin:1rem 0 0 1rem; min-height: 30vh; background-color: whitesmoke; float:left;width:50%; }
+#output { margin:1rem 0 0 1rem; min-height: 30vh; background-color:#fff; float:left;width:50%; }
 #config { padding: 10px; border: 1px solid silver; float:right;min-width:20%; position:fixed; top:1rem;right:20px}
 #config label { display: block; margin-bottom: 3px;}
 td:nth-child(1),td:nth-child(3),th:nth-child(1),th:nth-child(3){text-align:right;padding:0 .5rem;}
