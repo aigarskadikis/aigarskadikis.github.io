@@ -1,5 +1,5 @@
---create an empty database with name 'zabbix'. Zabbix 6.0 LTS
-CREATE DATABASE zabbix CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+--create an empty database with name 'zbx_db'. Zabbix 6.0 LTS
+CREATE DATABASE zbx_db CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 
 --DB1. user for replication
 CREATE USER 'repl'@'192.168.88.101' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBReplication';
@@ -17,7 +17,7 @@ CREATE USER 'zbx_srv'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 
 
 --bare minumum permissions for 'zabbix-server'. Command suitable for 6.0
 CREATE ROLE 'zbx_srv_role';
-GRANT SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, INDEX, REFERENCES ON zabbix.* TO 'zbx_srv_role';
+GRANT SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, INDEX, REFERENCES ON zbx_db.* TO 'zbx_srv_role';
 
 --APP1. Assign role
 GRANT 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.111';
@@ -35,7 +35,7 @@ CREATE USER 'zbx_web'@'192.168.88.122' IDENTIFIED WITH mysql_native_password BY 
 
 --install bare minimum permissions for frontend
 CREATE ROLE 'zbx_web_role';
-GRANT SELECT, UPDATE, DELETE, INSERT ON zabbix.* TO 'zbx_web_role';
+GRANT SELECT, UPDATE, DELETE, INSERT ON zbx_db.* TO 'zbx_web_role';
 
 --GUI1. Assign role
 GRANT 'zbx_web_role' TO 'zbx_web'@'192.168.88.121';
@@ -50,15 +50,15 @@ CREATE USER 'zbx_part'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'Pas
 GRANT ALL PRIVILEGES ON *.* to 'zbx_part'@'127.0.0.1';
 
 --User to monitor the health of MySQL server via local Zabbix agent 2. Not suitable for RDS.
-CREATE USER 'zbx_monitor'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2ActiveMonitoring';
+CREATE USER 'zbx_monitor'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring';
 GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'127.0.0.1';
 
 --APP1. user to monitor RDS database
-CREATE USER 'zbx_monitor'@'192.168.88.111' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2PassiveMonitoring';
+CREATE USER 'zbx_monitor'@'192.168.88.111' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring';
 GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.111';
 
 --APP2. user to monitor RDS database
-CREATE USER 'zbx_monitor'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2PassiveMonitoring';
+CREATE USER 'zbx_monitor'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring';
 GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.112';
 
 --backup user for 'mysqldump'
@@ -67,9 +67,9 @@ GRANT SELECT, LOCK TABLES, SHOW VIEW, RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';
 
 --Read only user for reporting
 CREATE USER 'zbx_read_only'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyUser';
-GRANT SELECT ON zabbix.* TO 'zbx_backup'@'127.0.0.1';
+GRANT SELECT ON zbx_db.* TO 'zbx_backup'@'127.0.0.1';
 
 --User for grafana which runs in docker
 CREATE USER 'grafana'@'%' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyGrafanaUser';
-GRANT SELECT ON zabbix.* TO 'grafana'@'%';
+GRANT SELECT ON zbx_db.* TO 'grafana'@'%';
 

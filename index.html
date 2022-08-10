@@ -168,26 +168,26 @@ Remove metrics where there are no item definition anymore<pre><code>DELETE FROM 
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab">
-Create an empty database with name 'zabbix'. Zabbix 6.0 LTS<pre><code>CREATE DATABASE zabbix CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</code></pre>
+Create an empty database with name 'zbx_db'. Zabbix 6.0 LTS<pre><code>CREATE DATABASE zbx_db CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</code></pre>
 DB1. User for replication<pre><code>CREATE USER 'repl'@'192.168.88.101' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBReplication'; GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.88.101';</code></pre>
 DB2. User for replication<pre><code>CREATE USER 'repl'@'192.168.88.102' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBReplication'; GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.88.102';</code></pre>
 APP1. User for 'zabbix-server'<pre><code>CREATE USER 'zbx_srv'@'192.168.88.111' IDENTIFIED WITH mysql_native_password BY 'PasswordForApplicationServer';</code></pre>
 APP2. User for 'zabbix-server'<pre><code>CREATE USER 'zbx_srv'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 'PasswordForApplicationServer';</code></pre>
-Bare minumum permissions for 'zabbix-server'. Command suitable for 6.0<pre><code>CREATE ROLE 'zbx_srv_role'; GRANT SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, INDEX, REFERENCES ON zabbix.* TO 'zbx_srv_role';</code></pre>
+Bare minumum permissions for 'zabbix-server'. Command suitable for 6.0<pre><code>CREATE ROLE 'zbx_srv_role'; GRANT SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, INDEX, REFERENCES ON zbx_db.* TO 'zbx_srv_role';</code></pre>
 APP1. Assign role<pre><code>GRANT 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.111'; SET DEFAULT ROLE 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.111';</code></pre>
 APP2. Assign role<pre><code>GRANT 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.112'; SET DEFAULT ROLE 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.112';</code></pre>
 GUI1. User for 'nginx'<pre><code>CREATE USER 'zbx_web'@'192.168.88.121' IDENTIFIED WITH mysql_native_password BY 'PasswordForFrontendNode';</code></pre>
 GUI2. User for 'nginx'<pre><code>CREATE USER 'zbx_web'@'192.168.88.122' IDENTIFIED WITH mysql_native_password BY 'PasswordForFrontendNode';</code></pre>
-Install bare minimum permissions for frontend<pre><code>CREATE ROLE 'zbx_web_role'; GRANT SELECT, UPDATE, DELETE, INSERT ON zabbix.* TO 'zbx_web_role';</code></pre>
+Install bare minimum permissions for frontend<pre><code>CREATE ROLE 'zbx_web_role'; GRANT SELECT, UPDATE, DELETE, INSERT ON zbx_db.* TO 'zbx_web_role';</code></pre>
 GUI1. Assign role<pre><code>GRANT 'zbx_web_role' TO 'zbx_web'@'192.168.88.121'; SET DEFAULT ROLE 'zbx_web_role' TO 'zbx_web'@'192.168.88.121';</code></pre>
 GUI2. Assign role<pre><code>GRANT 'zbx_web_role' TO 'zbx_web'@'192.168.88.122'; SET DEFAULT ROLE 'zbx_web_role' TO 'zbx_web'@'192.168.88.122';</code></pre>
 User for DB partitioning script<pre><code>CREATE USER 'zbx_part'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBPartitioning'; GRANT ALL PRIVILEGES ON *.* to 'zbx_part'@'127.0.0.1';</code></pre>
-User to monitor the health of MySQL server via local Zabbix agent 2. Not suitable for RDS.<pre><code>CREATE USER 'zbx_monitor'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2ActiveMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'127.0.0.1';</code></pre>
-APP1. User to monitor RDS database<pre><code>CREATE USER 'zbx_monitor'@'192.168.88.111' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2PassiveMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.111';</code></pre>
-APP2. User to monitor RDS database<pre><code>CREATE USER 'zbx_monitor'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2PassiveMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.112';</code></pre>
+User to monitor the health of MySQL server via local Zabbix agent 2. Not suitable for RDS.<pre><code>CREATE USER 'zbx_monitor'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'127.0.0.1';</code></pre>
+APP1. User to monitor RDS database<pre><code>CREATE USER 'zbx_monitor'@'192.168.88.111' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.111';</code></pre>
+APP2. User to monitor RDS database<pre><code>CREATE USER 'zbx_monitor'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.112';</code></pre>
 Backup user for 'mysqldump'<pre><code>CREATE USER 'zbx_backup'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PassfordForMySQLDUmp'; GRANT SELECT, LOCK TABLES, SHOW VIEW, RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';</code></pre>
-Read only user for reporting<pre><code>CREATE USER 'zbx_read_only'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyUser'; GRANT SELECT ON zabbix.* TO 'zbx_backup'@'127.0.0.1';</code></pre>
-User for grafana which runs in docker<pre><code>CREATE USER 'grafana'@'%' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyGrafanaUser'; GRANT SELECT ON zabbix.* TO 'grafana'@'%';</code></pre>
+Read only user for reporting<pre><code>CREATE USER 'zbx_read_only'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyUser'; GRANT SELECT ON zbx_db.* TO 'zbx_backup'@'127.0.0.1';</code></pre>
+User for grafana which runs in docker<pre><code>CREATE USER 'grafana'@'%' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyGrafanaUser'; GRANT SELECT ON zbx_db.* TO 'grafana'@'%';</code></pre>
 <p>Download this section: <a href="src/users.sql">https://aigarskadikis.github.io/src/users.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/users.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/users.sql</a></p>
 </div>
