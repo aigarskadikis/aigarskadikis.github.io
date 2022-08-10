@@ -36,21 +36,21 @@ do {
 # check empty line
 echo "$LINE" | grep "^$" > /dev/null
 if [ $? -eq 0 ]; then
-echo -e "\nempty"
+# echo -e "\nempty"
 echo "</code></pre>" >> $NAME.inc
 else
 
 # check if the line is having comment
 echo "$LINE" | grep "^#" > /dev/null
 if [ $? -eq 0 ]; then
-echo comment
+# echo comment
 # If sentence endis with dot and space '. ', then uppercase the letter of next sentence
 OUT=$(echo "$LINE" | sed 's|^# ||' | sed 's/\. ./\U&/')
 # convert line first letter to uppercase
 echo -e "${OUT^}\n<pre><code>" >> $NAME.inc
 else
 # blindly assume this is line having useful code
-echo -n "code"
+echo -n '.'
 
 # if lines ends with backslash then merge this line together with next line
 echo "$LINE" | grep " \\\\$" > /dev/null
@@ -104,21 +104,21 @@ do {
 # check empty line
 echo "$LINE" | grep "^$" > /dev/null
 if [ $? -eq 0 ]; then
-echo -e "\nempty"
+# echo -e "\nempty"
 echo "</code></pre>" >> $NAME.inc
 else
 
 # check if the line is having comment
 echo "$LINE" | grep "^--" > /dev/null
 if [ $? -eq 0 ]; then
-echo comment
+# echo comment
 # If sentence endis with dot and space '. ', then uppercase the letter of next sentence
 OUT=$(echo "$LINE" | sed 's|^--||' | sed 's/\. ./\U&/')
 # convert line first letter to uppercase
 echo -e "${OUT^}\n<pre><code>" >> $NAME.inc
 else
 # blindly assume this is line having useful code
-echo -n "code"
+echo -n '.'
 echo -n "$LINE " >> $NAME.inc
 
 fi
@@ -153,11 +153,15 @@ sed -i 's|input type="radio" name="tabs" id="backup"|input type="radio" name="ta
 # remove unnecessarry space
 sed -i 's| </code></pre>|</code></pre>|' ../index.html
 
+# install extra link to create users using wizard
+sed -i 's|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab">|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab"><p>Create MySQL users using wizard: <a href="./u/index.html">https://aigarskadikis.github.io/u</a></p>|' ../index.html
+
+
 # remove includes (a source for tabs)
 rm -rf *inc
 
 # test page imediatelly
-firefox ../index.html
+# firefox ../index.html
 
 echo
 
