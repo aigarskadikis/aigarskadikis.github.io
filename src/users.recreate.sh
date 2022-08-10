@@ -50,8 +50,8 @@ cat << 'EOF' >> ../u/index.html
 
 <style>
 * { margin:0; padding:0; }
-#output { margin:1rem 0 5rem 1rem; min-height: 30vh; background-color:#fff; float:left;width:50%; }
-#config { padding: 10px; border: 1px solid silver; float:right;min-width:20%; position:fixed; top:1rem;right:20px}
+#output { margin:1rem 0 5rem 1rem; min-height: 30vh; background-color:#fff; float:left;width:50%;z-index:-1; }
+#config { padding: 10px; border: 1px solid silver; float:right;min-width:20%; position:fixed; top:1rem;right:20px; background-color:#fff;z-index:9}
 #config label { display: block; margin-bottom: 3px;}
 td:nth-child(1),td:nth-child(3),th:nth-child(1),th:nth-child(3){text-align:right;padding:0 .5rem;}
 td:nth-child(2),td:nth-child(4),th:nth-child(2),th:nth-child(4){text-align:left}
