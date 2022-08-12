@@ -32,6 +32,21 @@ mysqldump \
 --no-data \
 zabbix | gzip --fast > schema.sql.gz
 
+# create backup with a purpose to set up master to master replication
+mysqldump --source-data --all-databases \
+--set-gtid-purged=OFF \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint | gzip --fast > /tmp/backup.sql.gz
+chmod 777 /tmp/backup.sql.gz
+
+# schema dump for historical tables only. backup schema for 7 historical tables. usefull if need to repair replication as fast as possible
+mysqldump --set-gtid-purged=OFF --no-data zabbix history history_uint history_str history_log history_text trends trends_uint > empty.data.tables.with.partitions.sql
+
 # data backup with gz compression
 mysqldump \
 --defaults-file=/root/.my.cnf \
