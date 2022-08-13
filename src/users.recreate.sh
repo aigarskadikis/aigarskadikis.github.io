@@ -75,36 +75,31 @@ echo -E "\"\"" >> ../u/index.html
 
 cat << 'EOF' >> ../u/index.html
 ];
-let placeholders = document.querySelectorAll('.output-replace');
+var placeholders = document.querySelectorAll('.output-replace');
 
-document.getElementById('config').addEventListener('change', e => {
-    if (!e.target.classList.contains('output-replace')) {
-        return;
-    }
-
+for (var i = 0; i < placeholders.length; i++) {
+    var placeholder = placeholders[i];
+    placeholder.onchange = function(e) {
+        updateOuput(dom, messages);
+    };
+}
+document.getElementById('config').onkeyup = function(e) {
     updateOuput(dom, messages);
-});
-document.getElementById('config').addEventListener('keyup', e => {
-    console.log('keyup');
-    if (!e.target.classList.contains('output-replace')) {
-        return;
-    }
-
-    updateOuput(dom, messages)
-});
+};
 updateOuput(dom, messages);
 
 function updateOuput(dom, messages) {
-    
 
-    let output = messages.join("\r\n");
-    let key, value;
 
-    for (let placeholder of placeholders) {
+    var output = messages.join("<br>");
+    var key, value;
+
+    for (var i = 0; i < placeholders.length; i++) {
+        var placeholder = placeholders[i];
         key = new RegExp(placeholder.getAttribute('name'), 'g');
         value = placeholder.value;
 
-        if (value == '' && placeholder.hasAttribute('data-default')) {
+        if (value === '' && placeholder.hasAttribute('data-default')) {
             value = placeholder.getAttribute('data-default');
         }
 

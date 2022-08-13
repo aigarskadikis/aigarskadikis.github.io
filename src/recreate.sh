@@ -17,7 +17,7 @@ echo "</style></head><body><div class='tabs'>" >> ../index.html
 # bash #
 ########
 
-# list all files with extension 'sh' and exclude this program
+# list all files with extension 'sh' and exclude program 'recreate.sh'
 ls -1 | grep -E "\.sh$" |grep -v "recreate.sh" | while IFS= read -r FILE
 do {
 
@@ -133,13 +133,10 @@ echo "Fancy syntax highlighter? Read same page on GitHub: <a href=\"https://gith
 # end of "TAB"
 echo "</div>" >> $NAME.inc
 
-
 # save some new line characters for '<pre><code></code></pre>'
 cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "H;1h;\${g;s|\n</code></pre>|</code></pre>|g;p}" >> ../index.html
 
 } done
-
-
 
 
 
@@ -156,6 +153,8 @@ sed -i 's| </code></pre>|</code></pre>|' ../index.html
 # install extra link to create users using wizard
 sed -i 's|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab">|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab"><p>Create MySQL users using wizard: <a href="./u/index.html">https://aigarskadikis.github.io/u</a></p>|' ../index.html
 
+# convert MySQL to PostgreSQL
+# sed "s|UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)|EXTRACT(epoch FROM NOW()-INTERVAL '30 MINUTE')|g"
 
 # remove includes (a source for tabs)
 rm -rf *inc
