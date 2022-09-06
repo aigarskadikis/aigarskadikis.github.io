@@ -10,6 +10,9 @@ nc -v servername 3306
 # check if port is open without external tools. if it reports 0, the port is reachable and in the listening state
 { echo >/dev/tcp/127.0.0.1/3306 ; } 2>/dev/null; echo $?
 
+# capture all SNMP traps traffic
+tcpdump -i any udp dst port 162 >> /var/log/zabbix/zabbix_traps.tcpdump
+
 # activity for each block device, pretty-print  device  names, report task creation and system switching activity.
 sar -d -p -w 1
 
