@@ -9,6 +9,11 @@ cd /etc/cron.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /usr/local/bin && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/nginx/conf.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
+30 days configuration backup if MySQL 8<pre><code>BACKUP_DIR=/home/zabbix/backup
+mkdir -p "$BACKUP_DIR"
+mysqldump --defaults-file=/etc/zabbix/zabbix_backup.cnf --flush-logs --single-transaction --no-tablespaces --set-gtid-purged=OFF --ignore-table=zabbix.history --ignore-table=zabbix.history_log --ignore-table=zabbix.history_str --ignore-table=zabbix.history_text --ignore-table=zabbix.history_uint --ignore-table=zabbix.trends --ignore-table=zabbix.trends_uint zabbix > "$BACKUP_DIR/backup.sql" && gzip --best "$BACKUP_DIR/backup.sql" && mv "$BACKUP_DIR/backup.sql.gz" "$BACKUP_DIR/quick.restore.$(date +%Y%m%d.%H%M).sql.gz"
+find /home/zabbix/backup -type f -mtime +30
+find /home/zabbix/backup -type f -mtime +30 -delete</code></pre>
 Backup and compress zabbix server config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress partitioning script and configuration files<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
@@ -119,6 +124,7 @@ Listening TCP ports<pre><code>ss --tcp --listen --numeric</code></pre>
 Listening TCP ports with process identification<pre><code>ss --tcp --listen --numeric --process</code></pre>
 Check if tcp port listens. Make sure it really listens on destination server before checking<pre><code>nc -v servername 3306</code></pre>
 Check if port is open without external tools. If it reports 0, the port is reachable and in the listening state<pre><code>{ echo >/dev/tcp/127.0.0.1/3306 ; } 2>/dev/null; echo $?</code></pre>
+Capture all SNMP traps traffic<pre><code>tcpdump -i any udp dst port 162 >> /var/log/zabbix/zabbix_traps.tcpdump</code></pre>
 Activity for each block device, pretty-print  device  names, report task creation and system switching activity.<pre><code>sar -d -p -w 1</code></pre>
 10 seconds of disk usage<pre><code>sar -d -wp 1 10 >> /tmp/disk.activity.txt</code></pre>
 Installed packages on EL7 or EL8 system<pre><code>rpm -qa > /tmp/installed.packages.txt</code></pre>
@@ -153,7 +159,7 @@ systemctl reload nginx</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="delete"><label for="delete">delete.sql</label><div class="tab">
-Discard all users which is using frontend<pre><code>SELECT FROM session;</code></pre>
+Discard all users which is using frontend<pre><code>DELETE FROM session;</code></pre>
 Delete all events comming from specific trigger id. Only execute if trigger is not in problem state<pre><code>DELETE FROM events WHERE events.source=0 AND events.object=0 AND events.objectid=987654321;</code></pre>
 Delete discovery, autoregistration and internal events<pre><code>DELETE FROM events WHERE source IN (1,2,3) LIMIT 1; DELETE FROM events WHERE source IN (1,2,3) LIMIT 10; DELETE FROM events WHERE source IN (1,2,3) LIMIT 100;</code></pre>
 Delete child events which was closed by global correlation<pre><code>DELETE e FROM events e LEFT JOIN event_recovery ON (event_recovery.eventid=e.eventid) WHERE event_recovery.c_eventid IS NOT NULL AND e.clock < 1234;</code></pre>
