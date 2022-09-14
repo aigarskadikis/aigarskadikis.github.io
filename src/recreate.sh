@@ -53,12 +53,12 @@ else
 echo -n '.'
 
 # if lines ends with backslash then merge this line together with next line
-echo "$LINE" | grep " \\\\$" > /dev/null
-if [ $? -eq 0 ]; then
-echo -n "$LINE" | sed 's|.$||' >> $NAME.inc
-else
+# echo "$LINE" | grep " \\\\$" > /dev/null
+# if [ $? -eq 0 ]; then
+# echo -n "$LINE" | sed 's|.$||' >> $NAME.inc
+# else
 echo "$LINE" >> $NAME.inc
-fi
+# fi
 
 fi
 
@@ -119,7 +119,8 @@ echo -e "${OUT^}\n<pre><code>" >> $NAME.inc
 else
 # blindly assume this is line having useful code
 echo -n '.'
-echo -n "$LINE " >> $NAME.inc
+# echo -n "$LINE " >> $NAME.inc
+echo "$LINE " >> $NAME.inc
 
 fi
 
@@ -134,6 +135,7 @@ echo "Fancy syntax highlighter? Read same page on GitHub: <a href=\"https://gith
 echo "</div>" >> $NAME.inc
 
 # save some new line characters for '<pre><code></code></pre>'
+# cat $NAME.inc >> ../index.html
 cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "H;1h;\${g;s|\n</code></pre>|</code></pre>|g;p}" >> ../index.html
 
 } done

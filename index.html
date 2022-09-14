@@ -11,7 +11,22 @@ cd /etc/nginx/conf.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
 30 days configuration backup if MySQL 8<pre><code>BACKUP_DIR=/home/zabbix/backup
 mkdir -p "$BACKUP_DIR"
-mysqldump --defaults-file=/etc/zabbix/zabbix_backup.cnf --flush-logs --single-transaction --no-tablespaces --set-gtid-purged=OFF --ignore-table=zabbix.history --ignore-table=zabbix.history_log --ignore-table=zabbix.history_str --ignore-table=zabbix.history_text --ignore-table=zabbix.history_uint --ignore-table=zabbix.trends --ignore-table=zabbix.trends_uint zabbix > "$BACKUP_DIR/backup.sql" && gzip --best "$BACKUP_DIR/backup.sql" && mv "$BACKUP_DIR/backup.sql.gz" "$BACKUP_DIR/quick.restore.$(date +%Y%m%d.%H%M).sql.gz"
+mysqldump \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--no-tablespaces \
+--set-gtid-purged=OFF \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix > "$BACKUP_DIR/backup.sql" && \
+gzip --best "$BACKUP_DIR/backup.sql" && \
+mv "$BACKUP_DIR/backup.sql.gz" "$BACKUP_DIR/quick.restore.$(date +%Y%m%d.%H%M).sql.gz"
 find /home/zabbix/backup -type f -mtime +30
 find /home/zabbix/backup -type f -mtime +30 -delete</code></pre>
 Rotate backups for 30 days<pre><code>find /home/zabbix/backup -type f -mtime +30
@@ -78,20 +93,84 @@ List of open files per MySQL server. If tables has a lot of partitions it will b
 How much data is generated in 24h<pre><code>du -lah /var/lib/mysql/zabbix | grep "$(date --date='2 days ago' '+p%Y_%m_%d')"
 du -lah /var/lib/mysql/zabbix | grep "$(date --date='2 days ago' '+p%Y%m%d0000')"</code></pre>
 Track progress of "OPTIMIZE TABLE" in MySQL<pre><code>watch -n1 "ls -Rltr /var/lib/mysql/zabbix | grep '#sql'"</code></pre>
-Schema backup for MySQL 8. Useful for scripts<pre><code>mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --set-gtid-purged=OFF --create-options --no-data zabbix | gzip --fast > schema.sql.gz</code></pre>
-Create backup with a purpose to set up master to master replication<pre><code>mysqldump --source-data --all-databases --set-gtid-purged=OFF --ignore-table=zabbix.history --ignore-table=zabbix.history_uint --ignore-table=zabbix.history_str --ignore-table=zabbix.history_text --ignore-table=zabbix.history_log --ignore-table=zabbix.trends --ignore-table=zabbix.trends_uint | gzip --fast > /tmp/backup.sql.gz
+Schema backup for MySQL 8. Useful for scripts<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--flush-logs \
+--single-transaction \
+--set-gtid-purged=OFF \
+--create-options \
+--no-data \
+zabbix | gzip --fast > schema.sql.gz</code></pre>
+Create backup with a purpose to set up master to master replication<pre><code>mysqldump --source-data --all-databases \
+--set-gtid-purged=OFF \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint | gzip --fast > /tmp/backup.sql.gz
 chmod 777 /tmp/backup.sql.gz</code></pre>
 Schema dump for historical tables only. Backup schema for 7 historical tables. usefull if need to repair replication as fast as possible<pre><code>mysqldump --set-gtid-purged=OFF --no-data zabbix history history_uint history_str history_log history_text trends trends_uint > empty.data.tables.with.partitions.sql</code></pre>
-Data backup with gz compression<pre><code>mysqldump --defaults-file=/root/.my.cnf --set-gtid-purged=OFF --flush-logs --single-transaction --no-create-info --ignore-table=zabbix.history --ignore-table=zabbix.history_log --ignore-table=zabbix.history_str --ignore-table=zabbix.history_text --ignore-table=zabbix.history_uint --ignore-table=zabbix.trends --ignore-table=zabbix.trends_uint zabbix > data.sql && gzip data.sql</code></pre>
-Data backup with xz compression<pre><code>mysqldump --defaults-file=/root/.my.cnf --set-gtid-purged=OFF --flush-logs --single-transaction --no-create-info --ignore-table=zabbix.history --ignore-table=zabbix.history_log --ignore-table=zabbix.history_str --ignore-table=zabbix.history_text --ignore-table=zabbix.history_uint --ignore-table=zabbix.trends --ignore-table=zabbix.trends_uint zabbix > data.sql && xz data.sql</code></pre>
+Data backup with gz compression<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--no-create-info \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix > data.sql && \
+gzip data.sql</code></pre>
+Data backup with xz compression<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--no-create-info \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix > data.sql && \
+xz data.sql</code></pre>
 Passwordless access for read-only user<pre><code>cd && cat << 'EOF' > .my.cnf
 [client]
 host=192.168.88.101
 user=zbx_ro
 password=passwd_ro_zbx
 EOF</code></pre>
-On-the-fly configuration backup. Check if this is not the node holding the Virtaul IP address. Do a backup on slave<pre><code>ip a | grep "192.168.88.55" || mysqldump --defaults-file=/root/.my.cnf --set-gtid-purged=OFF --flush-logs --single-transaction --ignore-table=zabbix.history --ignore-table=zabbix.history_log --ignore-table=zabbix.history_str --ignore-table=zabbix.history_text --ignore-table=zabbix.history_uint --ignore-table=zabbix.trends --ignore-table=zabbix.trends_uint zabbix | gzip > quick.restore.sql.gz</code></pre>
-Schema backup for MySQL 8. Credentials embeded in command<pre><code>mysqldump --host=127.0.0.1 --user=root --password='zabbix' --set-gtid-purged=OFF --flush-logs --single-transaction --create-options --no-data zabbix | gzip --fast > schema.sql.gz</code></pre>
+On-the-fly configuration backup. Check if this is not the node holding the Virtaul IP address. Do a backup on slave<pre><code>ip a | grep "192.168.88.55" || mysqldump \
+--defaults-file=/root/.my.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix | gzip > quick.restore.sql.gz</code></pre>
+Schema backup for MySQL 8. Credentials embeded in command<pre><code>mysqldump \
+--host=127.0.0.1 \
+--user=root \
+--password='zabbix' \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+zabbix | gzip --fast > schema.sql.gz</code></pre>
 <p>Download this section: <a href="src/my.sh">https://aigarskadikis.github.io/src/my.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh</a></p>
 </div>
@@ -110,7 +189,14 @@ MySQL<pre><code>echo "SELECT alias,
 attempt_failed,
 attempt_ip,
 FROM_UNIXTIME(attempt_clock)
-FROM users" | mysql --host='127.0.0.1' --user='zbx_web' --password='zabbix' --database='zabbix' --silent --skip-column-names --batch > /tmp/queue.tsv</code></pre>
+FROM users" | mysql \
+--host='127.0.0.1' \
+--user='zbx_web' \
+--password='zabbix' \
+--database='zabbix' \
+--silent \
+--skip-column-names \
+--batch > /tmp/queue.tsv</code></pre>
 <p>Download this section: <a href="src/sql2tsv.sh">https://aigarskadikis.github.io/src/sql2tsv.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sql2tsv.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sql2tsv.sh</a></p>
 </div>
@@ -165,8 +251,13 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="delete"><label for="delete">delete.sql</label><div class="tab">
 Discard all users which is using frontend<pre><code>DELETE FROM session;</code></pre>
 Delete all events comming from specific trigger id. Only execute if trigger is not in problem state<pre><code>DELETE FROM events WHERE events.source=0 AND events.object=0 AND events.objectid=987654321;</code></pre>
-Delete discovery, autoregistration and internal events<pre><code>DELETE FROM events WHERE source IN (1,2,3) LIMIT 1; DELETE FROM events WHERE source IN (1,2,3) LIMIT 10; DELETE FROM events WHERE source IN (1,2,3) LIMIT 100;</code></pre>
-Delete child events which was closed by global correlation<pre><code>DELETE e FROM events e LEFT JOIN event_recovery ON (event_recovery.eventid=e.eventid) WHERE event_recovery.c_eventid IS NOT NULL AND e.clock < 1234;</code></pre>
+Delete discovery, autoregistration and internal events<pre><code>DELETE FROM events WHERE source IN (1,2,3) LIMIT 1; 
+DELETE FROM events WHERE source IN (1,2,3) LIMIT 10; 
+DELETE FROM events WHERE source IN (1,2,3) LIMIT 100;</code></pre>
+Delete child events which was closed by global correlation<pre><code>DELETE e FROM events e 
+LEFT JOIN event_recovery ON (event_recovery.eventid=e.eventid) 
+WHERE event_recovery.c_eventid IS NOT NULL 
+AND e.clock < 1234;</code></pre>
 <p>Download this section: <a href="src/delete.sql">https://aigarskadikis.github.io/src/delete.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql</a></p>
 </div>
@@ -176,46 +267,213 @@ Active problems, including Zabbix internal problems (item unsupported, trigger u
 Hosts having problems with passive checks. Zabbix 4.0 till 5.2<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
 Check Zabbix 6.0 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive<pre><code>SELECT * FROM ha_node;</code></pre>
 Count of events. All version of Zabbix<pre><code>SELECT COUNT(*),source FROM events GROUP BY source;</code></pre>
-Show items by proxy. Works from Zabbix 3.0 till 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type FROM items JOIN hosts ON (items.hostid=hosts.hostid) JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE hosts.status = 0 AND items.status = 0 AND proxy.status IN (5,6) GROUP BY 2,3 ORDER BY 2,3;</code></pre>
-Which internal event is spamming database, Zabbix 4.0, Zabbix 5.0. Do not work with 3.4<pre><code>SELECT CASE object WHEN 0 THEN 'Trigger expression' WHEN 4 THEN 'Data collection' WHEN 5 THEN 'LLD rule' END AS object, objectid,value,name,COUNT(*) FROM events WHERE source=3 AND LENGTH(name)>0 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
-Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT parent.host AS 'Parent', hm1.macro,hm1.value,child.host AS 'Child',hm2.macro,hm2.value FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid AND hm1.macro = hm2.macro AND hm1.value <> hm2.value;</code></pre>
-Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT b.host, hm2.macro, hm2.value AS 'template value', h.host, hm1.macro, hm1.value AS 'host value' FROM hosts_templates, hosts h, hosts b, hostmacro hm1, hostmacro hm2, interface WHERE hosts_templates.hostid = h.hostid AND hosts_templates.templateid = b.hostid AND interface.hostid = h.hostid AND hm1.hostid = h.hostid AND hm2.hostid = hosts_templates.templateid AND hm1.macro = hm2.macro AND hm1.value <> hm2.value;</code></pre>
-Devices and it's status. Works from Zabbix 3.0 till 5.2<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, CASE hosts.available WHEN 0 THEN 'unknown'  WHEN 1 THEN 'available' WHEN 2 THEN 'down' END AS "status", CASE interface.type WHEN 1 THEN 'ZBX' WHEN 2 THEN 'SNMP' WHEN 3 THEN 'IPMI' WHEN 4 THEN 'JMX' END AS "type", hosts.error FROM hosts JOIN interface ON interface.hostid=hosts.hostid LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid WHERE hosts.status=0 AND interface.main=1;</code></pre>
-Items in use<pre><code>SELECT CASE items.type WHEN 0 THEN 'Zabbix agent' WHEN 2 THEN 'Zabbix trapper' WHEN 3 THEN 'Simple check' WHEN 5 THEN 'Zabbix internal' WHEN 7 THEN 'Zabbix agent (active) check' WHEN 8 THEN 'Aggregate' WHEN 9 THEN 'HTTP test (web monitoring scenario step)' WHEN 10 THEN 'External check' WHEN 11 THEN 'Database monitor' WHEN 12 THEN 'IPMI agent' WHEN 13 THEN 'SSH agent' WHEN 14 THEN 'TELNET agent' WHEN 15 THEN 'Calculated' WHEN 16 THEN 'JMX agent' WHEN 17 THEN 'SNMP trap' WHEN 18 THEN 'Dependent item' WHEN 19 THEN 'HTTP agent' WHEN 20 THEN 'SNMP agent' END as type,COUNT(*) FROM items JOIN hosts ON (hosts.hostid=items.hostid) WHERE hosts.status=0 AND items.status=0 GROUP BY items.type ORDER BY COUNT(*) DESC;</code></pre>
-Exceptions in update interval. When a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates<pre><code>SELECT h1.host AS exceptionInstalled, i1.name, i1.key_, i1.delay, h2.host AS differesFromTemplate, i2.name, i2.key_, i2.delay FROM items i1 JOIN items i2 ON (i2.itemid=i1.templateid) JOIN hosts h1 ON (h1.hostid=i1.hostid) JOIN hosts h2 ON (h2.hostid=i2.hostid) WHERE i1.delay<>i2.delay;</code></pre>
-All events closed by global correlation rule. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name FROM events repercussion JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) WHERE event_recovery.c_eventid IS NOT NULL ORDER BY repercussion.clock ASC;</code></pre>
-All active data collector items on enabled hosts. Zabbix 3.0, 4.0, 5.0, 6.0<pre><code>SELECT hosts.host, items.name, items.type, items.key_, items.delay FROM items JOIN hosts ON (hosts.hostid=items.hostid) WHERE hosts.status=0 AND items.status=0 ORDER BY 1,2,3,4,5;</code></pre>
-Determine which items report unsupported state:<pre><code>SELECT COUNT(items.key_), hosts.host, items.key_, item_rtdata.error FROM events JOIN items ON (items.itemid=events.objectid) JOIN hosts ON (hosts.hostid=items.hostid) JOIN item_rtdata ON (item_rtdata.itemid=items.itemid) WHERE source=3 AND object=4 AND items.status=0 AND items.flags IN (0,1,4) AND LENGTH(item_rtdata.error)>0 GROUP BY hosts.host,items.key_, item_rtdata.error ORDER BY COUNT(items.key_);</code></pre>
-List all function names together with arguments<pre><code>SELECT functions.name, functions.parameter, COUNT(*) FROM functions JOIN items ON (items.itemid = functions.itemid) JOIN hosts ON (items.hostid = hosts.hostid) JOIN triggers ON (triggers.triggerid=functions.triggerid) WHERE hosts.status=0 AND items.status=0 AND triggers.status=0 GROUP BY 1,2 ORDER BY 1;</code></pre>
-Owner of LLD dependent item. What is interval for owner. Zabbix 4.0 => 6.2<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items JOIN hosts ON (hosts.hostid=items.hostid) JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
-Frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts. Zabbix 4.0 => 6.2<pre><code>SELECT type,delay,COUNT(*) FROM items JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 AND items.status=0 GROUP BY 1,2 ORDER BY 1,2;</code></pre>
-Host inventory<pre><code>SELECT host_inventory.macaddress_a,GROUP_CONCAT(hosts.host) FROM host_inventory JOIN hosts ON (hosts.hostid=host_inventory.hostid) WHERE hosts.status=0 AND host_inventory.macaddress_a LIKE '%enterprises%' GROUP BY host_inventory.macaddress_a;</code></pre>
-Remove metrics where there are no item definition anymore<pre><code>DELETE FROM trends WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items); DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);</code></pre>
+Show items by proxy. Works from Zabbix 3.0 till 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Which internal event is spamming database, Zabbix 4.0, Zabbix 5.0. Do not work with 3.4<pre><code>SELECT 
+CASE object 
+WHEN 0 THEN 'Trigger expression' 
+WHEN 4 THEN 'Data collection' 
+WHEN 5 THEN 'LLD rule' 
+END AS object, 
+objectid,value,name,COUNT(*) FROM events 
+WHERE source=3 AND LENGTH(name)>0 
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
+GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
+Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT parent.host AS 'Parent', hm1.macro,hm1.value,child.host AS 'Child',hm2.macro,hm2.value 
+FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 
+WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid 
+AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid 
+AND hm1.macro = hm2.macro 
+AND hm1.value <> hm2.value;</code></pre>
+Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT b.host, 
+hm2.macro, 
+hm2.value AS 'template value', 
+h.host, 
+hm1.macro, 
+hm1.value AS 'host value' 
+FROM hosts_templates, 
+hosts h, 
+hosts b, 
+hostmacro hm1, 
+hostmacro hm2, 
+interface 
+WHERE hosts_templates.hostid = h.hostid 
+AND hosts_templates.templateid = b.hostid 
+AND interface.hostid = h.hostid 
+AND hm1.hostid = h.hostid 
+AND hm2.hostid = hosts_templates.templateid 
+AND hm1.macro = hm2.macro 
+AND hm1.value <> hm2.value;</code></pre>
+Devices and it's status. Works from Zabbix 3.0 till 5.2<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+Items in use<pre><code>SELECT CASE items.type 
+WHEN 0 THEN 'Zabbix agent' 
+WHEN 2 THEN 'Zabbix trapper' 
+WHEN 3 THEN 'Simple check' 
+WHEN 5 THEN 'Zabbix internal' 
+WHEN 7 THEN 'Zabbix agent (active) check' 
+WHEN 8 THEN 'Aggregate' 
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)' 
+WHEN 10 THEN 'External check' 
+WHEN 11 THEN 'Database monitor' 
+WHEN 12 THEN 'IPMI agent' 
+WHEN 13 THEN 'SSH agent' 
+WHEN 14 THEN 'TELNET agent' 
+WHEN 15 THEN 'Calculated' 
+WHEN 16 THEN 'JMX agent' 
+WHEN 17 THEN 'SNMP trap' 
+WHEN 18 THEN 'Dependent item' 
+WHEN 19 THEN 'HTTP agent' 
+WHEN 20 THEN 'SNMP agent' 
+END as type,COUNT(*) 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND items.status=0 
+GROUP BY items.type 
+ORDER BY COUNT(*) DESC;</code></pre>
+Exceptions in update interval. When a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates<pre><code>SELECT h1.host AS exceptionInstalled, 
+i1.name, 
+i1.key_, 
+i1.delay, 
+h2.host AS differesFromTemplate, 
+i2.name, 
+i2.key_, 
+i2.delay 
+FROM items i1 
+JOIN items i2 ON (i2.itemid=i1.templateid) 
+JOIN hosts h1 ON (h1.hostid=i1.hostid) 
+JOIN hosts h2 ON (h2.hostid=i2.hostid) 
+WHERE i1.delay<>i2.delay;</code></pre>
+All events closed by global correlation rule. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT 
+repercussion.clock, 
+repercussion.name, 
+rootCause.clock, 
+rootCause.name 
+FROM events repercussion 
+JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) 
+JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) 
+WHERE event_recovery.c_eventid IS NOT NULL 
+ORDER BY repercussion.clock ASC;</code></pre>
+All active data collector items on enabled hosts. Zabbix 3.0, 4.0, 5.0, 6.0<pre><code>SELECT 
+hosts.host, 
+items.name, 
+items.type, 
+items.key_, 
+items.delay 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND items.status=0 
+ORDER BY 1,2,3,4,5;</code></pre>
+Determine which items report unsupported state:<pre><code>SELECT COUNT(items.key_), 
+hosts.host, 
+items.key_, 
+item_rtdata.error 
+FROM events 
+JOIN items ON (items.itemid=events.objectid) 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN item_rtdata ON (item_rtdata.itemid=items.itemid) 
+WHERE source=3 
+AND object=4 
+AND items.status=0 
+AND items.flags IN (0,1,4) 
+AND LENGTH(item_rtdata.error)>0 
+GROUP BY hosts.host,items.key_, 
+item_rtdata.error 
+ORDER BY COUNT(items.key_);</code></pre>
+List all function names together with arguments<pre><code>SELECT functions.name, functions.parameter, COUNT(*) 
+FROM functions 
+JOIN items ON (items.itemid = functions.itemid) 
+JOIN hosts ON (items.hostid = hosts.hostid) 
+JOIN triggers ON (triggers.triggerid=functions.triggerid) 
+WHERE hosts.status=0 
+AND items.status=0 
+AND triggers.status=0 
+GROUP BY 1,2 
+ORDER BY 1;</code></pre>
+Owner of LLD dependent item. What is interval for owner. Zabbix 4.0 => 6.2<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+Frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts. Zabbix 4.0 => 6.2<pre><code>SELECT type,delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 
+GROUP BY 1,2 ORDER BY 1,2;</code></pre>
+Host inventory<pre><code>SELECT host_inventory.macaddress_a,GROUP_CONCAT(hosts.host) FROM host_inventory 
+JOIN hosts ON (hosts.hostid=host_inventory.hostid) 
+WHERE hosts.status=0 AND host_inventory.macaddress_a LIKE '%enterprises%' 
+GROUP BY host_inventory.macaddress_a;</code></pre>
+Remove metrics where there are no item definition anymore<pre><code>DELETE FROM trends WHERE itemid NOT IN (SELECT itemid FROM items); 
+DELETE FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items); 
+DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items); 
+DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items); 
+DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items); 
+DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab"><p>Create MySQL users using wizard: <a href="./u/index.html">https://aigarskadikis.github.io/u</a></p>
 Create an empty database with name 'zbx_db'. Zabbix 6.0 LTS<pre><code>CREATE DATABASE zbx_db CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</code></pre>
-DB1. User for replication<pre><code>CREATE USER 'repl'@'192.168.88.101' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBReplication'; GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.88.101';</code></pre>
-DB2. User for replication<pre><code>CREATE USER 'repl'@'192.168.88.102' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBReplication'; GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.88.102';</code></pre>
+DB1. User for replication<pre><code>CREATE USER 'repl'@'192.168.88.101' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBReplication'; 
+GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.88.101';</code></pre>
+DB2. User for replication<pre><code>CREATE USER 'repl'@'192.168.88.102' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBReplication'; 
+GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.88.102';</code></pre>
 APP1. User for 'zabbix-server'<pre><code>CREATE USER 'zbx_srv'@'192.168.88.111' IDENTIFIED WITH mysql_native_password BY 'PasswordForApplicationServer';</code></pre>
 APP2. User for 'zabbix-server'<pre><code>CREATE USER 'zbx_srv'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 'PasswordForApplicationServer';</code></pre>
-Bare minumum permissions for 'zabbix-server'<pre><code>CREATE ROLE 'zbx_srv_role'; GRANT SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, INDEX, REFERENCES ON zbx_db.* TO 'zbx_srv_role';</code></pre>
+Bare minumum permissions for 'zabbix-server'<pre><code>CREATE ROLE 'zbx_srv_role'; 
+GRANT SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, INDEX, REFERENCES ON zbx_db.* TO 'zbx_srv_role';</code></pre>
 Allow to use Zabbix 6.2. Required for incremental configuration synchronisation<pre><code>SET GLOBAL log_bin_trust_function_creators = 1;</code></pre>
-APP1. Assign role<pre><code>GRANT 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.111'; SET DEFAULT ROLE 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.111';</code></pre>
-APP2. Assign role<pre><code>GRANT 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.112'; SET DEFAULT ROLE 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.112';</code></pre>
+APP1. Assign role<pre><code>GRANT 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.111'; 
+SET DEFAULT ROLE 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.111';</code></pre>
+APP2. Assign role<pre><code>GRANT 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.112'; 
+SET DEFAULT ROLE 'zbx_srv_role' TO 'zbx_srv'@'192.168.88.112';</code></pre>
 GUI1. User for 'nginx'<pre><code>CREATE USER 'zbx_web'@'192.168.88.121' IDENTIFIED WITH mysql_native_password BY 'PasswordForFrontendNode';</code></pre>
 GUI2. User for 'nginx'<pre><code>CREATE USER 'zbx_web'@'192.168.88.122' IDENTIFIED WITH mysql_native_password BY 'PasswordForFrontendNode';</code></pre>
-Install bare minimum permissions for frontend<pre><code>CREATE ROLE 'zbx_web_role'; GRANT SELECT, UPDATE, DELETE, INSERT ON zbx_db.* TO 'zbx_web_role';</code></pre>
-GUI1. Assign role<pre><code>GRANT 'zbx_web_role' TO 'zbx_web'@'192.168.88.121'; SET DEFAULT ROLE 'zbx_web_role' TO 'zbx_web'@'192.168.88.121';</code></pre>
-GUI2. Assign role<pre><code>GRANT 'zbx_web_role' TO 'zbx_web'@'192.168.88.122'; SET DEFAULT ROLE 'zbx_web_role' TO 'zbx_web'@'192.168.88.122';</code></pre>
-User for DB partitioning script<pre><code>CREATE USER 'zbx_part'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBPartitioning'; GRANT ALL PRIVILEGES ON *.* to 'zbx_part'@'127.0.0.1';</code></pre>
-User to monitor the health of MySQL server via local Zabbix agent 2. Not suitable for RDS.<pre><code>CREATE USER 'zbx_monitor'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'127.0.0.1';</code></pre>
-APP1. User to monitor RDS database<pre><code>CREATE USER 'zbx_monitor'@'192.168.88.111' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.111';</code></pre>
-APP2. User to monitor RDS database<pre><code>CREATE USER 'zbx_monitor'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring'; GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.112';</code></pre>
-Backup user for 'mysqldump'<pre><code>CREATE USER 'zbx_backup'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PassfordForMySQLDUmp'; GRANT SELECT, LOCK TABLES, SHOW VIEW, RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';</code></pre>
-Read only user for reporting<pre><code>CREATE USER 'zbx_read_only'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyUser'; GRANT SELECT ON zbx_db.* TO 'zbx_backup'@'127.0.0.1';</code></pre>
-User for grafana which runs in docker<pre><code>CREATE USER 'grafana'@'%' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyGrafanaUser'; GRANT SELECT ON zbx_db.* TO 'grafana'@'%';</code></pre>
+Install bare minimum permissions for frontend<pre><code>CREATE ROLE 'zbx_web_role'; 
+GRANT SELECT, UPDATE, DELETE, INSERT ON zbx_db.* TO 'zbx_web_role';</code></pre>
+GUI1. Assign role<pre><code>GRANT 'zbx_web_role' TO 'zbx_web'@'192.168.88.121'; 
+SET DEFAULT ROLE 'zbx_web_role' TO 'zbx_web'@'192.168.88.121';</code></pre>
+GUI2. Assign role<pre><code>GRANT 'zbx_web_role' TO 'zbx_web'@'192.168.88.122'; 
+SET DEFAULT ROLE 'zbx_web_role' TO 'zbx_web'@'192.168.88.122';</code></pre>
+User for DB partitioning script<pre><code>CREATE USER 'zbx_part'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBPartitioning'; 
+GRANT ALL PRIVILEGES ON *.* to 'zbx_part'@'127.0.0.1';</code></pre>
+User to monitor the health of MySQL server via local Zabbix agent 2. Not suitable for RDS.<pre><code>CREATE USER 'zbx_monitor'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring'; 
+GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'127.0.0.1';</code></pre>
+APP1. User to monitor RDS database<pre><code>CREATE USER 'zbx_monitor'@'192.168.88.111' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring'; 
+GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.111';</code></pre>
+APP2. User to monitor RDS database<pre><code>CREATE USER 'zbx_monitor'@'192.168.88.112' IDENTIFIED WITH mysql_native_password BY 'PasswordForAgent2MySQLMonitoring'; 
+GRANT REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zbx_monitor'@'192.168.88.112';</code></pre>
+Backup user for 'mysqldump'<pre><code>CREATE USER 'zbx_backup'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PassfordForMySQLDUmp'; 
+GRANT SELECT, LOCK TABLES, SHOW VIEW, RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';</code></pre>
+Read only user for reporting<pre><code>CREATE USER 'zbx_read_only'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyUser'; 
+GRANT SELECT ON zbx_db.* TO 'zbx_backup'@'127.0.0.1';</code></pre>
+User for grafana which runs in docker<pre><code>CREATE USER 'grafana'@'%' IDENTIFIED WITH mysql_native_password BY 'PasswordForReadOnlyGrafanaUser'; 
+GRANT SELECT ON zbx_db.* TO 'grafana'@'%';</code></pre>
 <p>Download this section: <a href="src/users.sql">https://aigarskadikis.github.io/src/users.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/users.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/users.sql</a></p>
 </div>
