@@ -29,6 +29,10 @@ mv "$BACKUP_DIR/backup.sql.gz" "$BACKUP_DIR/quick.restore.$(date +%Y%m%d.%H%M).s
 find /home/zabbix/backup -type f -mtime +30
 find /home/zabbix/backup -type f -mtime +30 -delete
 
+# rotate backups for 30 days
+find /home/zabbix/backup -type f -mtime +30
+find /home/zabbix/backup -type f -mtime +30 -delete
+
 # Backup and compress zabbix server config with a purpose to restore it on other machine
 tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo
 

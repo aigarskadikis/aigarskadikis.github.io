@@ -64,6 +64,12 @@ tail -1000000 /var/log/zabbix/zabbix_proxy.log | gzip --best > /tmp/zabbix_proxy
 # last 1 million lines from /var/log/zabbix/zabbix_server.log
 tail -1000000 /var/log/zabbix/zabbix_server.log | gzip --best > /tmp/zabbix_server.$(date +%Y%m%d.%H%M).log.gz
 
+# all trapper processes
+watch -n1 'ps auxww | grep -Eo "[:] trapper #.*"'
+
+# free trapper processes
+watch -n1 'ps auxww | grep -Eo "[:] trapper #.*waiting for connection"'
+
 # service not booting up
 journalctl -u sshd | tail -100 > /tmp/sshd.txt
 

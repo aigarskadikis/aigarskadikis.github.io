@@ -24,6 +24,47 @@ AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;
 
+--which internal event is spamming database, Zabbix 4.0, Zabbix 5.0. Do not work with 3.4
+SELECT
+CASE object
+WHEN 0 THEN 'Trigger expression'
+WHEN 4 THEN 'Data collection'
+WHEN 5 THEN 'LLD rule'
+END AS object,
+objectid,value,name,COUNT(*) FROM events
+WHERE source=3 AND LENGTH(name)>0
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
+GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
+
+--difference between installed macros between host VS template VS nested/child templates
+SELECT parent.host AS 'Parent', hm1.macro,hm1.value,child.host AS 'Child',hm2.macro,hm2.value
+FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
+WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid
+AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid
+AND hm1.macro = hm2.macro
+AND hm1.value <> hm2.value;
+
+--detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates
+SELECT b.host,
+hm2.macro,
+hm2.value AS 'template value',
+h.host,
+hm1.macro,
+hm1.value AS 'host value'
+FROM hosts_templates,
+hosts h,
+hosts b,
+hostmacro hm1,
+hostmacro hm2,
+interface
+WHERE hosts_templates.hostid = h.hostid
+AND hosts_templates.templateid = b.hostid
+AND interface.hostid = h.hostid
+AND hm1.hostid = h.hostid
+AND hm2.hostid = hosts_templates.templateid
+AND hm1.macro = hm2.macro
+AND hm1.value <> hm2.value;
+
 --devices and it's status. Works from Zabbix 3.0 till 5.2
 SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
 CASE hosts.available
@@ -99,7 +140,7 @@ JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
 WHERE event_recovery.c_eventid IS NOT NULL
 ORDER BY repercussion.clock ASC;
 
---all active data collector items. Zabbix 3.0, 4.0, 5.0, 6.0
+--all active data collector items on enabled hosts. Zabbix 3.0, 4.0, 5.0, 6.0
 SELECT
 hosts.host,
 items.name,
