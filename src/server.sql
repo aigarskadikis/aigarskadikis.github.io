@@ -210,3 +210,9 @@ DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);
 
+--drop table partition in MySQL
+ALTER TABLE history_uint DROP PARTITION p2018_06_06;
+
+--don't replicate transactions to the other servers in pool. don't write to binlog
+SET SESSION SQL_LOG_BIN=0;
+
