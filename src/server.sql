@@ -216,3 +216,18 @@ ALTER TABLE history_uint DROP PARTITION p2018_06_06;
 --don't replicate transactions to the other servers in pool. don't write to binlog
 SET SESSION SQL_LOG_BIN=0;
 
+--Zabbix 6.2. Host behind proxy 'z62prx' where interface is not healthy. Host is down
+SELECT hosts.host, interface.error
+FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE interface.available=2 AND hosts.status=0 AND proxy.host='z62prx';
+
+--Zabbix 6.2. Host/interface errors per all hosts behind proxy
+SELECT proxy.host, hosts.host, interface.error
+FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE interface.available=2 AND proxy.host IS NOT NULL
+ORDER BY 1,2,3;
+

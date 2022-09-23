@@ -26,20 +26,20 @@ rpm -qa > /tmp/installed.packages.txt
 apt list --installed > /tmp/apt.installed.txt
 
 # OS information
-cat /etc/*release* /tmp/os.info.txt
+cat /etc/*release* > /tmp/os.info.txt
 
 # disk space
 df -h > /tmp/disk.space.txt
 
-# memory
-cat /proc/meminfo > /tmp/memory.txt
-free -h >> /tmp/memory.txt
+# OS, Memory, CPU, Disk characteristics
+cat /etc/*release* > /tmp/$(hostname).characteristics.txt
+cat /proc/meminfo >> /tmp/$(hostname).characteristics.txt
+free -h >> /tmp/$(hostname).characteristics.txt
+cat /proc/cpuinfo >> /tmp/$(hostname).characteristics.txt
+df -h >> /tmp/$(hostname).characteristics.txt
 
 # Usage of swap:
-for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done >> /tmp/swap.usage.txt
-
-# CPU information
-cat /proc/cpuinfo > /tmp/cpu.txt
+for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done >> /tmp/$(hostname).swap.usage.txt
 
 # process list. top memory. top CPU
 ps auxww > /tmp/process.list.txt
