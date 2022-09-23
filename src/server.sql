@@ -216,6 +216,12 @@ ALTER TABLE history_uint DROP PARTITION p2018_06_06;
 --don't replicate transactions to the other servers in pool. don't write to binlog
 SET SESSION SQL_LOG_BIN=0;
 
+--Few MySQL key settings
+SELECT @@hostname, @@version, @@datadir,
+@@innodb_file_per_table, @@innodb_buffer_pool_size, @@innodb_buffer_pool_instances,
+@@innodb_flush_method, @@innodb_log_file_size, @@max_connections,
+@@open_files_limit, @@innodb_flush_log_at_trx_commit, @@log_bin\G
+
 --Zabbix 6.2. Host behind proxy 'z62prx' where interface is not healthy. Host is down
 SELECT hosts.host, interface.error
 FROM interface
