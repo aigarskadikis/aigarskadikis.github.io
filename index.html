@@ -218,12 +218,14 @@ Activity for each block device, pretty-print  device  names, report task creatio
 10 seconds of disk usage<pre><code>sar -d -wp 1 10 >> /tmp/disk.activity.txt</code></pre>
 Installed packages on EL7 or EL8 system<pre><code>rpm -qa > /tmp/installed.packages.txt</code></pre>
 Installed packages on Ubuntu/Debian<pre><code>apt list --installed > /tmp/apt.installed.txt</code></pre>
-OS information<pre><code>cat /etc/*release* /tmp/os.info.txt</code></pre>
+OS information<pre><code>cat /etc/*release* > /tmp/os.info.txt</code></pre>
 Disk space<pre><code>df -h > /tmp/disk.space.txt</code></pre>
-Memory<pre><code>cat /proc/meminfo > /tmp/memory.txt
-free -h >> /tmp/memory.txt</code></pre>
-Usage of swap:<pre><code>for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done >> /tmp/swap.usage.txt</code></pre>
-CPU information<pre><code>cat /proc/cpuinfo > /tmp/cpu.txt</code></pre>
+OS, Memory, CPU, Disk characteristics<pre><code>cat /etc/*release* > /tmp/$(hostname).characteristics.txt
+cat /proc/meminfo >> /tmp/$(hostname).characteristics.txt
+free -h >> /tmp/$(hostname).characteristics.txt
+cat /proc/cpuinfo >> /tmp/$(hostname).characteristics.txt
+df -h >> /tmp/$(hostname).characteristics.txt</code></pre>
+Usage of swap:<pre><code>for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done >> /tmp/$(hostname).swap.usage.txt</code></pre>
 Process list. Top memory. top CPU<pre><code>ps auxww > /tmp/process.list.txt
 ps auxww --sort -%mem > /tmp/top.mem.processes.txt
 ps auxww --sort -%cpu > /tmp/top.cpu.processes.txt</code></pre>
@@ -289,6 +291,10 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Works on Zabbix 4.0, 5.0, 6.0, 6,2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 Hosts having problems with passive checks. Zabbix 4.0 till 5.2<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Hosts having problems with passive checks. Zabbix 6.0<pre><code>SELECT proxy.host AS proxy,hosts.host,interface.error 
+FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+JOIN interface ON (interface.hostid=hosts.hostid) 
+WHERE LENGTH(interface.error)>0;</code></pre>
 Check Zabbix 6.0 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive<pre><code>SELECT * FROM ha_node;</code></pre>
 Count of events. All version of Zabbix<pre><code>SELECT COUNT(*),source FROM events GROUP BY source;</code></pre>
 Show items by proxy. Works from Zabbix 3.0 till 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
@@ -458,6 +464,23 @@ DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items); 
 DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items); 
 DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);</code></pre>
+Drop table partition in MySQL<pre><code>ALTER TABLE history_uint DROP PARTITION p2018_06_06;</code></pre>
+Don't replicate transactions to the other servers in pool. Don't write to binlog<pre><code>SET SESSION SQL_LOG_BIN=0;</code></pre>
+Few MySQL key settings<pre><code>SELECT @@hostname, @@version, @@datadir, 
+@@innodb_file_per_table, @@innodb_buffer_pool_size, @@innodb_buffer_pool_instances, 
+@@innodb_flush_method, @@innodb_log_file_size, @@max_connections, 
+@@open_files_limit, @@innodb_flush_log_at_trx_commit, @@log_bin\G</code></pre>
+Zabbix 6.2. Host behind proxy 'z62prx' where interface is not healthy. Host is down<pre><code>SELECT hosts.host, interface.error 
+FROM interface 
+JOIN hosts ON (hosts.hostid=interface.hostid) 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE interface.available=2 AND hosts.status=0 AND proxy.host='z62prx';</code></pre>
+Zabbix 6.2. Host/interface errors per all hosts behind proxy<pre><code>SELECT proxy.host, hosts.host, interface.error 
+FROM interface 
+JOIN hosts ON (hosts.hostid=interface.hostid) 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE interface.available=2 AND proxy.host IS NOT NULL 
+ORDER BY 1,2,3;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
