@@ -7,6 +7,12 @@ SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY seve
 --hosts having problems with passive checks. Zabbix 4.0 till 5.2
 SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;
 
+--hosts having problems with passive checks. Zabbix 6.0
+SELECT proxy.host AS proxy,hosts.host,interface.error
+FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+JOIN interface ON (interface.hostid=hosts.hostid)
+WHERE LENGTH(interface.error)>0;
+
 --check Zabbix 6.0 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive
 SELECT * FROM ha_node;
 
