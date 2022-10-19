@@ -13,6 +13,13 @@ FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN interface ON (interface.hostid=hosts.hostid)
 WHERE LENGTH(interface.error)>0;
 
+--non-working external scripts on Zabbxi 6.0
+SELECT hosts.host,items.key_,item_rtdata.error FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
+WHERE hosts.status=0 AND items.status=0 AND items.type=10
+AND LENGTH(item_rtdata.error)>0;
+
 --check Zabbix 6.0 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive
 SELECT * FROM ha_node;
 
