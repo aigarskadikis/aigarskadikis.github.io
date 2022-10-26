@@ -1,7 +1,7 @@
 --how many user groups has debug mode 1. Zabbix 5.0, 5.2
 SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 
---active problems, including Zabbix internal problems (item unsupported, trigger unsupported). works on Zabbix 4.0, 5.0, 6.0, 6,2
+--active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
@@ -13,20 +13,20 @@ FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN interface ON (interface.hostid=hosts.hostid)
 WHERE LENGTH(interface.error)>0;
 
---non-working external scripts on Zabbxi 5.4, 6.0, 6.2
+--non-working external scripts. Zabbix 5.4, 6.0, 6.2
 SELECT hosts.host,items.key_,item_rtdata.error FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
 WHERE hosts.status=0 AND items.status=0 AND items.type=10
 AND LENGTH(item_rtdata.error)>0;
 
---check Zabbix 6.0, 6.2 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive
+--Check native HA heartbeat. Zabbix 6.0, 6.2
 SELECT * FROM ha_node;
 
 --count of events. All version of Zabbix
 SELECT COUNT(*),source FROM events GROUP BY source;
 
---show items by proxy. works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
+--show items by proxy. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
 SELECT COUNT(*),proxy.host AS proxy,items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
@@ -37,7 +37,7 @@ AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;
 
---which internal event is spamming database, Zabbix 4.0, Zabbix 5.0. Do not work with 3.4
+--which internal event is spamming database. Zabbix 4.0, 5.0
 SELECT
 CASE object
 WHEN 0 THEN 'Trigger expression'
@@ -49,7 +49,7 @@ WHERE source=3 AND LENGTH(name)>0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
 
---difference between installed macros between host VS template VS nested/child templates
+--difference between installed macros between host VS template VS nested/child templates. Zabbix 5.0, 6.0
 SELECT parent.host AS Parent, hm1.macro AS macro1, hm1.value AS value1,
 child.host AS Child, hm2.macro AS macro2, hm2.value AS value2
 FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
@@ -58,13 +58,13 @@ AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid
 AND hm1.macro = hm2.macro
 AND hm1.value <> hm2.value;
 
---detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates
+--detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates. Zabbix 5.0, 6.0
 SELECT b.host,
 hm2.macro,
-hm2.value AS 'template value',
+hm2.value AS templateValue,
 h.host,
 hm1.macro,
-hm1.value AS 'host value'
+hm1.value AS hostValue
 FROM hosts_templates,
 hosts h,
 hosts b,
@@ -79,7 +79,7 @@ AND hm2.hostid = hosts_templates.templateid
 AND hm1.macro = hm2.macro
 AND hm1.value <> hm2.value;
 
---devices and it's status. Works from Zabbix 3.0 till 5.2
+--devices and it's status. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2
 SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown' 
@@ -99,7 +99,7 @@ LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE hosts.status=0
 AND interface.main=1;
 
---items in use
+--items in use. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
 SELECT CASE items.type 
 WHEN 0 THEN 'Zabbix agent' 
 WHEN 1 THEN 'SNMPv1 agent' 
@@ -123,7 +123,7 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent' 
 WHEN 20 THEN 'SNMP agent' 
 WHEN 21 THEN 'Script item' 
-END as type,COUNT(*) 
+END AS type,COUNT(*) 
 FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE hosts.status=0 
@@ -155,7 +155,7 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent' 
 WHEN 20 THEN 'SNMP agent' 
 WHEN 21 THEN 'Script item' 
-END as type,COUNT(*) 
+END AS type,COUNT(*) 
 FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -164,7 +164,7 @@ AND items.status=0
 GROUP BY proxy.host, items.type 
 ORDER BY 1,2,3 DESC;
 
---exceptions in update interval. when a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates
+--exceptions in update interval. when a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates. Zabbix 5.0
 SELECT h1.host AS exceptionInstalled,
 i1.name,
 i1.key_,
@@ -234,7 +234,7 @@ AND triggers.status=0
 GROUP BY 1,2
 ORDER BY 1;
 
---owner of LLD dependent item. What is interval for owner. Zabbix 4.0 => 6.2
+--owner of LLD dependent item. What is interval for owner. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
 SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -254,6 +254,7 @@ WHERE hosts.status=0 AND host_inventory.macaddress_a LIKE '%enterprises%'
 GROUP BY host_inventory.macaddress_a;
 
 --remove metrics where there are no item definition anymore
+SET SESSION SQL_LOG_BIN=0;
 DELETE FROM trends WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items);
@@ -273,14 +274,14 @@ SELECT @@hostname, @@version, @@datadir,
 @@innodb_flush_method, @@innodb_log_file_size, @@max_connections,
 @@open_files_limit, @@innodb_flush_log_at_trx_commit, @@log_bin\G
 
---Zabbix 6.2. Host behind proxy 'z62prx' where interface is not healthy. Host is down
+--Host behind proxy 'z62prx' where interface is not healthy. Host is down. Zabbix 6.2
 SELECT hosts.host, interface.error
 FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE interface.available=2 AND hosts.status=0 AND proxy.host='z62prx';
 
---Zabbix 6.2. Host/interface errors per all hosts behind proxy
+--Host/interface errors per all hosts behind proxy. Zabbix 6.2
 SELECT proxy.host, hosts.host, interface.error
 FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)

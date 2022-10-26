@@ -1,7 +1,9 @@
 .tabs {
             display: flex;
             flex-wrap: wrap;
-            width: 100%
+            width: 100%;
+	    position: absolute;
+	    top: 3em;
         }
 
         .tabs label {

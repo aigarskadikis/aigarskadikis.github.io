@@ -8,7 +8,7 @@ clear
 echo "<html><head><style type='text/css'>" >> ../index.html
 
 # install css
-cat css.css >> ../index.html
+cat readable.css >> ../index.html
 
 # start body and all tabs
 echo "</style></head><body onLoad='initDataArray()'><div class='tabs'>" >> ../index.html
