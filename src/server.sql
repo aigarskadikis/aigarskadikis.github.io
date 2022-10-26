@@ -50,7 +50,8 @@ AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
 
 --difference between installed macros between host VS template VS nested/child templates
-SELECT parent.host AS 'Parent', hm1.macro,hm1.value,child.host AS 'Child',hm2.macro,hm2.value
+SELECT parent.host AS Parent, hm1.macro AS macro1, hm1.value AS value1,
+child.host AS Child, hm2.macro AS macro2, hm2.value AS value2
 FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
 WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid
 AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid
