@@ -13,18 +13,8 @@ FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN interface ON (interface.hostid=hosts.hostid)
 WHERE LENGTH(interface.error)>0;
 
---non-working external scripts on Zabbxi 5.4, 6.0, 6.2
-SELECT hosts.host,items.key_,item_rtdata.error FROM items
-JOIN hosts ON (hosts.hostid=items.hostid)
-JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
-WHERE hosts.status=0 AND items.status=0 AND items.type=10
-AND LENGTH(item_rtdata.error)>0;
-
 --check Zabbix 6.0, 6.2 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive
 SELECT * FROM ha_node;
-
---count of events. All version of Zabbix
-SELECT COUNT(*),source FROM events GROUP BY source;
 
 --show items by proxy. works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
 SELECT COUNT(*),proxy.host AS proxy,items.type
@@ -48,36 +38,6 @@ objectid,value,name,COUNT(*) FROM events
 WHERE source=3 AND LENGTH(name)>0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
-
---difference between installed macros between host VS template VS nested/child templates
-SELECT parent.host AS Parent, hm1.macro AS macro1, hm1.value AS value1,
-child.host AS Child, hm2.macro AS macro2, hm2.value AS value2
-FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
-WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid
-AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid
-AND hm1.macro = hm2.macro
-AND hm1.value <> hm2.value;
-
---detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates
-SELECT b.host,
-hm2.macro,
-hm2.value AS 'template value',
-h.host,
-hm1.macro,
-hm1.value AS 'host value'
-FROM hosts_templates,
-hosts h,
-hosts b,
-hostmacro hm1,
-hostmacro hm2,
-interface
-WHERE hosts_templates.hostid = h.hostid
-AND hosts_templates.templateid = b.hostid
-AND interface.hostid = h.hostid
-AND hm1.hostid = h.hostid
-AND hm2.hostid = hosts_templates.templateid
-AND hm1.macro = hm2.macro
-AND hm1.value <> hm2.value;
 
 --devices and it's status. Works from Zabbix 3.0 till 5.2
 SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
@@ -164,21 +124,6 @@ AND items.status=0
 GROUP BY proxy.host, items.type 
 ORDER BY 1,2,3 DESC;
 
---exceptions in update interval. when a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates
-SELECT h1.host AS exceptionInstalled,
-i1.name,
-i1.key_,
-i1.delay,
-h2.host AS differesFromTemplate,
-i2.name,
-i2.key_,
-i2.delay
-FROM items i1
-JOIN items i2 ON (i2.itemid=i1.templateid)
-JOIN hosts h1 ON (h1.hostid=i1.hostid)
-JOIN hosts h2 ON (h2.hostid=i2.hostid)
-WHERE i1.delay<>i2.delay;
-
 --all events closed by global correlation rule. Zabbix 4.0, 5.0, 6.0
 SELECT
 repercussion.clock,
@@ -204,36 +149,6 @@ WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;
 
---determine which items report unsupported state:
-SELECT COUNT(items.key_),
-hosts.host,
-items.key_,
-item_rtdata.error
-FROM events
-JOIN items ON (items.itemid=events.objectid)
-JOIN hosts ON (hosts.hostid=items.hostid)
-JOIN item_rtdata ON (item_rtdata.itemid=items.itemid)
-WHERE source=3
-AND object=4
-AND items.status=0
-AND items.flags IN (0,1,4)
-AND LENGTH(item_rtdata.error)>0
-GROUP BY hosts.host,items.key_,
-item_rtdata.error
-ORDER BY COUNT(items.key_);
-
---list all function names together with arguments
-SELECT functions.name, functions.parameter, COUNT(*)
-FROM functions
-JOIN items ON (items.itemid = functions.itemid)
-JOIN hosts ON (items.hostid = hosts.hostid)
-JOIN triggers ON (triggers.triggerid=functions.triggerid)
-WHERE hosts.status=0
-AND items.status=0
-AND triggers.status=0
-GROUP BY 1,2
-ORDER BY 1;
-
 --owner of LLD dependent item. What is interval for owner. Zabbix 4.0 => 6.2
 SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -246,32 +161,6 @@ SELECT type,delay,COUNT(*) FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0
 GROUP BY 1,2 ORDER BY 1,2;
-
---host inventory
-SELECT host_inventory.macaddress_a,GROUP_CONCAT(hosts.host) FROM host_inventory
-JOIN hosts ON (hosts.hostid=host_inventory.hostid)
-WHERE hosts.status=0 AND host_inventory.macaddress_a LIKE '%enterprises%'
-GROUP BY host_inventory.macaddress_a;
-
---remove metrics where there are no item definition anymore
-DELETE FROM trends WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);
-
---drop table partition in MySQL
-ALTER TABLE history_uint DROP PARTITION p2018_06_06;
-
---don't replicate transactions to the other servers in pool. don't write to binlog
-SET SESSION SQL_LOG_BIN=0;
-
---Few MySQL key settings
-SELECT @@hostname, @@version, @@datadir,
-@@innodb_file_per_table, @@innodb_buffer_pool_size, @@innodb_buffer_pool_instances,
-@@innodb_flush_method, @@innodb_log_file_size, @@max_connections,
-@@open_files_limit, @@innodb_flush_log_at_trx_commit, @@log_bin\G
 
 --Zabbix 6.2. Host behind proxy 'z62prx' where interface is not healthy. Host is down
 SELECT hosts.host, interface.error

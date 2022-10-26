@@ -251,6 +251,335 @@ systemctl reload nginx</code></pre>
 <p>Download this section: <a href="src/web.sh">https://aigarskadikis.github.io/src/web.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh</a></p>
 </div>
+<input type="radio" name="tabs" id="30"><label for="30">30.sql</label><div class="tab">
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Devices and it's status. Works from Zabbix 3.0 till 5.2<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+All active data collector items on enabled hosts<pre><code>SELECT 
+hosts.host, 
+items.name, 
+items.type, 
+items.key_, 
+items.delay 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND items.status=0 
+ORDER BY 1,2,3,4,5;</code></pre>
+<p>Download this section: <a href="src/30.sql">https://aigarskadikis.github.io/src/30.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/30.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/30.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="32"><label for="32">32.sql</label><div class="tab">
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+<p>Download this section: <a href="src/32.sql">https://aigarskadikis.github.io/src/32.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/32.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/32.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="34"><label for="34">34.sql</label><div class="tab">
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Which internal event is spamming database, Zabbix 4.0, Zabbix 5.0. Do not work with 3.4<pre><code>SELECT 
+CASE object 
+WHEN 0 THEN 'Trigger expression' 
+WHEN 4 THEN 'Data collection' 
+WHEN 5 THEN 'LLD rule' 
+END AS object, 
+objectid,value,name,COUNT(*) FROM events 
+WHERE source=3 AND LENGTH(name)>0 
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
+GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
+<p>Download this section: <a href="src/34.sql">https://aigarskadikis.github.io/src/34.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/34.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/34.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="40"><label for="40">40.sql</label><div class="tab">
+Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Works on Zabbix 4.0, 5.0, 6.0, 6,2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Which internal event is spamming database, Zabbix 4.0, Zabbix 5.0. Do not work with 3.4<pre><code>SELECT 
+CASE object 
+WHEN 0 THEN 'Trigger expression' 
+WHEN 4 THEN 'Data collection' 
+WHEN 5 THEN 'LLD rule' 
+END AS object, 
+objectid,value,name,COUNT(*) FROM events 
+WHERE source=3 AND LENGTH(name)>0 
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
+GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
+All events closed by global correlation rule<pre><code>SELECT 
+repercussion.clock, 
+repercussion.name, 
+rootCause.clock, 
+rootCause.name 
+FROM events repercussion 
+JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) 
+JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) 
+WHERE event_recovery.c_eventid IS NOT NULL 
+ORDER BY repercussion.clock ASC;</code></pre>
+All active data collector items on enabled hosts<pre><code>SELECT 
+hosts.host, 
+items.name, 
+items.type, 
+items.key_, 
+items.delay 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND items.status=0 
+ORDER BY 1,2,3,4,5;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+Frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts<pre><code>SELECT type,delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 
+GROUP BY 1,2 ORDER BY 1,2;</code></pre>
+<p>Download this section: <a href="src/40.sql">https://aigarskadikis.github.io/src/40.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="42"><label for="42">42.sql</label><div class="tab">
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+<p>Download this section: <a href="src/42.sql">https://aigarskadikis.github.io/src/42.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="44"><label for="44">44.sql</label><div class="tab">
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+<p>Download this section: <a href="src/44.sql">https://aigarskadikis.github.io/src/44.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/44.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/44.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="50"><label for="50">50.sql</label><div class="tab">
+How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
+Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Works on Zabbix 4.0, 5.0, 6.0, 6,2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Which internal event is spamming database, Zabbix 4.0, Zabbix 5.0. Do not work with 3.4<pre><code>SELECT 
+CASE object 
+WHEN 0 THEN 'Trigger expression' 
+WHEN 4 THEN 'Data collection' 
+WHEN 5 THEN 'LLD rule' 
+END AS object, 
+objectid,value,name,COUNT(*) FROM events 
+WHERE source=3 AND LENGTH(name)>0 
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
+GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
+All events closed by global correlation rule<pre><code>SELECT 
+repercussion.clock, 
+repercussion.name, 
+rootCause.clock, 
+rootCause.name 
+FROM events repercussion 
+JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) 
+JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) 
+WHERE event_recovery.c_eventid IS NOT NULL 
+ORDER BY repercussion.clock ASC;</code></pre>
+All active data collector items on enabled hosts<pre><code>SELECT 
+hosts.host, 
+items.name, 
+items.type, 
+items.key_, 
+items.delay 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND items.status=0 
+ORDER BY 1,2,3,4,5;</code></pre>
+<p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="52"><label for="52">52.sql</label><div class="tab">
+How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Devices and it's status. Works from Zabbix 3.0 till 5.2<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+<p>Download this section: <a href="src/52.sql">https://aigarskadikis.github.io/src/52.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="54"><label for="54">54.sql</label><div class="tab">
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+<p>Download this section: <a href="src/54.sql">https://aigarskadikis.github.io/src/54.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="60"><label for="60">60.sql</label><div class="tab">
+Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Works on Zabbix 4.0, 5.0, 6.0, 6,2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,interface.error 
+FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+JOIN interface ON (interface.hostid=hosts.hostid) 
+WHERE LENGTH(interface.error)>0;</code></pre>
+Check Zabbix 6.0, 6.2 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive<pre><code>SELECT * FROM ha_node;</code></pre>
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+All events closed by global correlation rule<pre><code>SELECT 
+repercussion.clock, 
+repercussion.name, 
+rootCause.clock, 
+rootCause.name 
+FROM events repercussion 
+JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) 
+JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) 
+WHERE event_recovery.c_eventid IS NOT NULL 
+ORDER BY repercussion.clock ASC;</code></pre>
+All active data collector items on enabled hosts<pre><code>SELECT 
+hosts.host, 
+items.name, 
+items.type, 
+items.key_, 
+items.delay 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND items.status=0 
+ORDER BY 1,2,3,4,5;</code></pre>
+<p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="62"><label for="62">62.sql</label><div class="tab">
+Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Works on Zabbix 4.0, 5.0, 6.0, 6,2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Check Zabbix 6.0, 6.2 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive<pre><code>SELECT * FROM ha_node;</code></pre>
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+Frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts<pre><code>SELECT type,delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 
+GROUP BY 1,2 ORDER BY 1,2;</code></pre>
+Zabbix 6.2. Host behind proxy 'z62prx' where interface is not healthy. Host is down<pre><code>SELECT hosts.host, interface.error 
+FROM interface 
+JOIN hosts ON (hosts.hostid=interface.hostid) 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE interface.available=2 AND hosts.status=0 AND proxy.host='z62prx';</code></pre>
+Zabbix 6.2. Host/interface errors per all hosts behind proxy<pre><code>SELECT proxy.host, hosts.host, interface.error 
+FROM interface 
+JOIN hosts ON (hosts.hostid=interface.hostid) 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE interface.available=2 AND proxy.host IS NOT NULL 
+ORDER BY 1,2,3;</code></pre>
+<p>Download this section: <a href="src/62.sql">https://aigarskadikis.github.io/src/62.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/62.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/62.sql</a></p>
+</div>
 <input type="radio" name="tabs" id="delete"><label for="delete">delete.sql</label><div class="tab">
 Discard all users which is using frontend<pre><code>DELETE FROM session;</code></pre>
 Delete all events comming from specific trigger id. Only execute if trigger is not in problem state<pre><code>DELETE FROM events WHERE events.source=0 AND events.object=0 AND events.objectid=987654321;</code></pre>
@@ -284,25 +613,27 @@ JOIN items ON (items.itemid = proxy_history.itemid)
 JOIN hosts ON (hosts.hostid = items.hostid) 
 WHERE items.flags=1 
 AND LENGTH(value)>6000;</code></pre>
+LLD rules<pre><code>SELECT items.key_,COUNT(*),AVG(LENGTH(value)) FROM proxy_history, items 
+WHERE proxy_history.itemid=items.itemid AND items.flags=1 GROUP BY 1 ORDER BY 3,2;</code></pre>
 <p>Download this section: <a href="src/proxy.sql">https://aigarskadikis.github.io/src/proxy.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/proxy.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/proxy.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab">
-How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
+How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Works on Zabbix 4.0, 5.0, 6.0, 6,2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks. Zabbix 4.0 till 5.2<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
 Hosts having problems with passive checks. Zabbix 6.0<pre><code>SELECT proxy.host AS proxy,hosts.host,interface.error 
 FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 JOIN interface ON (interface.hostid=hosts.hostid) 
 WHERE LENGTH(interface.error)>0;</code></pre>
-Non-working external scripts on Zabbxi 6.0<pre><code>SELECT hosts.host,items.key_,item_rtdata.error FROM items 
+Non-working external scripts on Zabbxi 5.4, 6.0, 6.2<pre><code>SELECT hosts.host,items.key_,item_rtdata.error FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid) 
 WHERE hosts.status=0 AND items.status=0 AND items.type=10 
 AND LENGTH(item_rtdata.error)>0;</code></pre>
-Check Zabbix 6.0 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive<pre><code>SELECT * FROM ha_node;</code></pre>
+Check Zabbix 6.0, 6.2 native HA heartbeat. When was the last time the node reported back. Good way to ensure if DB replication is responsive<pre><code>SELECT * FROM ha_node;</code></pre>
 Count of events. All version of Zabbix<pre><code>SELECT COUNT(*),source FROM events GROUP BY source;</code></pre>
-Show items by proxy. Works from Zabbix 3.0 till 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+Show items by proxy. Works from Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 

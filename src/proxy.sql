@@ -25,3 +25,7 @@ JOIN hosts ON (hosts.hostid = items.hostid)
 WHERE items.flags=1
 AND LENGTH(value)>6000;
 
+--LLD rules
+SELECT items.key_,COUNT(*),AVG(LENGTH(value)) FROM proxy_history, items
+WHERE proxy_history.itemid=items.itemid AND items.flags=1 GROUP BY 1 ORDER BY 3,2;
+

@@ -18,7 +18,7 @@ echo "</style></head><body onLoad='initDataArray()'><div class='tabs'>" >> ../in
 ########
 
 # list all files with extension 'sh' and exclude program 'recreate.sh'
-ls -1 | grep -E "\.sh$" |grep -v "recreate.sh" | while IFS= read -r FILE
+ls -1 | grep -E "\.sh$" |grep -v "recreate.sh" | grep -v "perversion.sh" | while IFS= read -r FILE
 do {
 
 # filename without extension
