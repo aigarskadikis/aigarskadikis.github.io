@@ -1,0 +1,987 @@
+<html><head><style type='text/css'>
+.tabs {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+	    position: absolute;
+	    top: 3em;
+        }
+
+        .tabs label {
+            order: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: .1rem .5rem;
+            margin: 0;
+            cursor: pointer
+        }
+
+        .tabs .tab {
+            order: 9;
+            flex-grow: 1;
+            width: 100%;
+            height: 100rem;
+            display: none;
+            background: #fff;
+            padding: .4rem
+        }
+
+        .tabs input[type="radio"] {
+            display: none
+        }
+
+        .tabs input[type="radio"]:checked+label {
+            background: #fff
+        }
+
+        .tabs input[type="radio"]:checked+label+.tab {
+            display: block
+        }
+
+        body {
+            background: #dcdcdc;
+            min-height: 100vh;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+            font-weight: 300;
+            line-height: 1.5;
+            font-size: 100%;
+            display: flex
+        }
+
+        pre {
+            padding: 0;
+            margin: 0 0 1em
+        }
+
+        /* ================= */
+        #searchInputArea {
+            display: flex;
+            position: absolute;
+            right: 50px;
+            top: 5px;
+        }
+
+        #searchInput {
+            margin-left: 20px;
+            border: 0px;
+        }
+
+        #searchInput:focus {
+            outline: none;
+        }
+
+        #searchResultDlg {
+            display: none;
+
+            flex-direction: column;
+            position: fixed;
+            top: 50px;
+            left: 100px;
+            right: 100px;
+            bottom: 50px;
+            padding: 10px;
+            background-color: #dcdcdc;
+            overflow: auto;
+            overscroll-behavior: contain
+        }
+
+        #searchResultDlgContent {
+            display: grid;
+            flex-direction: column;
+            height: 100%;
+            overflow: auto;
+            overscroll-behavior: contain
+        }
+
+        #closeIcon {
+            color: lightslategrey;
+            font-size: 55px;
+            display: block;
+            position: fixed;
+            top: 20px;
+            right: 50px;
+            cursor: pointer;
+        }
+
+        .resultBlock {
+            width: 100%;
+            border-bottom: 1px solid #000;
+        }
+
+        .resultBlock .tabName {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* ================= */
+</style></head><body onLoad='initDataArray()'><div class='tabs'>
+<input type="radio" name="tabs" id="30"><label for="30">30.sql</label><div class="tab">
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+All active data collector items on enabled hosts<pre><code>SELECT 
+hosts.host, 
+items.name, 
+items.type, 
+items.key_, 
+items.delay 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND items.status=0 
+ORDER BY 1,2,3,4,5;</code></pre>
+<p>Download this section: <a href="src/30.sql">https://aigarskadikis.github.io/src/30.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/30.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/30.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="32"><label for="32">32.sql</label><div class="tab">
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+<p>Download this section: <a href="src/32.sql">https://aigarskadikis.github.io/src/32.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/32.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/32.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="34"><label for="34">34.sql</label><div class="tab">
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+<p>Download this section: <a href="src/34.sql">https://aigarskadikis.github.io/src/34.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/34.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/34.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="40"><label for="40">40.sql</label><div class="tab">
+Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Which internal event is spamming database<pre><code>SELECT 
+CASE object 
+WHEN 0 THEN 'Trigger expression' 
+WHEN 4 THEN 'Data collection' 
+WHEN 5 THEN 'LLD rule' 
+END AS object, 
+objectid,value,name,COUNT(*) FROM events 
+WHERE source=3 AND LENGTH(name)>0 
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
+GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
+Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+All events closed by global correlation rule<pre><code>SELECT 
+repercussion.clock, 
+repercussion.name, 
+rootCause.clock, 
+rootCause.name 
+FROM events repercussion 
+JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) 
+JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) 
+WHERE event_recovery.c_eventid IS NOT NULL 
+ORDER BY repercussion.clock ASC;</code></pre>
+All active data collector items on enabled hosts<pre><code>SELECT 
+hosts.host, 
+items.name, 
+items.type, 
+items.key_, 
+items.delay 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND items.status=0 
+ORDER BY 1,2,3,4,5;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+Frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts<pre><code>SELECT type,delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 
+GROUP BY 1,2 ORDER BY 1,2;</code></pre>
+<p>Download this section: <a href="src/40.sql">https://aigarskadikis.github.io/src/40.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="42"><label for="42">42.sql</label><div class="tab">
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+<p>Download this section: <a href="src/42.sql">https://aigarskadikis.github.io/src/42.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="44"><label for="44">44.sql</label><div class="tab">
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+<p>Download this section: <a href="src/44.sql">https://aigarskadikis.github.io/src/44.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/44.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/44.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="50"><label for="50">50.sql</label><div class="tab">
+How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
+Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Which internal event is spamming database<pre><code>SELECT 
+CASE object 
+WHEN 0 THEN 'Trigger expression' 
+WHEN 4 THEN 'Data collection' 
+WHEN 5 THEN 'LLD rule' 
+END AS object, 
+objectid,value,name,COUNT(*) FROM events 
+WHERE source=3 AND LENGTH(name)>0 
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
+GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
+Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT parent.host AS Parent, hm1.macro AS macro1, hm1.value AS value1, 
+child.host AS Child, hm2.macro AS macro2, hm2.value AS value2 
+FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 
+WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid 
+AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid 
+AND hm1.macro = hm2.macro 
+AND hm1.value <> hm2.value;</code></pre>
+Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT b.host, 
+hm2.macro, 
+hm2.value AS templateValue, 
+h.host, 
+hm1.macro, 
+hm1.value AS hostValue 
+FROM hosts_templates, 
+hosts h, 
+hosts b, 
+hostmacro hm1, 
+hostmacro hm2, 
+interface 
+WHERE hosts_templates.hostid = h.hostid 
+AND hosts_templates.templateid = b.hostid 
+AND interface.hostid = h.hostid 
+AND hm1.hostid = h.hostid 
+AND hm2.hostid = hosts_templates.templateid 
+AND hm1.macro = hm2.macro 
+AND hm1.value <> hm2.value;</code></pre>
+Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+Exceptions in update interval. When a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates<pre><code>SELECT h1.host AS exceptionInstalled, 
+i1.name, 
+i1.key_, 
+i1.delay, 
+h2.host AS differesFromTemplate, 
+i2.name, 
+i2.key_, 
+i2.delay 
+FROM items i1 
+JOIN items i2 ON (i2.itemid=i1.templateid) 
+JOIN hosts h1 ON (h1.hostid=i1.hostid) 
+JOIN hosts h2 ON (h2.hostid=i2.hostid) 
+WHERE i1.delay<>i2.delay;</code></pre>
+All events closed by global correlation rule<pre><code>SELECT 
+repercussion.clock, 
+repercussion.name, 
+rootCause.clock, 
+rootCause.name 
+FROM events repercussion 
+JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) 
+JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) 
+WHERE event_recovery.c_eventid IS NOT NULL 
+ORDER BY repercussion.clock ASC;</code></pre>
+All active data collector items on enabled hosts<pre><code>SELECT 
+hosts.host, 
+items.name, 
+items.type, 
+items.key_, 
+items.delay 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND items.status=0 
+ORDER BY 1,2,3,4,5;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+<p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="52"><label for="52">52.sql</label><div class="tab">
+How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
+CASE hosts.available 
+WHEN 0 THEN 'unknown'  
+WHEN 1 THEN 'available' 
+WHEN 2 THEN 'down' 
+END AS "status", 
+CASE interface.type 
+WHEN 1 THEN 'ZBX' 
+WHEN 2 THEN 'SNMP' 
+WHEN 3 THEN 'IPMI' 
+WHEN 4 THEN 'JMX' 
+END AS "type", 
+hosts.error 
+FROM hosts 
+JOIN interface ON interface.hostid=hosts.hostid 
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
+WHERE hosts.status=0 
+AND interface.main=1;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+<p>Download this section: <a href="src/52.sql">https://aigarskadikis.github.io/src/52.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="54"><label for="54">54.sql</label><div class="tab">
+Non-working external scripts<pre><code>SELECT hosts.host,items.key_,item_rtdata.error FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN item_rtdata ON (items.itemid=item_rtdata.itemid) 
+WHERE hosts.status=0 AND items.status=0 AND items.type=10 
+AND LENGTH(item_rtdata.error)>0;</code></pre>
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+<p>Download this section: <a href="src/54.sql">https://aigarskadikis.github.io/src/54.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="60"><label for="60">60.sql</label><div class="tab">
+Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,interface.error 
+FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+JOIN interface ON (interface.hostid=hosts.hostid) 
+WHERE LENGTH(interface.error)>0;</code></pre>
+Non-working external scripts<pre><code>SELECT hosts.host,items.key_,item_rtdata.error FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN item_rtdata ON (items.itemid=item_rtdata.itemid) 
+WHERE hosts.status=0 AND items.status=0 AND items.type=10 
+AND LENGTH(item_rtdata.error)>0;</code></pre>
+Check native HA heartbeat<pre><code>SELECT * FROM ha_node;</code></pre>
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT parent.host AS Parent, hm1.macro AS macro1, hm1.value AS value1, 
+child.host AS Child, hm2.macro AS macro2, hm2.value AS value2 
+FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 
+WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid 
+AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid 
+AND hm1.macro = hm2.macro 
+AND hm1.value <> hm2.value;</code></pre>
+Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT b.host, 
+hm2.macro, 
+hm2.value AS templateValue, 
+h.host, 
+hm1.macro, 
+hm1.value AS hostValue 
+FROM hosts_templates, 
+hosts h, 
+hosts b, 
+hostmacro hm1, 
+hostmacro hm2, 
+interface 
+WHERE hosts_templates.hostid = h.hostid 
+AND hosts_templates.templateid = b.hostid 
+AND interface.hostid = h.hostid 
+AND hm1.hostid = h.hostid 
+AND hm2.hostid = hosts_templates.templateid 
+AND hm1.macro = hm2.macro 
+AND hm1.value <> hm2.value;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+All events closed by global correlation rule<pre><code>SELECT 
+repercussion.clock, 
+repercussion.name, 
+rootCause.clock, 
+rootCause.name 
+FROM events repercussion 
+JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) 
+JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) 
+WHERE event_recovery.c_eventid IS NOT NULL 
+ORDER BY repercussion.clock ASC;</code></pre>
+All active data collector items on enabled hosts<pre><code>SELECT 
+hosts.host, 
+items.name, 
+items.type, 
+items.key_, 
+items.delay 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND items.status=0 
+ORDER BY 1,2,3,4,5;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+<p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="62"><label for="62">62.sql</label><div class="tab">
+Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Non-working external scripts<pre><code>SELECT hosts.host,items.key_,item_rtdata.error FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN item_rtdata ON (items.itemid=item_rtdata.itemid) 
+WHERE hosts.status=0 AND items.status=0 AND items.type=10 
+AND LENGTH(item_rtdata.error)>0;</code></pre>
+Check native HA heartbeat<pre><code>SELECT * FROM ha_node;</code></pre>
+Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
+FROM items 
+JOIN hosts ON (items.hostid=hosts.hostid) 
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status = 0 
+AND items.status = 0 
+AND proxy.status IN (5,6) 
+GROUP BY 2,3 
+ORDER BY 2,3;</code></pre>
+Items in use<pre><code>SELECT CASE items.type  
+WHEN 0 THEN 'Zabbix agent'  
+WHEN 1 THEN 'SNMPv1 agent'  
+WHEN 2 THEN 'Zabbix trapper'  
+WHEN 3 THEN 'Simple check'  
+WHEN 4 THEN 'SNMPv2 agent'  
+WHEN 5 THEN 'Zabbix internal'  
+WHEN 6 THEN 'SNMPv3 agent'  
+WHEN 7 THEN 'Zabbix agent (active) check'  
+WHEN 8 THEN 'Aggregate'  
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'  
+WHEN 10 THEN 'External check'  
+WHEN 11 THEN 'Database monitor'  
+WHEN 12 THEN 'IPMI agent'  
+WHEN 13 THEN 'SSH agent'  
+WHEN 14 THEN 'TELNET agent'  
+WHEN 15 THEN 'Calculated'  
+WHEN 16 THEN 'JMX agent'  
+WHEN 17 THEN 'SNMP trap'  
+WHEN 18 THEN 'Dependent item'  
+WHEN 19 THEN 'HTTP agent'  
+WHEN 20 THEN 'SNMP agent'  
+WHEN 21 THEN 'Script item'  
+END AS type,COUNT(*)  
+FROM items  
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE hosts.status=0  
+AND items.status=0  
+GROUP BY items.type  
+ORDER BY COUNT(*) DESC;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+Frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts<pre><code>SELECT type,delay,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE items.flags=1 AND hosts.status=0 AND items.status=0 
+GROUP BY 1,2 ORDER BY 1,2;</code></pre>
+Host behind proxy 'z62prx' where interface is not healthy. Host is down<pre><code>SELECT hosts.host, interface.error 
+FROM interface 
+JOIN hosts ON (hosts.hostid=interface.hostid) 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE interface.available=2 AND hosts.status=0 AND proxy.host='z62prx';</code></pre>
+Host/interface errors per all hosts behind proxy<pre><code>SELECT proxy.host, hosts.host, interface.error 
+FROM interface 
+JOIN hosts ON (hosts.hostid=interface.hostid) 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE interface.available=2 AND proxy.host IS NOT NULL 
+ORDER BY 1,2,3;</code></pre>
+<p>Download this section: <a href="src/62.sql">https://aigarskadikis.github.io/src/62.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/62.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/62.sql</a></p>
+</div>
+</div><div id='searchInputArea'><span>SEARCH</span><input type='text' id='searchInput' placeholder='Type at least 1 characters...' onkeyup='onTypeSearchInput(event)' /></div><div id='searchResultDlg'><div id='closeIcon' onclick='onCloseDlg()'>&times;</div><div id='searchResultDlgContent'></div></div><script src='searcher.js'></script></body></html>

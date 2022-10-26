@@ -18,7 +18,7 @@ echo "</style></head><body onLoad='initDataArray()'><div class='tabs'>" >> ../in
 ########
 
 # list all files with extension 'sh' and exclude program 'recreate.sh'
-ls -1 | grep -E "\.sh$" |grep -v "recreate.sh" | grep -v "perversion.sh" | while IFS= read -r FILE
+ls -1 | grep -E "\.sh$" |grep -v "recreate" | grep -v "perversion.sh" | while IFS= read -r FILE
 do {
 
 # filename without extension
@@ -86,7 +86,7 @@ cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "
 #######
 
 # list all files with extension 'sh' exclude this program
-ls -1 | grep -E "\.sql$" | while IFS= read -r FILE
+ls -1 | grep -E "\.sql$" | grep -v "^[0-9]" | while IFS= read -r FILE
 do {
 
 # extract name without extension
