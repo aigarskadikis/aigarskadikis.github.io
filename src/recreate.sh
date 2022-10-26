@@ -155,6 +155,9 @@ sed -i 's| </code></pre>|</code></pre>|' ../index.html
 # install extra link to create users using wizard
 sed -i 's|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab">|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab"><p>Create MySQL users using wizard: <a href="./u/index.html">https://aigarskadikis.github.io/u</a></p>|' ../index.html
 
+# install extra link under 'server.sql' to have quries per version
+sed -i 's|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab">|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab"><p>Explore SQLs per specific Zabbix version: <a href="./version.html">https://aigarskadikis.github.io/version.html</a></p>|' ../index.html
+
 # convert MySQL to PostgreSQL
 # sed "s|UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)|EXTRACT(epoch FROM NOW()-INTERVAL '30 MINUTE')|g"
 

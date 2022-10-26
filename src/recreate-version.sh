@@ -79,7 +79,7 @@ cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "
 echo "</div><div id='searchInputArea'><span>SEARCH</span><input type='text' id='searchInput' placeholder='Type at least 1 characters...' onkeyup='onTypeSearchInput(event)' /></div><div id='searchResultDlg'><div id='closeIcon' onclick='onCloseDlg()'>&times;</div><div id='searchResultDlgContent'></div></div><script src='searcher.js'></script></body></html>" >> ../version.html
 
 # install default block
-sed -i 's|input type="radio" name="tabs" id="backup"|input type="radio" name="tabs" id="backup" checked="checked"|' ../version.html
+sed -i 's|input type="radio" name="tabs" id="backup"|input type="radio" name="tabs" id="50" checked="checked"|' ../version.html
 
 # remove unnecessarry space
 sed -i 's| </code></pre>|</code></pre>|' ../version.html
