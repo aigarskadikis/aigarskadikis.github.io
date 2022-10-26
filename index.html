@@ -117,7 +117,7 @@
 
         /* ================= */
 </style></head><body onLoad='initDataArray()'><div class='tabs'>
-<input type="radio" name="tabs" id="backup" checked="checked"><label for="backup">backup</label><div class="tab">
+<input type="radio" name="tabs" id="backup"><label for="backup">backup</label><div class="tab">
 Backup directories which can be related to Zabbix<pre><code>cd /usr/share/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /usr/lib/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
@@ -405,7 +405,7 @@ WHERE proxy_history.itemid=items.itemid AND items.flags=1 GROUP BY 1 ORDER BY 3,
 <p>Download this section: <a href="src/proxy.sql">https://aigarskadikis.github.io/src/proxy.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/proxy.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/proxy.sql</a></p>
 </div>
-<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab"><p>Explore SQLs per specific Zabbix version: <a href="./version.html">https://aigarskadikis.github.io/version.html</a></p>
+<input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab">
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 Hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
