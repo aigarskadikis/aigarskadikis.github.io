@@ -432,7 +432,7 @@ GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 <p>Download this section: <a href="src/44.sql">https://aigarskadikis.github.io/src/44.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/44.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/44.sql</a></p>
 </div>
-<input type="radio" name="tabs" id="50"><label for="50">50.sql</label><div class="tab">
+<input type="radio" name="tabs" id="50" checked="checked"><label for="50">50.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
