@@ -1,5 +1,7 @@
 --hosts having problems with passive checks
-SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;
+SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0 AND LENGTH(hosts.error)>0;
 
 --show items by proxy
 SELECT COUNT(*),proxy.host AS proxy,items.type

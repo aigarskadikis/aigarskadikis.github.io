@@ -5,7 +5,9 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
-SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;
+SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0 AND LENGTH(hosts.error)>0;
 
 --hosts having problems with passive checks. Zabbix 6.0
 SELECT proxy.host AS proxy,hosts.host,interface.error

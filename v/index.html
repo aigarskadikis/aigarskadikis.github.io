@@ -197,7 +197,9 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="40"><label for="40">40.sql</label><div class="tab">
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -299,7 +301,9 @@ GROUP BY 1,2 ORDER BY 1,2;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="42"><label for="42">42.sql</label><div class="tab">
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -366,7 +370,9 @@ GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="44"><label for="44">44.sql</label><div class="tab">
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -435,7 +441,9 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="50" checked="checked"><label for="50">50.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -568,12 +576,17 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
+GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
 <p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="52"><label for="52">52.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -636,6 +649,9 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
+GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
 <p>Download this section: <a href="src/52.sql">https://aigarskadikis.github.io/src/52.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql</a></p>
 </div>
@@ -689,6 +705,9 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
+GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
 <p>Download this section: <a href="src/54.sql">https://aigarskadikis.github.io/src/54.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql</a></p>
 </div>
@@ -795,6 +814,9 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
+GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
 <p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
 </div>

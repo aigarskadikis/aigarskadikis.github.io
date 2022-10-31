@@ -122,3 +122,8 @@ JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;
 
+--enabled and disabled LLD items, its key
+SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
+JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
+GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
+

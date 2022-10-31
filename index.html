@@ -292,7 +292,9 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE LENGTH(hosts.error)>0;</code></pre>
+Hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
 Hosts having problems with passive checks. Zabbix 6.0<pre><code>SELECT proxy.host AS proxy,hosts.host,interface.error 
 FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 JOIN interface ON (interface.hostid=hosts.hostid) 
@@ -525,6 +527,21 @@ JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 WHERE interface.available=2 AND proxy.host IS NOT NULL 
 ORDER BY 1,2,3;</code></pre>
+Enabled and disabled LLD items, its key. Zabbix 5.0, 5.2, 5.4, 6.0<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
+GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
+Item is not discovered anymore and will be deleted in<pre><code>SELECT hosts.host, 
+items.key_ 
+FROM items 
+JOIN item_discovery ON (item_discovery.itemid=items.itemid) 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE item_discovery.ts_delete > 0;</code></pre>
+Count of item is not discovered anymore and will be deleted<pre><code>SELECT hosts.host,COUNT(*) 
+FROM items 
+JOIN item_discovery ON (item_discovery.itemid=items.itemid) 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE item_discovery.ts_delete > 0 
+GROUP BY 1 ORDER BY 2 DESC LIMIT 30;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
