@@ -289,3 +289,8 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE interface.available=2 AND proxy.host IS NOT NULL
 ORDER BY 1,2,3;
 
+--enabled and disabled LLD items, its key. Zabbix 5.0, 5.2, 5.4, 6.0
+SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
+JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
+GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
+
