@@ -294,3 +294,19 @@ SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
 
+--item is not discovered anymore and will be deleted in
+SELECT hosts.host,
+items.key_
+FROM items
+JOIN item_discovery ON (item_discovery.itemid=items.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE item_discovery.ts_delete > 0;
+
+--count of item is not discovered anymore and will be deleted
+SELECT hosts.host,COUNT(*)
+FROM items
+JOIN item_discovery ON (item_discovery.itemid=items.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE item_discovery.ts_delete > 0
+GROUP BY 1 ORDER BY 2 DESC LIMIT 30;
+
