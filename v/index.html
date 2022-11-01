@@ -579,6 +579,11 @@ GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
+Which dashboard has been using host group id:2 for the input<pre><code>SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field 
+JOIN widget ON (widget.widgetid=widget_field.widgetid) 
+JOIN dashboard ON (dashboard.dashboardid=widget.dashboardid) 
+JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid) 
+WHERE widget_field.value_groupid IN (2);</code></pre>
 <p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
 </div>
@@ -708,6 +713,12 @@ GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
+Which dashboard has been using host group id:2 for the input<pre><code>SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field 
+JOIN widget ON (widget.widgetid=widget_field.widgetid) 
+JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid) 
+JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid) 
+JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid) 
+WHERE widget_field.value_groupid IN (2);</code></pre>
 <p>Download this section: <a href="src/54.sql">https://aigarskadikis.github.io/src/54.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql</a></p>
 </div>
@@ -817,6 +828,12 @@ GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
+Which dashboard has been using host group id:2 for the input<pre><code>SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field 
+JOIN widget ON (widget.widgetid=widget_field.widgetid) 
+JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid) 
+JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid) 
+JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid) 
+WHERE widget_field.value_groupid IN (2);</code></pre>
 <p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
 </div>

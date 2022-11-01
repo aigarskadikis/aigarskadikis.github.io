@@ -312,3 +312,18 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE item_discovery.ts_delete > 0
 GROUP BY 1 ORDER BY 2 DESC LIMIT 30;
 
+--which dashboard has been using host group id:2 for the input. Zabbix 5.0,5.2
+SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field
+JOIN widget ON (widget.widgetid=widget_field.widgetid)
+JOIN dashboard ON (dashboard.dashboardid=widget.dashboardid)
+JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
+WHERE widget_field.value_groupid IN (2);
+
+--which dashboard has been using host group id:2 for the input. Zabbix 5.4, 6.0
+SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field
+JOIN widget ON (widget.widgetid=widget_field.widgetid)
+JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
+JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid)
+JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
+WHERE widget_field.value_groupid IN (2);
+

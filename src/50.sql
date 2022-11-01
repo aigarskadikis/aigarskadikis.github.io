@@ -166,3 +166,10 @@ SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
 
+--which dashboard has been using host group id:2 for the input
+SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field
+JOIN widget ON (widget.widgetid=widget_field.widgetid)
+JOIN dashboard ON (dashboard.dashboardid=widget.dashboardid)
+JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
+WHERE widget_field.value_groupid IN (2);
+

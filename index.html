@@ -542,6 +542,17 @@ JOIN item_discovery ON (item_discovery.itemid=items.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE item_discovery.ts_delete > 0 
 GROUP BY 1 ORDER BY 2 DESC LIMIT 30;</code></pre>
+Which dashboard has been using host group id:2 for the input. Zabbix 5.0,5.2<pre><code>SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field 
+JOIN widget ON (widget.widgetid=widget_field.widgetid) 
+JOIN dashboard ON (dashboard.dashboardid=widget.dashboardid) 
+JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid) 
+WHERE widget_field.value_groupid IN (2);</code></pre>
+Which dashboard has been using host group id:2 for the input. Zabbix 5.4, 6.0<pre><code>SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field 
+JOIN widget ON (widget.widgetid=widget_field.widgetid) 
+JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid) 
+JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid) 
+JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid) 
+WHERE widget_field.value_groupid IN (2);</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
