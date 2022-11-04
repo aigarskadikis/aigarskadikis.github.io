@@ -584,6 +584,11 @@ JOIN hosts ON (hosts.hostid=interface.hostid)
 WHERE hosts.flags=0 
 GROUP BY hosts.host 
 HAVING COUNT(interface.interfaceid)>1;</code></pre>
+Amount of items not discovered anymore<pre><code>SELECT hosts.host, COUNT(*) FROM items 
+JOIN item_discovery ON (item_discovery.itemid=items.itemid) 
+JOIN hosts ON (hosts.hostid=items.hostid)  
+WHERE item_discovery.ts_delete > 0 
+GROUP BY 1 ORDER BY 2 ASC;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>

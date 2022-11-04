@@ -356,3 +356,10 @@ WHERE hosts.flags=0
 GROUP BY hosts.host
 HAVING COUNT(interface.interfaceid)>1;
 
+--amount of items not discovered anymore
+SELECT hosts.host, COUNT(*) FROM items
+JOIN item_discovery ON (item_discovery.itemid=items.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE item_discovery.ts_delete > 0
+GROUP BY 1 ORDER BY 2 ASC;
+
