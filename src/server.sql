@@ -343,11 +343,9 @@ FROM autoreg_host
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
 GROUP BY 1,2,3 ORDER BY 1,2,3;
 
---items without a template. Zabbix 4.0, 5.0, 6.0
-SELECT hosts.host,items.key_
-FROM items
+--items without a template. Zabbix 5.0, 6.0
+SELECT hosts.host, items.key_ FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE hosts.status=0
-AND hosts.flags=0
-AND items.templateid IS NULL;
+WHERE hosts.status=0 AND hosts.flags=0
+AND items.status=0 AND items.templateid IS NULL AND items.flags=0;
 

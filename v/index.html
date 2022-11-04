@@ -297,12 +297,6 @@ Frequency of LLD rule for enabled hosts and enabled items discoveries for only m
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0 
 GROUP BY 1,2 ORDER BY 1,2;</code></pre>
-Items without a template<pre><code>SELECT hosts.host,items.key_ 
-FROM items 
-JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE hosts.status=0 
-AND hosts.flags=0 
-AND items.templateid IS NULL;</code></pre>
 <p>Download this section: <a href="src/40.sql">https://aigarskadikis.github.io/src/40.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql</a></p>
 </div>
@@ -604,12 +598,10 @@ COUNT(*) AS "amount of hosts"
 FROM autoreg_host 
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid) 
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
-Items without a template<pre><code>SELECT hosts.host,items.key_ 
-FROM items 
+Items without a template<pre><code>SELECT hosts.host, items.key_ FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE hosts.status=0 
-AND hosts.flags=0 
-AND items.templateid IS NULL;</code></pre>
+WHERE hosts.status=0 AND hosts.flags=0 
+AND items.status=0 AND items.templateid IS NULL AND items.flags=0;</code></pre>
 <p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
 </div>
@@ -902,12 +894,10 @@ COUNT(*) AS "amount of hosts"
 FROM autoreg_host 
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid) 
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
-Items without a template<pre><code>SELECT hosts.host,items.key_ 
-FROM items 
+Items without a template<pre><code>SELECT hosts.host, items.key_ FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE hosts.status=0 
-AND hosts.flags=0 
-AND items.templateid IS NULL;</code></pre>
+WHERE hosts.status=0 AND hosts.flags=0 
+AND items.status=0 AND items.templateid IS NULL AND items.flags=0;</code></pre>
 <p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
 </div>

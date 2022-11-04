@@ -575,12 +575,10 @@ COUNT(*) AS "amount of hosts"
 FROM autoreg_host 
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid) 
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
-Items without a template. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT hosts.host,items.key_ 
-FROM items 
+Items without a template. Zabbix 5.0, 6.0<pre><code>SELECT hosts.host, items.key_ FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE hosts.status=0 
-AND hosts.flags=0 
-AND items.templateid IS NULL;</code></pre>
+WHERE hosts.status=0 AND hosts.flags=0 
+AND items.status=0 AND items.templateid IS NULL AND items.flags=0;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
