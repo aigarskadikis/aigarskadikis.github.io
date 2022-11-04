@@ -29,13 +29,7 @@ GROUP BY 2,3
 ORDER BY 2,3;
 
 --difference between installed macros between host VS template VS nested/child templates
-SELECT parent.host AS Parent, hm1.macro AS macro1, hm1.value AS value1,
-child.host AS Child, hm2.macro AS macro2, hm2.value AS value2
-FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
-WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid
-AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid
-AND hm1.macro = hm2.macro
-AND hm1.value <> hm2.value;
+SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue, parent.host AS OverrideInstalled, hm1.value AS OverrideValue FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid AND hm1.macro = hm2.macro AND parent.flags=0 AND child.flags=0 AND hm1.value <> hm2.value;
 
 --detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates
 SELECT b.host,
