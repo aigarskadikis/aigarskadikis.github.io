@@ -81,3 +81,19 @@ SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
 
+--Zabbix agent hitting the central server
+SELECT hosts.host AS proxy,
+CASE autoreg_host.flags
+WHEN 0 THEN 'IP address, do not update host interface'
+WHEN 1 THEN 'IP address, update default host interface'
+WHEN 2 THEN 'DNS name, update default host interface'
+END AS "connect using",
+CASE autoreg_host.tls_accepted
+WHEN 1 THEN 'Unencrypted'
+WHEN 2 THEN 'TLS with PSK'
+END AS "Encryption",
+COUNT(*) AS "amount of hosts"
+FROM autoreg_host
+JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
+GROUP BY 1,2,3 ORDER BY 1,2,3;
+

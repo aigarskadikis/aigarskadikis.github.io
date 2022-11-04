@@ -119,3 +119,11 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0
 GROUP BY 1,2 ORDER BY 1,2;
 
+--items without a template
+SELECT hosts.host,items.key_
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status=0
+AND hosts.flags=0
+AND items.templateid IS NULL;
+

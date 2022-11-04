@@ -297,6 +297,12 @@ Frequency of LLD rule for enabled hosts and enabled items discoveries for only m
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0 
 GROUP BY 1,2 ORDER BY 1,2;</code></pre>
+Items without a template<pre><code>SELECT hosts.host,items.key_ 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND hosts.flags=0 
+AND items.templateid IS NULL;</code></pre>
 <p>Download this section: <a href="src/40.sql">https://aigarskadikis.github.io/src/40.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql</a></p>
 </div>
@@ -584,6 +590,26 @@ JOIN widget ON (widget.widgetid=widget_field.widgetid)
 JOIN dashboard ON (dashboard.dashboardid=widget.dashboardid) 
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid) 
 WHERE widget_field.value_groupid IN (2);</code></pre>
+Zabbix agent hitting the central server<pre><code>SELECT hosts.host AS proxy, 
+CASE autoreg_host.flags 
+WHEN 0 THEN 'IP address, do not update host interface' 
+WHEN 1 THEN 'IP address, update default host interface' 
+WHEN 2 THEN 'DNS name, update default host interface' 
+END AS "connect using", 
+CASE autoreg_host.tls_accepted 
+WHEN 1 THEN 'Unencrypted' 
+WHEN 2 THEN 'TLS with PSK' 
+END AS "Encryption", 
+COUNT(*) AS "amount of hosts" 
+FROM autoreg_host 
+JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid) 
+GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
+Items without a template<pre><code>SELECT hosts.host,items.key_ 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND hosts.flags=0 
+AND items.templateid IS NULL;</code></pre>
 <p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
 </div>
@@ -657,6 +683,20 @@ GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
+Zabbix agent hitting the central server<pre><code>SELECT hosts.host AS proxy, 
+CASE autoreg_host.flags 
+WHEN 0 THEN 'IP address, do not update host interface' 
+WHEN 1 THEN 'IP address, update default host interface' 
+WHEN 2 THEN 'DNS name, update default host interface' 
+END AS "connect using", 
+CASE autoreg_host.tls_accepted 
+WHEN 1 THEN 'Unencrypted' 
+WHEN 2 THEN 'TLS with PSK' 
+END AS "Encryption", 
+COUNT(*) AS "amount of hosts" 
+FROM autoreg_host 
+JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid) 
+GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
 <p>Download this section: <a href="src/52.sql">https://aigarskadikis.github.io/src/52.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql</a></p>
 </div>
@@ -719,6 +759,20 @@ JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
 JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid) 
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid) 
 WHERE widget_field.value_groupid IN (2);</code></pre>
+Zabbix agent hitting the central server<pre><code>SELECT hosts.host AS proxy, 
+CASE autoreg_host.flags 
+WHEN 0 THEN 'IP address, do not update host interface' 
+WHEN 1 THEN 'IP address, update default host interface' 
+WHEN 2 THEN 'DNS name, update default host interface' 
+END AS "connect using", 
+CASE autoreg_host.tls_accepted 
+WHEN 1 THEN 'Unencrypted' 
+WHEN 2 THEN 'TLS with PSK' 
+END AS "Encryption", 
+COUNT(*) AS "amount of hosts" 
+FROM autoreg_host 
+JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid) 
+GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
 <p>Download this section: <a href="src/54.sql">https://aigarskadikis.github.io/src/54.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql</a></p>
 </div>
@@ -834,6 +888,26 @@ JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
 JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid) 
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid) 
 WHERE widget_field.value_groupid IN (2);</code></pre>
+Zabbix agent hitting the central server<pre><code>SELECT hosts.host AS proxy, 
+CASE autoreg_host.flags 
+WHEN 0 THEN 'IP address, do not update host interface' 
+WHEN 1 THEN 'IP address, update default host interface' 
+WHEN 2 THEN 'DNS name, update default host interface' 
+END AS "connect using", 
+CASE autoreg_host.tls_accepted 
+WHEN 1 THEN 'Unencrypted' 
+WHEN 2 THEN 'TLS with PSK' 
+END AS "Encryption", 
+COUNT(*) AS "amount of hosts" 
+FROM autoreg_host 
+JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid) 
+GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
+Items without a template<pre><code>SELECT hosts.host,items.key_ 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND hosts.flags=0 
+AND items.templateid IS NULL;</code></pre>
 <p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
 </div>
