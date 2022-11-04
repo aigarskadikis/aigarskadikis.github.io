@@ -579,6 +579,11 @@ Items without a template. Zabbix 5.0, 6.0<pre><code>SELECT hosts.host, items.key
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE hosts.status=0 AND hosts.flags=0 
 AND items.status=0 AND items.templateid IS NULL AND items.flags=0;</code></pre>
+Hosts with multiple interfaces. Zabbix 5.0, 6.0<pre><code>SELECT hosts.host FROM interface 
+JOIN hosts ON (hosts.hostid=interface.hostid) 
+WHERE hosts.flags=0 
+GROUP BY hosts.host 
+HAVING COUNT(interface.interfaceid)>1;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>

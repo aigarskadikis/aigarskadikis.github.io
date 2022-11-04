@@ -349,3 +349,10 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0 AND hosts.flags=0
 AND items.status=0 AND items.templateid IS NULL AND items.flags=0;
 
+--hosts with multiple interfaces. Zabbix 5.0, 6.0
+SELECT hosts.host FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+WHERE hosts.flags=0
+GROUP BY hosts.host
+HAVING COUNT(interface.interfaceid)>1;
+
