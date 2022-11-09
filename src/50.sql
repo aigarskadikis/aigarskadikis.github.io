@@ -202,3 +202,31 @@ SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host)
 --MySQL
 SELECT proxy.host AS proxy, hosts.host, GROUP_CONCAT(template.host SEPARATOR ', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;
 
+--which action is responsible
+SELECT FROM_UNIXTIME(events.clock) AS 'time',
+CASE events.severity
+WHEN 0 THEN 'NOT_CLASSIFIED'
+WHEN 1 THEN 'INFORMATION'
+WHEN 2 THEN 'WARNING'
+WHEN 3 THEN 'AVERAGE'
+WHEN 4 THEN 'HIGH'
+WHEN 5 THEN 'DISASTER'
+END AS severity,
+CASE events.acknowledged
+WHEN 0 THEN 'NO'
+WHEN 1 THEN 'YES'
+END AS acknowledged,
+CASE events.value
+WHEN 0 THEN 'OK'
+WHEN 1 THEN 'PROBLEM '
+END AS trigger_status,
+events.name AS 'event',
+actions.name AS 'action'
+FROM events
+JOIN alerts ON (alerts.eventid=events.eventid)
+JOIN actions ON (actions.actionid=alerts.actionid)
+WHERE events.source=0
+AND events.object=0
+ORDER BY events.clock DESC
+LIMIT 10;
+
