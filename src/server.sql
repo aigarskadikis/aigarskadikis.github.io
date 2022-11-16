@@ -469,3 +469,30 @@ AND items.status=0
 AND items.templateid IS NULL
 AND items.flags=0;
 
+--user sessions. Zabbix 6.0
+SELECT COUNT(*),users.username
+FROM sessions
+JOIN users ON (users.userid=sessions.userid)
+GROUP BY 2 ORDER BY 1 ASC;
+
+--user sessions. Zabbix 5.0
+SELECT COUNT(*),users.alias
+FROM sessions
+JOIN users ON (users.userid=sessions.userid)
+GROUP BY 2 ORDER BY 1 ASC;
+
+--open problems. Zabbix 5.0, 6.0
+SELECT COUNT(*) AS count,
+CASE
+WHEN source=0 THEN 'surface'
+WHEN source>0 THEN 'internal'
+END AS level,
+CASE
+WHEN source=0 AND object=0 THEN 'trigger in a problem state'
+WHEN source=3 AND object=0 THEN 'cannot evaluate trigger expression'
+WHEN source=3 AND object=4 THEN 'data collection not working'
+WHEN source=3 AND object=5 THEN 'low level discovery not perfect'
+END AS problemCategory
+FROM problem GROUP BY 2,3
+ORDER BY 2 DESC;
+

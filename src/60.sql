@@ -215,3 +215,24 @@ JOIN items ON (items.itemid=functions.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE problem.source > 0 AND problem.object=0;
 
+--user sessions
+SELECT COUNT(*),users.username
+FROM sessions
+JOIN users ON (users.userid=sessions.userid)
+GROUP BY 2 ORDER BY 1 ASC;
+
+--open problems
+SELECT COUNT(*) AS count,
+CASE
+WHEN source=0 THEN 'surface'
+WHEN source>0 THEN 'internal'
+END AS level,
+CASE
+WHEN source=0 AND object=0 THEN 'trigger in a problem state'
+WHEN source=3 AND object=0 THEN 'cannot evaluate trigger expression'
+WHEN source=3 AND object=4 THEN 'data collection not working'
+WHEN source=3 AND object=5 THEN 'low level discovery not perfect'
+END AS problemCategory
+FROM problem GROUP BY 2,3
+ORDER BY 2 DESC;
+

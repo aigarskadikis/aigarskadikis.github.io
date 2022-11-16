@@ -677,6 +677,27 @@ AND hosts.flags=0
 AND items.status=0 
 AND items.templateid IS NULL 
 AND items.flags=0;</code></pre>
+User sessions. Zabbix 6.0<pre><code>SELECT COUNT(*),users.username 
+FROM sessions 
+JOIN users ON (users.userid=sessions.userid) 
+GROUP BY 2 ORDER BY 1 ASC;</code></pre>
+User sessions. Zabbix 5.0<pre><code>SELECT COUNT(*),users.alias 
+FROM sessions 
+JOIN users ON (users.userid=sessions.userid) 
+GROUP BY 2 ORDER BY 1 ASC;</code></pre>
+Open problems. Zabbix 5.0, 6.0<pre><code>SELECT COUNT(*) AS count, 
+CASE 
+WHEN source=0 THEN 'surface' 
+WHEN source>0 THEN 'internal' 
+END AS level, 
+CASE 
+WHEN source=0 AND object=0 THEN 'trigger in a problem state' 
+WHEN source=3 AND object=0 THEN 'cannot evaluate trigger expression' 
+WHEN source=3 AND object=4 THEN 'data collection not working' 
+WHEN source=3 AND object=5 THEN 'low level discovery not perfect' 
+END AS problemCategory 
+FROM problem GROUP BY 2,3 
+ORDER BY 2 DESC;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>

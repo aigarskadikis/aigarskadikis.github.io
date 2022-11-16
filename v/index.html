@@ -710,6 +710,23 @@ JOIN functions ON (functions.triggerid=triggers.triggerid)
 JOIN items ON (items.itemid=functions.itemid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE problem.source > 0 AND problem.object=0;</code></pre>
+User sessions<pre><code>SELECT COUNT(*),users.alias 
+FROM sessions 
+JOIN users ON (users.userid=sessions.userid) 
+GROUP BY 2 ORDER BY 1 ASC;</code></pre>
+Open problems<pre><code>SELECT COUNT(*) AS count, 
+CASE 
+WHEN source=0 THEN 'surface' 
+WHEN source>0 THEN 'internal' 
+END AS level, 
+CASE 
+WHEN source=0 AND object=0 THEN 'trigger in a problem state' 
+WHEN source=3 AND object=0 THEN 'cannot evaluate trigger expression' 
+WHEN source=3 AND object=4 THEN 'data collection not working' 
+WHEN source=3 AND object=5 THEN 'low level discovery not perfect' 
+END AS problemCategory 
+FROM problem GROUP BY 2,3 
+ORDER BY 2 DESC;</code></pre>
 <p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
 </div>
@@ -1067,6 +1084,23 @@ JOIN functions ON (functions.triggerid=triggers.triggerid)
 JOIN items ON (items.itemid=functions.itemid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE problem.source > 0 AND problem.object=0;</code></pre>
+User sessions<pre><code>SELECT COUNT(*),users.username 
+FROM sessions 
+JOIN users ON (users.userid=sessions.userid) 
+GROUP BY 2 ORDER BY 1 ASC;</code></pre>
+Open problems<pre><code>SELECT COUNT(*) AS count, 
+CASE 
+WHEN source=0 THEN 'surface' 
+WHEN source>0 THEN 'internal' 
+END AS level, 
+CASE 
+WHEN source=0 AND object=0 THEN 'trigger in a problem state' 
+WHEN source=3 AND object=0 THEN 'cannot evaluate trigger expression' 
+WHEN source=3 AND object=4 THEN 'data collection not working' 
+WHEN source=3 AND object=5 THEN 'low level discovery not perfect' 
+END AS problemCategory 
+FROM problem GROUP BY 2,3 
+ORDER BY 2 DESC;</code></pre>
 <p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
 </div>
