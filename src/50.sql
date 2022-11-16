@@ -254,10 +254,10 @@ WHERE problem.source > 0 AND problem.object=4;
 
 --trigger evaluation problems
 SELECT
+DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo,
 hosts.name AS hostName,
 triggers.description AS triggerTitle,
-problem.name AS TriggerEvaluationError,
-CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo
+problem.name AS TriggerEvaluationError
 FROM problem
 JOIN triggers ON (triggers.triggerid=problem.objectid)
 JOIN functions ON (functions.triggerid=triggers.triggerid)
