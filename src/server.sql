@@ -5,9 +5,17 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
-SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts
+SELECT proxy.host AS proxy,
+hosts.host,
+CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError
+FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE hosts.status=0 AND LENGTH(hosts.error)>0;
+WHERE hosts.status=0 AND (
+LENGTH(hosts.error)>0 OR
+LENGTH(hosts.snmp_error)>0 OR
+LENGTH(hosts.ipmi_error)>0 OR
+LENGTH(hosts.jmx_error)>0
+);
 
 --hosts having problems with passive checks. Zabbix 6.0
 SELECT proxy.host AS proxy,hosts.host,interface.error
@@ -425,4 +433,16 @@ JOIN functions ON (functions.triggerid=triggers.triggerid)
 JOIN items ON (items.itemid=functions.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE problem.source > 0 AND problem.object=0;
+
+--loneley item
+SELECT hosts.host,
+items.key_,
+CONCAT('items.php?form=update&itemid=',items.itemid) AS goTo
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status=0
+AND hosts.flags=0
+AND items.status=0
+AND items.templateid IS NULL
+AND items.flags=0;
 

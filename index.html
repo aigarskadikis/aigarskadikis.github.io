@@ -300,9 +300,17 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+Hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
+WHERE hosts.status=0 AND ( 
+LENGTH(hosts.error)>0 OR 
+LENGTH(hosts.snmp_error)>0 OR 
+LENGTH(hosts.ipmi_error)>0 OR 
+LENGTH(hosts.jmx_error)>0 
+);</code></pre>
 Hosts having problems with passive checks. Zabbix 6.0<pre><code>SELECT proxy.host AS proxy,hosts.host,interface.error 
 FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 JOIN interface ON (interface.hostid=hosts.hostid) 
@@ -640,6 +648,16 @@ JOIN functions ON (functions.triggerid=triggers.triggerid)
 JOIN items ON (items.itemid=functions.itemid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE problem.source > 0 AND problem.object=0;</code></pre>
+Loneley item<pre><code>SELECT hosts.host, 
+items.key_, 
+CONCAT('items.php?form=update&itemid=',items.itemid) AS goTo 
+FROM items 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE hosts.status=0 
+AND hosts.flags=0 
+AND items.status=0 
+AND items.templateid IS NULL 
+AND items.flags=0;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>

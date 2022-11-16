@@ -5,9 +5,17 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --hosts having problems with passive checks
-SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts
+SELECT proxy.host AS proxy,
+hosts.host,
+CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError
+FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE hosts.status=0 AND LENGTH(hosts.error)>0;
+WHERE hosts.status=0 AND (
+LENGTH(hosts.error)>0 OR
+LENGTH(hosts.snmp_error)>0 OR
+LENGTH(hosts.ipmi_error)>0 OR
+LENGTH(hosts.jmx_error)>0
+);
 
 --show items by proxy
 SELECT COUNT(*),proxy.host AS proxy,items.type

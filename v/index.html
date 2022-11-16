@@ -197,9 +197,17 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="40"><label for="40">40.sql</label><div class="tab">
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
+WHERE hosts.status=0 AND ( 
+LENGTH(hosts.error)>0 OR 
+LENGTH(hosts.snmp_error)>0 OR 
+LENGTH(hosts.ipmi_error)>0 OR 
+LENGTH(hosts.jmx_error)>0 
+);</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -301,9 +309,17 @@ GROUP BY 1,2 ORDER BY 1,2;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="42"><label for="42">42.sql</label><div class="tab">
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
+WHERE hosts.status=0 AND ( 
+LENGTH(hosts.error)>0 OR 
+LENGTH(hosts.snmp_error)>0 OR 
+LENGTH(hosts.ipmi_error)>0 OR 
+LENGTH(hosts.jmx_error)>0 
+);</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -370,9 +386,17 @@ GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="44"><label for="44">44.sql</label><div class="tab">
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
+WHERE hosts.status=0 AND ( 
+LENGTH(hosts.error)>0 OR 
+LENGTH(hosts.snmp_error)>0 OR 
+LENGTH(hosts.ipmi_error)>0 OR 
+LENGTH(hosts.jmx_error)>0 
+);</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -441,9 +465,17 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="50" checked="checked"><label for="50">50.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
+WHERE hosts.status=0 AND ( 
+LENGTH(hosts.error)>0 OR 
+LENGTH(hosts.snmp_error)>0 OR 
+LENGTH(hosts.ipmi_error)>0 OR 
+LENGTH(hosts.jmx_error)>0 
+);</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -663,9 +695,17 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="52"><label for="52">52.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,hosts.error FROM hosts 
+Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND LENGTH(hosts.error)>0;</code></pre>
+WHERE hosts.status=0 AND ( 
+LENGTH(hosts.error)>0 OR 
+LENGTH(hosts.snmp_error)>0 OR 
+LENGTH(hosts.ipmi_error)>0 OR 
+LENGTH(hosts.jmx_error)>0 
+);</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
