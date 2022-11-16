@@ -300,26 +300,45 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT proxy.host AS proxy, 
+Unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT proxy.host AS proxy, 
 hosts.host, 
-CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+hosts.error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND ( 
-LENGTH(hosts.error)>0 OR 
-LENGTH(hosts.snmp_error)>0 OR 
-LENGTH(hosts.ipmi_error)>0 OR 
-LENGTH(hosts.jmx_error)>0 
-);</code></pre>
-Hosts having problems with passive checks. Zabbix 6.0<pre><code>SELECT proxy.host AS proxy,hosts.host,interface.error 
-FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 
+AND LENGTH(hosts.error) > 0;</code></pre>
+Unreachable SNMP hosts. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+hosts.snmp_error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
+FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 
+AND LENGTH(hosts.snmp_error) > 0;</code></pre>
+ZBX hosts unreachable. Zabbix 6.0<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+interface.error, 
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo 
+FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 JOIN interface ON (interface.hostid=hosts.hostid) 
-WHERE LENGTH(interface.error)>0;</code></pre>
+WHERE LENGTH(interface.error) > 0 
+AND interface.type=1;</code></pre>
+SNMP hosts unreachable. Zabbix 6.0<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+interface.error, 
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo 
+FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+JOIN interface ON (interface.hostid=hosts.hostid) 
+WHERE LENGTH(interface.error) > 0 
+AND interface.type=2;</code></pre>
 Non-working external scripts. Zabbix 5.4, 6.0, 6.2<pre><code>SELECT hosts.host,items.key_,item_rtdata.error FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid) 
 WHERE hosts.status=0 AND items.status=0 AND items.type=10 
-AND LENGTH(item_rtdata.error)>0;</code></pre>
+AND LENGTH(item_rtdata.error) > 0;</code></pre>
 Check native HA heartbeat. Zabbix 6.0, 6.2<pre><code>SELECT * FROM ha_node;</code></pre>
 Count of events. All version of Zabbix<pre><code>SELECT COUNT(*),source FROM events GROUP BY source;</code></pre>
 Show items by proxy. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
@@ -338,7 +357,7 @@ WHEN 4 THEN 'Data collection'
 WHEN 5 THEN 'LLD rule' 
 END AS object, 
 objectid,value,name,COUNT(*) FROM events 
-WHERE source=3 AND LENGTH(name)>0 
+WHERE source=3 AND LENGTH(name) > 0 
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
 Difference between installed macros between host VS template VS nested/child templates. Zabbix 5.0, 6.0<pre><code>SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue, parent.host AS OverrideInstalled, hm1.value AS OverrideValue FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid AND hm1.macro = hm2.macro AND parent.flags=0 AND child.flags=0 AND hm1.value <> hm2.value;</code></pre>
@@ -452,7 +471,7 @@ FROM items i1
 JOIN items i2 ON (i2.itemid=i1.templateid) 
 JOIN hosts h1 ON (h1.hostid=i1.hostid) 
 JOIN hosts h2 ON (h2.hostid=i2.hostid) 
-WHERE i1.delay<>i2.delay;</code></pre>
+WHERE i1.delay <> i2.delay;</code></pre>
 All events closed by global correlation rule. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT 
 repercussion.clock, 
 repercussion.name, 
@@ -486,7 +505,7 @@ WHERE source=3
 AND object=4 
 AND items.status=0 
 AND items.flags IN (0,1,4) 
-AND LENGTH(item_rtdata.error)>0 
+AND LENGTH(item_rtdata.error) > 0 
 GROUP BY hosts.host,items.key_, 
 item_rtdata.error 
 ORDER BY COUNT(items.key_);</code></pre>

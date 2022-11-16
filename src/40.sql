@@ -1,18 +1,25 @@
 --active problems, including Zabbix internal problems (item unsupported, trigger unsupported)
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
---hosts having problems with passive checks
+--unreachable ZBX host
 SELECT proxy.host AS proxy,
 hosts.host,
-CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError
+hosts.error AS hostError,
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE hosts.status=0 AND (
-LENGTH(hosts.error)>0 OR
-LENGTH(hosts.snmp_error)>0 OR
-LENGTH(hosts.ipmi_error)>0 OR
-LENGTH(hosts.jmx_error)>0
-);
+WHERE hosts.status=0
+AND LENGTH(hosts.error) > 0;
+
+--unreachable SNMP hosts
+SELECT proxy.host AS proxy,
+hosts.host,
+hosts.snmp_error AS hostError,
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND LENGTH(hosts.snmp_error) > 0;
 
 --show items by proxy
 SELECT COUNT(*),proxy.host AS proxy,items.type
@@ -33,7 +40,7 @@ WHEN 4 THEN 'Data collection'
 WHEN 5 THEN 'LLD rule'
 END AS object,
 objectid,value,name,COUNT(*) FROM events
-WHERE source=3 AND LENGTH(name)>0
+WHERE source=3 AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
 

@@ -197,17 +197,22 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="40"><label for="40">40.sql</label><div class="tab">
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy, 
+Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, 
 hosts.host, 
-CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+hosts.error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND ( 
-LENGTH(hosts.error)>0 OR 
-LENGTH(hosts.snmp_error)>0 OR 
-LENGTH(hosts.ipmi_error)>0 OR 
-LENGTH(hosts.jmx_error)>0 
-);</code></pre>
+WHERE hosts.status=0 
+AND LENGTH(hosts.error) > 0;</code></pre>
+Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+hosts.snmp_error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
+FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 
+AND LENGTH(hosts.snmp_error) > 0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -224,7 +229,7 @@ WHEN 4 THEN 'Data collection'
 WHEN 5 THEN 'LLD rule' 
 END AS object, 
 objectid,value,name,COUNT(*) FROM events 
-WHERE source=3 AND LENGTH(name)>0 
+WHERE source=3 AND LENGTH(name) > 0 
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
 Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip, 
@@ -309,17 +314,22 @@ GROUP BY 1,2 ORDER BY 1,2;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="42"><label for="42">42.sql</label><div class="tab">
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy, 
+Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, 
 hosts.host, 
-CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+hosts.error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND ( 
-LENGTH(hosts.error)>0 OR 
-LENGTH(hosts.snmp_error)>0 OR 
-LENGTH(hosts.ipmi_error)>0 OR 
-LENGTH(hosts.jmx_error)>0 
-);</code></pre>
+WHERE hosts.status=0 
+AND LENGTH(hosts.error) > 0;</code></pre>
+Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+hosts.snmp_error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
+FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 
+AND LENGTH(hosts.snmp_error) > 0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -386,17 +396,22 @@ GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="44"><label for="44">44.sql</label><div class="tab">
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy, 
+Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, 
 hosts.host, 
-CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+hosts.error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND ( 
-LENGTH(hosts.error)>0 OR 
-LENGTH(hosts.snmp_error)>0 OR 
-LENGTH(hosts.ipmi_error)>0 OR 
-LENGTH(hosts.jmx_error)>0 
-);</code></pre>
+WHERE hosts.status=0 
+AND LENGTH(hosts.error) > 0;</code></pre>
+Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+hosts.snmp_error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
+FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 
+AND LENGTH(hosts.snmp_error) > 0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -465,17 +480,22 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="50" checked="checked"><label for="50">50.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy, 
+Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, 
 hosts.host, 
-CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+hosts.error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND ( 
-LENGTH(hosts.error)>0 OR 
-LENGTH(hosts.snmp_error)>0 OR 
-LENGTH(hosts.ipmi_error)>0 OR 
-LENGTH(hosts.jmx_error)>0 
-);</code></pre>
+WHERE hosts.status=0 
+AND LENGTH(hosts.error) > 0;</code></pre>
+Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+hosts.snmp_error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
+FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 
+AND LENGTH(hosts.snmp_error) > 0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -492,7 +512,7 @@ WHEN 4 THEN 'Data collection'
 WHEN 5 THEN 'LLD rule' 
 END AS object, 
 objectid,value,name,COUNT(*) FROM events 
-WHERE source=3 AND LENGTH(name)>0 
+WHERE source=3 AND LENGTH(name) > 0 
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
 Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue, parent.host AS OverrideInstalled, hm1.value AS OverrideValue FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid AND hm1.macro = hm2.macro AND parent.flags=0 AND child.flags=0 AND hm1.value <> hm2.value;</code></pre>
@@ -575,7 +595,7 @@ FROM items i1
 JOIN items i2 ON (i2.itemid=i1.templateid) 
 JOIN hosts h1 ON (h1.hostid=i1.hostid) 
 JOIN hosts h2 ON (h2.hostid=i2.hostid) 
-WHERE i1.delay<>i2.delay;</code></pre>
+WHERE i1.delay <> i2.delay;</code></pre>
 All events closed by global correlation rule<pre><code>SELECT 
 repercussion.clock, 
 repercussion.name, 
@@ -695,17 +715,22 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="52"><label for="52">52.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy, 
+Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, 
 hosts.host, 
-CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError 
+hosts.error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
-WHERE hosts.status=0 AND ( 
-LENGTH(hosts.error)>0 OR 
-LENGTH(hosts.snmp_error)>0 OR 
-LENGTH(hosts.ipmi_error)>0 OR 
-LENGTH(hosts.jmx_error)>0 
-);</code></pre>
+WHERE hosts.status=0 
+AND LENGTH(hosts.error) > 0;</code></pre>
+Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+hosts.snmp_error AS hostError, 
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
+FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+WHERE hosts.status=0 
+AND LENGTH(hosts.snmp_error) > 0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -795,7 +820,7 @@ Non-working external scripts<pre><code>SELECT hosts.host,items.key_,item_rtdata.
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid) 
 WHERE hosts.status=0 AND items.status=0 AND items.type=10 
-AND LENGTH(item_rtdata.error)>0;</code></pre>
+AND LENGTH(item_rtdata.error) > 0;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
 JOIN hosts ON (items.hostid=hosts.hostid) 
@@ -870,15 +895,29 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="60"><label for="60">60.sql</label><div class="tab">
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Hosts having problems with passive checks<pre><code>SELECT proxy.host AS proxy,hosts.host,interface.error 
-FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+ZBX hosts unreachable<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+interface.error, 
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo 
+FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 JOIN interface ON (interface.hostid=hosts.hostid) 
-WHERE LENGTH(interface.error)>0;</code></pre>
+WHERE LENGTH(interface.error) > 0 
+AND interface.type=1;</code></pre>
+SNMP hosts unreachable<pre><code>SELECT proxy.host AS proxy, 
+hosts.host, 
+interface.error, 
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo 
+FROM hosts 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+JOIN interface ON (interface.hostid=hosts.hostid) 
+WHERE LENGTH(interface.error) > 0 
+AND interface.type=2;</code></pre>
 Non-working external scripts<pre><code>SELECT hosts.host,items.key_,item_rtdata.error FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid) 
 WHERE hosts.status=0 AND items.status=0 AND items.type=10 
-AND LENGTH(item_rtdata.error)>0;</code></pre>
+AND LENGTH(item_rtdata.error) > 0;</code></pre>
 Check native HA heartbeat<pre><code>SELECT * FROM ha_node;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 
@@ -1037,7 +1076,7 @@ Non-working external scripts<pre><code>SELECT hosts.host,items.key_,item_rtdata.
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid) 
 WHERE hosts.status=0 AND items.status=0 AND items.type=10 
-AND LENGTH(item_rtdata.error)>0;</code></pre>
+AND LENGTH(item_rtdata.error) > 0;</code></pre>
 Check native HA heartbeat<pre><code>SELECT * FROM ha_node;</code></pre>
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
 FROM items 

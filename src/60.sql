@@ -1,18 +1,34 @@
 --active problems, including Zabbix internal problems (item unsupported, trigger unsupported)
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
---hosts having problems with passive checks
-SELECT proxy.host AS proxy,hosts.host,interface.error
-FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+--ZBX hosts unreachable
+SELECT proxy.host AS proxy,
+hosts.host,
+interface.error,
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN interface ON (interface.hostid=hosts.hostid)
-WHERE LENGTH(interface.error)>0;
+WHERE LENGTH(interface.error) > 0
+AND interface.type=1;
+
+--SNMP hosts unreachable
+SELECT proxy.host AS proxy,
+hosts.host,
+interface.error,
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+JOIN interface ON (interface.hostid=hosts.hostid)
+WHERE LENGTH(interface.error) > 0
+AND interface.type=2;
 
 --non-working external scripts
 SELECT hosts.host,items.key_,item_rtdata.error FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
 WHERE hosts.status=0 AND items.status=0 AND items.type=10
-AND LENGTH(item_rtdata.error)>0;
+AND LENGTH(item_rtdata.error) > 0;
 
 --Check native HA heartbeat
 SELECT * FROM ha_node;

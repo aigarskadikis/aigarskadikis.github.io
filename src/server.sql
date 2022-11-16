@@ -4,31 +4,54 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 --active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
---hosts having problems with passive checks. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
+--unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
 SELECT proxy.host AS proxy,
 hosts.host,
-CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError
+hosts.error AS hostError,
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE hosts.status=0 AND (
-LENGTH(hosts.error)>0 OR
-LENGTH(hosts.snmp_error)>0 OR
-LENGTH(hosts.ipmi_error)>0 OR
-LENGTH(hosts.jmx_error)>0
-);
+WHERE hosts.status=0
+AND LENGTH(hosts.error) > 0;
 
---hosts having problems with passive checks. Zabbix 6.0
-SELECT proxy.host AS proxy,hosts.host,interface.error
-FROM hosts LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+--unreachable SNMP hosts. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
+SELECT proxy.host AS proxy,
+hosts.host,
+hosts.snmp_error AS hostError,
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND LENGTH(hosts.snmp_error) > 0;
+
+--ZBX hosts unreachable. Zabbix 6.0
+SELECT proxy.host AS proxy,
+hosts.host,
+interface.error,
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN interface ON (interface.hostid=hosts.hostid)
-WHERE LENGTH(interface.error)>0;
+WHERE LENGTH(interface.error) > 0
+AND interface.type=1;
+
+--SNMP hosts unreachable. Zabbix 6.0
+SELECT proxy.host AS proxy,
+hosts.host,
+interface.error,
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+JOIN interface ON (interface.hostid=hosts.hostid)
+WHERE LENGTH(interface.error) > 0
+AND interface.type=2;
 
 --non-working external scripts. Zabbix 5.4, 6.0, 6.2
 SELECT hosts.host,items.key_,item_rtdata.error FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
 WHERE hosts.status=0 AND items.status=0 AND items.type=10
-AND LENGTH(item_rtdata.error)>0;
+AND LENGTH(item_rtdata.error) > 0;
 
 --Check native HA heartbeat. Zabbix 6.0, 6.2
 SELECT * FROM ha_node;
@@ -55,7 +78,7 @@ WHEN 4 THEN 'Data collection'
 WHEN 5 THEN 'LLD rule'
 END AS object,
 objectid,value,name,COUNT(*) FROM events
-WHERE source=3 AND LENGTH(name)>0
+WHERE source=3 AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
 
@@ -181,7 +204,7 @@ FROM items i1
 JOIN items i2 ON (i2.itemid=i1.templateid)
 JOIN hosts h1 ON (h1.hostid=i1.hostid)
 JOIN hosts h2 ON (h2.hostid=i2.hostid)
-WHERE i1.delay<>i2.delay;
+WHERE i1.delay <> i2.delay;
 
 --all events closed by global correlation rule. Zabbix 4.0, 5.0, 6.0
 SELECT
@@ -221,7 +244,7 @@ WHERE source=3
 AND object=4
 AND items.status=0
 AND items.flags IN (0,1,4)
-AND LENGTH(item_rtdata.error)>0
+AND LENGTH(item_rtdata.error) > 0
 GROUP BY hosts.host,items.key_,
 item_rtdata.error
 ORDER BY COUNT(items.key_);

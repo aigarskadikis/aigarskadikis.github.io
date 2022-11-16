@@ -3,7 +3,7 @@ SELECT hosts.host,items.key_,item_rtdata.error FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
 WHERE hosts.status=0 AND items.status=0 AND items.type=10
-AND LENGTH(item_rtdata.error)>0;
+AND LENGTH(item_rtdata.error) > 0;
 
 --show items by proxy
 SELECT COUNT(*),proxy.host AS proxy,items.type

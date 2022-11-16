@@ -1,18 +1,25 @@
 --how many user groups has debug mode 1
 SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 
---hosts having problems with passive checks
+--unreachable ZBX host
 SELECT proxy.host AS proxy,
 hosts.host,
-CONCAT(hosts.error,hosts.snmp_error,hosts.ipmi_error,hosts.jmx_error) AS hostError
+hosts.error AS hostError,
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE hosts.status=0 AND (
-LENGTH(hosts.error)>0 OR
-LENGTH(hosts.snmp_error)>0 OR
-LENGTH(hosts.ipmi_error)>0 OR
-LENGTH(hosts.jmx_error)>0
-);
+WHERE hosts.status=0
+AND LENGTH(hosts.error) > 0;
+
+--unreachable SNMP hosts
+SELECT proxy.host AS proxy,
+hosts.host,
+hosts.snmp_error AS hostError,
+CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND LENGTH(hosts.snmp_error) > 0;
 
 --show items by proxy
 SELECT COUNT(*),proxy.host AS proxy,items.type
