@@ -164,3 +164,38 @@ SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host)
 --MySQL
 SELECT proxy.host AS proxy, hosts.host, GROUP_CONCAT(template.host SEPARATOR ', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;
 
+--non-working LLD rules
+SELECT
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS LLDerror,
+CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo
+FROM problem
+JOIN items ON (items.itemid=problem.objectid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE problem.source > 0 AND problem.object=5;
+
+--non-working data collector items
+SELECT
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS DataCollectorError,
+CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo
+FROM problem
+JOIN items ON (items.itemid=problem.objectid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE problem.source > 0 AND problem.object=4;
+
+--trigger evaluation problems
+SELECT
+hosts.name AS hostName,
+triggers.description AS triggerTitle,
+problem.name AS TriggerEvaluationError,
+CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo
+FROM problem
+JOIN triggers ON (triggers.triggerid=problem.objectid)
+JOIN functions ON (functions.triggerid=triggers.triggerid)
+JOIN items ON (items.itemid=functions.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE problem.source > 0 AND problem.object=0;
+

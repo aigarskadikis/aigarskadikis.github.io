@@ -391,25 +391,38 @@ AND events.object=0
 ORDER BY events.clock DESC
 LIMIT 10;
 
---non-working LLD rules. Zabbix 5.0
+--non-working LLD rules. Zabbix 5.0, 6.0
 SELECT
-hosts.name,
-items.key_ AS keyName,
-problem.name AS error,
-CONCAT('host_discovery.php?form=update&itemid=',objectid) AS goTo
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS LLDerror,
+CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE problem.source>0 AND problem.object=5;
+WHERE problem.source > 0 AND problem.object=5;
 
---non-working items. Zabbix 5.0
+--non-working data collector items. Zabbix 5.0, 6.0
 SELECT
-hosts.name,
-items.key_ AS keyName,
-problem.name AS error,
-CONCAT('items.php?form=update&itemid=',objectid) AS goTo
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS DataCollectorError,
+CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE problem.source>0 AND problem.object=4;
+WHERE problem.source > 0 AND problem.object=4;
+
+--trigger evaluation problems. Zabbix 5.0, 6.0
+SELECT
+hosts.name AS hostName,
+triggers.description AS triggerTitle,
+problem.name AS TriggerEvaluationError,
+CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo
+FROM problem
+JOIN triggers ON (triggers.triggerid=problem.objectid)
+JOIN functions ON (functions.triggerid=triggers.triggerid)
+JOIN items ON (items.itemid=functions.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE problem.source > 0 AND problem.object=0;
 

@@ -630,23 +630,34 @@ AND events.object=0
 ORDER BY events.clock DESC 
 LIMIT 10;</code></pre>
 Non-working LLD rules<pre><code>SELECT 
-hosts.name, 
-items.key_ AS keyName, 
-problem.name AS error, 
-CONCAT('host_discovery.php?form=update&itemid=',objectid) AS goTo 
+hosts.name AS hostName, 
+items.key_ AS itemKey, 
+problem.name AS LLDerror, 
+CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo 
 FROM problem 
 JOIN items ON (items.itemid=problem.objectid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE problem.source>0 AND problem.object=5;</code></pre>
-Non-working items<pre><code>SELECT 
-hosts.name, 
-items.key_ AS keyName, 
-problem.name AS error, 
-CONCAT('items.php?form=update&itemid=',objectid) AS goTo 
+WHERE problem.source > 0 AND problem.object=5;</code></pre>
+Non-working data collector items<pre><code>SELECT 
+hosts.name AS hostName, 
+items.key_ AS itemKey, 
+problem.name AS DataCollectorError, 
+CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo 
 FROM problem 
 JOIN items ON (items.itemid=problem.objectid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE problem.source>0 AND problem.object=4;</code></pre>
+WHERE problem.source > 0 AND problem.object=4;</code></pre>
+Trigger evaluation problems<pre><code>SELECT 
+hosts.name AS hostName, 
+triggers.description AS triggerTitle, 
+problem.name AS TriggerEvaluationError, 
+CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo 
+FROM problem 
+JOIN triggers ON (triggers.triggerid=problem.objectid) 
+JOIN functions ON (functions.triggerid=triggers.triggerid) 
+JOIN items ON (items.itemid=functions.itemid) 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE problem.source > 0 AND problem.object=0;</code></pre>
 <p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
 </div>
@@ -948,6 +959,35 @@ GROUP BY hosts.host
 HAVING COUNT(interface.interfaceid)>1;</code></pre>
 PostgreSQL<pre><code>SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
 MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, GROUP_CONCAT(template.host SEPARATOR ', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
+Non-working LLD rules<pre><code>SELECT 
+hosts.name AS hostName, 
+items.key_ AS itemKey, 
+problem.name AS LLDerror, 
+CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo 
+FROM problem 
+JOIN items ON (items.itemid=problem.objectid) 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE problem.source > 0 AND problem.object=5;</code></pre>
+Non-working data collector items<pre><code>SELECT 
+hosts.name AS hostName, 
+items.key_ AS itemKey, 
+problem.name AS DataCollectorError, 
+CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo 
+FROM problem 
+JOIN items ON (items.itemid=problem.objectid) 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE problem.source > 0 AND problem.object=4;</code></pre>
+Trigger evaluation problems<pre><code>SELECT 
+hosts.name AS hostName, 
+triggers.description AS triggerTitle, 
+problem.name AS TriggerEvaluationError, 
+CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo 
+FROM problem 
+JOIN triggers ON (triggers.triggerid=problem.objectid) 
+JOIN functions ON (functions.triggerid=triggers.triggerid) 
+JOIN items ON (items.itemid=functions.itemid) 
+JOIN hosts ON (hosts.hostid=items.hostid) 
+WHERE problem.source > 0 AND problem.object=0;</code></pre>
 <p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
 </div>
