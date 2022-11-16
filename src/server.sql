@@ -391,3 +391,25 @@ AND events.object=0
 ORDER BY events.clock DESC
 LIMIT 10;
 
+--non-working LLD rules. Zabbix 5.0
+SELECT
+hosts.name,
+items.key_ AS keyName,
+problem.name AS error,
+CONCAT('host_discovery.php?form=update&itemid=',objectid) AS goTo
+FROM problem
+JOIN items ON (items.itemid=problem.objectid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE problem.source>0 AND problem.object=5;
+
+--non-working items. Zabbix 5.0
+SELECT
+hosts.name,
+items.key_ AS keyName,
+problem.name AS error,
+CONCAT('items.php?form=update&itemid=',objectid) AS goTo
+FROM problem
+JOIN items ON (items.itemid=problem.objectid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE problem.source>0 AND problem.object=4;
+
