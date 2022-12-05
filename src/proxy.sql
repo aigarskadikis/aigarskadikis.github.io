@@ -12,7 +12,7 @@ CONCAT('history.php?itemids%5B0%5D=',proxy_history.itemid ,'&action=showlatest' 
 FROM proxy_history
 JOIN items ON (items.itemid = proxy_history.itemid)
 JOIN hosts ON (hosts.hostid = items.hostid)
-WHERE LENGTH(value)>60000;
+WHERE LENGTH(value) > 60000;
 
 --check big LLD rules and its frequency based on clock
 SELECT clock,
@@ -23,7 +23,7 @@ FROM proxy_history
 JOIN items ON (items.itemid = proxy_history.itemid)
 JOIN hosts ON (hosts.hostid = items.hostid)
 WHERE items.flags=1
-AND LENGTH(value)>6000;
+AND LENGTH(value) > 6000;
 
 --LLD rules
 SELECT items.key_,COUNT(*),AVG(LENGTH(value)) FROM proxy_history, items
