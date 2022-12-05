@@ -379,7 +379,7 @@ SELECT hosts.host FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 WHERE hosts.flags=0
 GROUP BY hosts.host
-HAVING COUNT(interface.interfaceid)>1;
+HAVING COUNT(interface.interfaceid) > 1;
 
 --amount of items not discovered anymore
 SELECT hosts.host, COUNT(*) FROM items
@@ -484,8 +484,8 @@ GROUP BY 2 ORDER BY 1 ASC;
 --open problems. Zabbix 5.0, 6.0
 SELECT COUNT(*) AS count,
 CASE
-WHEN source=0 THEN 'surface'
-WHEN source>0 THEN 'internal'
+WHEN source = 0 THEN 'surface'
+WHEN source > 0 THEN 'internal'
 END AS level,
 CASE
 WHEN source=0 AND object=0 THEN 'trigger in a problem state'

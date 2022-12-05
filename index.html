@@ -605,7 +605,7 @@ Hosts with multiple interfaces. Zabbix 5.0, 6.0<pre><code>SELECT hosts.host FROM
 JOIN hosts ON (hosts.hostid=interface.hostid) 
 WHERE hosts.flags=0 
 GROUP BY hosts.host 
-HAVING COUNT(interface.interfaceid)>1;</code></pre>
+HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 Amount of items not discovered anymore<pre><code>SELECT hosts.host, COUNT(*) FROM items 
 JOIN item_discovery ON (item_discovery.itemid=items.itemid) 
 JOIN hosts ON (hosts.hostid=items.hostid)  
@@ -688,8 +688,8 @@ JOIN users ON (users.userid=sessions.userid)
 GROUP BY 2 ORDER BY 1 ASC;</code></pre>
 Open problems. Zabbix 5.0, 6.0<pre><code>SELECT COUNT(*) AS count, 
 CASE 
-WHEN source=0 THEN 'surface' 
-WHEN source>0 THEN 'internal' 
+WHEN source = 0 THEN 'surface' 
+WHEN source > 0 THEN 'internal' 
 END AS level, 
 CASE 
 WHEN source=0 AND object=0 THEN 'trigger in a problem state' 

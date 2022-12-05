@@ -172,7 +172,7 @@ SELECT hosts.host FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 WHERE hosts.flags=0
 GROUP BY hosts.host
-HAVING COUNT(interface.interfaceid)>1;
+HAVING COUNT(interface.interfaceid) > 1;
 
 --PostgreSQL
 SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;
@@ -224,8 +224,8 @@ GROUP BY 2 ORDER BY 1 ASC;
 --open problems
 SELECT COUNT(*) AS count,
 CASE
-WHEN source=0 THEN 'surface'
-WHEN source>0 THEN 'internal'
+WHEN source = 0 THEN 'surface'
+WHEN source > 0 THEN 'internal'
 END AS level,
 CASE
 WHEN source=0 AND object=0 THEN 'trigger in a problem state'
