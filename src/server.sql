@@ -497,5 +497,23 @@ FROM problem GROUP BY 2,3
 ORDER BY 2 DESC;
 
 --item update frequency. Zabbix 5.0, 6.0
-SELECT h2.host AS Source, i2.name AS itemName, i2.key_ AS itemKey, i2.delay AS OriginalUpdateFrequency,h1.host AS exceptionInstalledOn, i1.delay AS FrequencyChild, CASE WHEN i1.flags=1 THEN 'LLD rule' WHEN i1.flags IN (0,4) THEN 'data collection' END AS itemCategory , CASE WHEN i1.flags=1 THEN CONCAT('host_discovery.php?form=update&context=host&itemid=',i1.itemid) WHEN i1.flags IN (0,4) THEN CONCAT('items.php?form=update&context=host&hostid=',h1.hostid,'&itemid=',i1.itemid) END AS goTo FROM items i1 JOIN items i2 ON (i2.itemid=i1.templateid) JOIN hosts h1 ON (h1.hostid=i1.hostid) JOIN hosts h2 ON (h2.hostid=i2.hostid) WHERE i1.delay <> i2.delay;
+SELECT h2.host AS Source,
+i2.name AS itemName,
+i2.key_ AS itemKey,
+i2.delay AS OriginalUpdateFrequency,
+h1.host AS exceptionInstalledOn,
+i1.delay AS FrequencyChild,
+CASE
+WHEN i1.flags=1 THEN 'LLD rule'
+WHEN i1.flags IN (0,4) THEN 'data collection'
+END AS itemCategory,
+CASE
+WHEN i1.flags=1 THEN CONCAT('host_discovery.php?form=update&context=host&itemid=',i1.itemid)
+WHEN i1.flags IN (0,4) THEN CONCAT('items.php?form=update&context=host&hostid=',h1.hostid,'&itemid=',i1.itemid)
+END AS goTo
+FROM items i1
+JOIN items i2 ON (i2.itemid=i1.templateid)
+JOIN hosts h1 ON (h1.hostid=i1.hostid)
+JOIN hosts h2 ON (h2.hostid=i2.hostid)
+WHERE i1.delay <> i2.delay;
 

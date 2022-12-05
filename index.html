@@ -699,7 +699,25 @@ WHEN source=3 AND object=5 THEN 'low level discovery not perfect'
 END AS problemCategory 
 FROM problem GROUP BY 2,3 
 ORDER BY 2 DESC;</code></pre>
-Item update frequency. Zabbix 5.0, 6.0<pre><code>SELECT h2.host AS Source, i2.name AS itemName, i2.key_ AS itemKey, i2.delay AS OriginalUpdateFrequency,h1.host AS exceptionInstalledOn, i1.delay AS FrequencyChild, CASE WHEN i1.flags=1 THEN 'LLD rule' WHEN i1.flags IN (0,4) THEN 'data collection' END AS itemCategory , CASE WHEN i1.flags=1 THEN CONCAT('host_discovery.php?form=update&context=host&itemid=',i1.itemid) WHEN i1.flags IN (0,4) THEN CONCAT('items.php?form=update&context=host&hostid=',h1.hostid,'&itemid=',i1.itemid) END AS goTo FROM items i1 JOIN items i2 ON (i2.itemid=i1.templateid) JOIN hosts h1 ON (h1.hostid=i1.hostid) JOIN hosts h2 ON (h2.hostid=i2.hostid) WHERE i1.delay <> i2.delay;</code></pre>
+Item update frequency. Zabbix 5.0, 6.0<pre><code>SELECT h2.host AS Source, 
+i2.name AS itemName, 
+i2.key_ AS itemKey, 
+i2.delay AS OriginalUpdateFrequency, 
+h1.host AS exceptionInstalledOn, 
+i1.delay AS FrequencyChild, 
+CASE 
+WHEN i1.flags=1 THEN 'LLD rule' 
+WHEN i1.flags IN (0,4) THEN 'data collection' 
+END AS itemCategory, 
+CASE 
+WHEN i1.flags=1 THEN CONCAT('host_discovery.php?form=update&context=host&itemid=',i1.itemid) 
+WHEN i1.flags IN (0,4) THEN CONCAT('items.php?form=update&context=host&hostid=',h1.hostid,'&itemid=',i1.itemid) 
+END AS goTo 
+FROM items i1 
+JOIN items i2 ON (i2.itemid=i1.templateid) 
+JOIN hosts h1 ON (h1.hostid=i1.hostid) 
+JOIN hosts h2 ON (h2.hostid=i2.hostid) 
+WHERE i1.delay <> i2.delay;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
