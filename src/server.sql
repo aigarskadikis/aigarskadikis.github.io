@@ -517,3 +517,6 @@ JOIN hosts h1 ON (h1.hostid=i1.hostid)
 JOIN hosts h2 ON (h2.hostid=i2.hostid)
 WHERE i1.delay <> i2.delay;
 
+--unsupported items and LLD rules. Zabbix 5.0
+SELECT DISTINCT i.key_,COALESCE(ir.error,'') AS error FROM hosts h,items i LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid WHERE i.type<>9 AND i.flags IN (0,1,4) AND h.hostid=i.hostid AND h.status<>3 AND i.status=0 AND ir.state=1 LIMIT 5001;
+

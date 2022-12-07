@@ -746,6 +746,7 @@ JOIN items i2 ON (i2.itemid=i1.templateid)
 JOIN hosts h1 ON (h1.hostid=i1.hostid) 
 JOIN hosts h2 ON (h2.hostid=i2.hostid) 
 WHERE i1.delay <> i2.delay;</code></pre>
+Unsupported items and LLD rules<pre><code>SELECT DISTINCT i.key_,COALESCE(ir.error,'') AS error FROM hosts h,items i LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid WHERE i.type<>9 AND i.flags IN (0,1,4) AND h.hostid=i.hostid AND h.status<>3 AND i.status=0 AND ir.state=1 LIMIT 5001;</code></pre>
 <p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
 </div>
