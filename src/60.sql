@@ -257,3 +257,14 @@ JOIN hosts h1 ON (h1.hostid=i1.hostid)
 JOIN hosts h2 ON (h2.hostid=i2.hostid)
 WHERE i1.delay <> i2.delay;
 
+--which dashboard widgets are using wildcards
+SELECT value_str AS pattern,
+widget.name AS widgetName,
+dashboard.name AS dashboardName
+FROM widget_field, widget, dashboard_page, dashboard
+WHERE widget_field.value_str like '%*%'
+AND widget.widgetid=widget_field.widgetid
+AND dashboard_page.dashboard_pageid=widget.dashboard_pageid
+AND dashboard.dashboardid=dashboard_page.dashboard_pageid
+ORDER BY 3,2,1;
+

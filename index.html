@@ -719,6 +719,15 @@ JOIN hosts h1 ON (h1.hostid=i1.hostid)
 JOIN hosts h2 ON (h2.hostid=i2.hostid) 
 WHERE i1.delay <> i2.delay;</code></pre>
 Unsupported items and LLD rules. Zabbix 5.0<pre><code>SELECT DISTINCT i.key_,COALESCE(ir.error,'') AS error FROM hosts h,items i LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid WHERE i.type<>9 AND i.flags IN (0,1,4) AND h.hostid=i.hostid AND h.status<>3 AND i.status=0 AND ir.state=1 LIMIT 5001;</code></pre>
+Which dashboard widgets are using wildcards. Zabbix 6.0<pre><code>SELECT value_str AS pattern, 
+widget.name AS widgetName, 
+dashboard.name AS dashboardName 
+FROM widget_field, widget, dashboard_page, dashboard 
+WHERE widget_field.value_str like '%*%' 
+AND widget.widgetid=widget_field.widgetid 
+AND dashboard_page.dashboard_pageid=widget.dashboard_pageid 
+AND dashboard.dashboardid=dashboard_page.dashboard_pageid 
+ORDER BY 3,2,1;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>

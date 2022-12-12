@@ -520,3 +520,14 @@ WHERE i1.delay <> i2.delay;
 --unsupported items and LLD rules. Zabbix 5.0
 SELECT DISTINCT i.key_,COALESCE(ir.error,'') AS error FROM hosts h,items i LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid WHERE i.type<>9 AND i.flags IN (0,1,4) AND h.hostid=i.hostid AND h.status<>3 AND i.status=0 AND ir.state=1 LIMIT 5001;
 
+--which dashboard widgets are using wildcards. Zabbix 6.0
+SELECT value_str AS pattern,
+widget.name AS widgetName,
+dashboard.name AS dashboardName
+FROM widget_field, widget, dashboard_page, dashboard
+WHERE widget_field.value_str like '%*%'
+AND widget.widgetid=widget_field.widgetid
+AND dashboard_page.dashboard_pageid=widget.dashboard_pageid
+AND dashboard.dashboardid=dashboard_page.dashboard_pageid
+ORDER BY 3,2,1;
+
