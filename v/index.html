@@ -1149,6 +1149,7 @@ AND widget.widgetid=widget_field.widgetid
 AND dashboard_page.dashboard_pageid=widget.dashboard_pageid 
 AND dashboard.dashboardid=dashboard_page.dashboard_pageid 
 ORDER BY 3,2,1;</code></pre>
+Remove user refresh overrides in user level<pre><code>DELETE FROM profiles WHERE idx='web.dashboard.widget.rf_rate';</code></pre>
 <p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
 </div>

@@ -268,3 +268,6 @@ AND dashboard_page.dashboard_pageid=widget.dashboard_pageid
 AND dashboard.dashboardid=dashboard_page.dashboard_pageid
 ORDER BY 3,2,1;
 
+--remove user refresh overrides in user level
+DELETE FROM profiles WHERE idx='web.dashboard.widget.rf_rate';
+
