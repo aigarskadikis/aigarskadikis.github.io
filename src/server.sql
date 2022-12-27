@@ -536,9 +536,9 @@ DELETE FROM profiles WHERE idx='web.dashboard.widget.rf_rate';
 
 --print all online users with rights group ID: 13. Zabbix 6.0
 SELECT users.username, CASE
-WHEN rights.permission=0 THEN 'DENY'
-WHEN rights.permission=2 THEN 'READ_ONLY'
-WHEN rights.permission=3 THEN 'READ_WRITE'
+WHEN permission=0 THEN 'DENY'
+WHEN permission=2 THEN 'READ_ONLY'
+WHEN permission=3 THEN 'READ_WRITE'
 END AS permission,
 hstgrp.name
 FROM users, users_groups, sessions, usrgrp, rights, hstgrp
