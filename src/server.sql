@@ -534,3 +534,20 @@ ORDER BY 3,2,1;
 --remove user refresh overrides in user level. Zabbix 6.0
 DELETE FROM profiles WHERE idx='web.dashboard.widget.rf_rate';
 
+--print all online users with rights group ID: 13. Zabbix 6.0
+SELECT users.username, CASE
+WHEN rights.permission=0 THEN 'DENY'
+WHEN rights.permission=2 THEN 'READ_ONLY'
+WHEN rights.permission=3 THEN 'READ_WRITE'
+END AS permission,
+hstgrp.name
+FROM users, users_groups, sessions, usrgrp, rights, hstgrp
+WHERE sessions.status=0
+AND rights.groupid=13
+AND users.userid=users_groups.userid
+AND users.userid=sessions.userid
+AND users_groups.usrgrpid=usrgrp.usrgrpid
+AND users_groups.userid=users.userid
+AND usrgrp.usrgrpid=rights.groupid
+AND rights.id=hstgrp.groupid;
+
