@@ -325,3 +325,19 @@ WHERE i1.delay <> i2.delay;
 --unsupported items and LLD rules
 SELECT DISTINCT i.key_,COALESCE(ir.error,'') AS error FROM hosts h,items i LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid WHERE i.type<>9 AND i.flags IN (0,1,4) AND h.hostid=i.hostid AND h.status<>3 AND i.status=0 AND ir.state=1 LIMIT 5001;
 
+--For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why
+UPDATE item_rtdata SET error='' WHERE itemid IN (
+SELECT items.itemid FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid
+);
+
+--For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled
+UPDATE item_rtdata SET state=0 WHERE itemid IN (
+SELECT items.itemid FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid
+);
+

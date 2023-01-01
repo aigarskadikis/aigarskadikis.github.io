@@ -474,6 +474,18 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata SET error='' WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
+For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata SET state=0 WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
 <p>Download this section: <a href="src/44.sql">https://aigarskadikis.github.io/src/44.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/44.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/44.sql</a></p>
 </div>
@@ -747,6 +759,18 @@ JOIN hosts h1 ON (h1.hostid=i1.hostid)
 JOIN hosts h2 ON (h2.hostid=i2.hostid) 
 WHERE i1.delay <> i2.delay;</code></pre>
 Unsupported items and LLD rules<pre><code>SELECT DISTINCT i.key_,COALESCE(ir.error,'') AS error FROM hosts h,items i LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid WHERE i.type<>9 AND i.flags IN (0,1,4) AND h.hostid=i.hostid AND h.status<>3 AND i.status=0 AND ir.state=1 LIMIT 5001;</code></pre>
+For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata SET error='' WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
+For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata SET state=0 WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
 <p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
 </div>
@@ -849,6 +873,18 @@ JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
 PostgreSQL<pre><code>SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
 MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, GROUP_CONCAT(template.host SEPARATOR ', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
+For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata SET error='' WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
+For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata SET state=0 WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
 <p>Download this section: <a href="src/52.sql">https://aigarskadikis.github.io/src/52.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql</a></p>
 </div>
@@ -927,6 +963,18 @@ JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
 PostgreSQL<pre><code>SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
 MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, GROUP_CONCAT(template.host SEPARATOR ', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
+For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata SET error='' WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
+For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata SET state=0 WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
 <p>Download this section: <a href="src/54.sql">https://aigarskadikis.github.io/src/54.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql</a></p>
 </div>
@@ -1165,6 +1213,18 @@ AND users_groups.usrgrpid=usrgrp.usrgrpid
 AND users_groups.userid=users.userid 
 AND usrgrp.usrgrpid=rights.groupid 
 AND rights.id=hstgrp.groupid;</code></pre>
+For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata SET error='' WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
+For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata SET state=0 WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
 <p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
 </div>
@@ -1235,6 +1295,18 @@ JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 WHERE interface.available=2 AND proxy.host IS NOT NULL 
 ORDER BY 1,2,3;</code></pre>
+For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata SET error='' WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
+For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata SET state=0 WHERE itemid IN ( 
+SELECT items.itemid FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid 
+);</code></pre>
 <p>Download this section: <a href="src/62.sql">https://aigarskadikis.github.io/src/62.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/62.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/62.sql</a></p>
 </div>

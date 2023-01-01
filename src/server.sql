@@ -551,3 +551,19 @@ AND users_groups.userid=users.userid
 AND usrgrp.usrgrpid=rights.groupid
 AND rights.id=hstgrp.groupid;
 
+--For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
+UPDATE item_rtdata SET error='' WHERE itemid IN (
+SELECT items.itemid FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid
+);
+
+--For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
+UPDATE item_rtdata SET state=0 WHERE itemid IN (
+SELECT items.itemid FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid
+);
+

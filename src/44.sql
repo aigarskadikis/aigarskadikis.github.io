@@ -88,3 +88,19 @@ JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;
 
+--For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why
+UPDATE item_rtdata SET error='' WHERE itemid IN (
+SELECT items.itemid FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid
+);
+
+--For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled
+UPDATE item_rtdata SET state=0 WHERE itemid IN (
+SELECT items.itemid FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid
+);
+
