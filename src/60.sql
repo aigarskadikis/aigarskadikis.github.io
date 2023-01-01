@@ -304,3 +304,9 @@ AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid
 );
 
+--print error message for enabled hosts and enabled data collector items
+SELECT hosts.host, items.name, item_rtdata.error FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=0
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid;
+

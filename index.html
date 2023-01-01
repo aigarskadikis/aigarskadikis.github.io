@@ -756,6 +756,10 @@ WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
 AND item_rtdata.itemid=items.itemid 
 AND hosts.hostid=items.hostid 
 );</code></pre>
+Print error message for enabled hosts and enabled data collector items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT hosts.host, items.name, item_rtdata.error FROM item_rtdata, items, hosts 
+WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=0 
+AND item_rtdata.itemid=items.itemid 
+AND hosts.hostid=items.hostid;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
