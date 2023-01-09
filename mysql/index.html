@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<body>
+<div id='config'>
+
+<div id='dbserversdns'><table>
+<tr><th>node1</th><th>hostname</th><th>node2</th><th>hostname</th></tr>
+<tr>
+<td><code>db1</code></td><td><input class='output-replace' name='db1node' value='db1node' data-default=''></td>
+<td><code>db2</code></td><td><input class='output-replace' name='db2node' value='db2node' data-default=''></td>
+</tr>
+</table></div>
+
+
+<div id='dbserversip'><table>
+<tr><th>node1</th><th>IP</th><th>node2</th><th>IP</th></tr>
+<tr>
+<td><code>db1</code></td><td><input class='output-replace' name='10.0.0.62' value='10.0.0.62' data-default=''></td>
+<td><code>db2</code></td><td><input class='output-replace' name='10.0.0.63' value='10.0.0.63' data-default=''></td>
+</tr>
+</table></div>
+
+<div id='primaryUsers'><table>
+<tr><th>user</th><th>password</th></tr>
+<tr><td><code>clone_user</code></td><td><input class='output-replace' name='CloneUserForMySQL' value='zabbix' data-default=''></td></tr>
+</table></div>
+
+
+</div>
+<div id='output'></div>
+
+
+<style>
+* { margin:0; padding:0; }
+#output { margin:1rem 0 5rem 1rem; min-height: 30vh; background-color:#fff; float:left;width:50%;z-index:-1; }
+#config { padding: 10px; border: 1px solid silver; float:right;min-width:20%; position:fixed; top:1rem;right:20px; background-color:#fff;z-index:9}
+#config label { display: block; margin-bottom: 3px;}
+td:nth-child(1),td:nth-child(3),th:nth-child(1),th:nth-child(3){text-align:right;padding:0 .5rem;}
+td:nth-child(2),td:nth-child(4),th:nth-child(2),th:nth-child(4){text-align:left}
+table{padding:.5rem 0}
+
+</style>
+<script>
+let dom = document.getElementById('output');
+let messages = [
+
+"From db2node server (destination), authorize into 'mysql' client",
+"<pre>[root@db2node ~]# mysql -uroot -p",
+"Enter password:",
+"Welcome to the MySQL monitor.  Commands end with ; or \g.",
+"Your MySQL connection id is 182",
+"Server version: 8.0.26 Source distribution",
+" ",
+"Copyright (c) 2000, 2021, Oracle and/or its affiliates.",
+" ",
+"Oracle is a registered trademark of Oracle Corporation and/or its",
+"affiliates. Other names may be trademarks of their respective",
+"owners.",
+" ",
+"Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.</pre>",
+"<br />",
+"<br />",
+
+"Ensure if 'PLUGIN_STATUS: ACTIVE'",
+"<pre>mysql&gt; SELECT * FROM information_schema.PLUGINS where PLUGIN_NAME='clone'\G",
+"*************************** 1. row ***************************",
+"           PLUGIN_NAME: clone",
+"        PLUGIN_VERSION: 1.0",
+"         PLUGIN_STATUS: ACTIVE",
+"           PLUGIN_TYPE: CLONE",
+"   PLUGIN_TYPE_VERSION: 1.0",
+"        PLUGIN_LIBRARY: mysql_clone.so",
+"PLUGIN_LIBRARY_VERSION: 1.10",
+"         PLUGIN_AUTHOR: Oracle Corporation",
+"    PLUGIN_DESCRIPTION: CLONE PLUGIN",
+"        PLUGIN_LICENSE: GPL",
+"           LOAD_OPTION: ON</pre>",
+"<br />",
+"<br />",
+
+"Make db1node to act as donor:",
+"<pre>mysql&gt; SET GLOBAL clone_valid_donor_list = '10.0.0.62:3306'</pre>",
+"<br />",
+"<br />",
+
+""
+];
+let placeholders = document.querySelectorAll('.output-replace');
+
+document.getElementById('config').addEventListener('change', e => {
+    if (!e.target.classList.contains('output-replace')) {
+        return;
+    }
+
+    updateOuput(dom, messages);
+});
+document.getElementById('config').addEventListener('keyup', e => {
+    console.log('keyup');
+    if (!e.target.classList.contains('output-replace')) {
+        return;
+    }
+
+    updateOuput(dom, messages)
+});
+updateOuput(dom, messages);
+
+function updateOuput(dom, messages) {
+    
+
+    let output = messages.join("\r\n");
+    let key, value;
+
+    for (let placeholder of placeholders) {
+        key = new RegExp(placeholder.getAttribute('name'), 'g');
+        value = placeholder.value;
+
+        if (value == '' && placeholder.hasAttribute('data-default')) {
+            value = placeholder.getAttribute('data-default');
+        }
+
+        output = output.replace(key, value);
+    }
+
+    dom.innerHTML = output;
+}
+</script>
+    </body>
+</html>
