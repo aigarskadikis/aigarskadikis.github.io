@@ -573,3 +573,20 @@ WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;
 
+--identify item membership. usefull if that is master item. Zabbix 5.0, 5.2, 5.4, 6.0
+SELECT proxy.host AS proxy, hosts.host, items.name, items.key_, items.delay
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+JOIN items ON (items.hostid=hosts.hostid)
+WHERE items.itemid IN (12345,5678);
+
+--unique items keys behind proxy
+SELECT proxy.host AS proxy,
+items.key_, COUNT(*)
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+JOIN items ON (items.hostid=hosts.hostid)
+WHERE hosts.status=0 AND items.status=0 AND items.flags<>2
+GROUP BY 1,2
+ORDER BY 3 ASC;
+

@@ -30,3 +30,6 @@ grep -r '=' /etc/zabbix/zabbix_server.d/*
 # how much time take for housekeeper process to complete
 grep housekeeper /var/log/zabbix/zabbix_server.log
 
+# most busy item for preprocessing worker
+grep zabbix_server.log | grep -Eo "In preprocessor_enqueue_dependent.*" | sort | uniq -c | sort
+
