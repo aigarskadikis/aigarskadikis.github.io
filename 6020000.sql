@@ -116,8 +116,6 @@ SELECT `usrgrpid` FROM `report_usrgrp` WHERE `usrgrpid` NOT IN (SELECT `usrgrpid
 SELECT `groupid` FROM `rights` WHERE `groupid` NOT IN (SELECT `usrgrpid` FROM `usrgrp`);
 SELECT `id` FROM `rights` WHERE `id` NOT IN (SELECT `groupid` FROM `hstgrp`);
 SELECT `roleid` FROM `role_rule` WHERE `roleid` NOT IN (SELECT `roleid` FROM `role`);
-SELECT `value_moduleid` FROM `role_rule` WHERE `value_moduleid` NOT IN (SELECT `moduleid` FROM `module`);
-SELECT `value_serviceid` FROM `role_rule` WHERE `value_serviceid` NOT IN (SELECT `serviceid` FROM `services`);
 SELECT `scriptid` FROM `script_param` WHERE `scriptid` NOT IN (SELECT `scriptid` FROM `scripts`);
 SELECT `serviceid` FROM `service_alarms` WHERE `serviceid` NOT IN (SELECT `serviceid` FROM `services`);
 SELECT `eventid` FROM `service_problem` WHERE `eventid` NOT IN (SELECT `eventid` FROM `problem`);
@@ -173,5 +171,3 @@ SELECT `value_hostid` FROM `widget_field` WHERE `value_hostid` NOT IN (SELECT `h
 SELECT `value_itemid` FROM `widget_field` WHERE `value_itemid` NOT IN (SELECT `itemid` FROM `items`);
 SELECT `value_graphid` FROM `widget_field` WHERE `value_graphid` NOT IN (SELECT `graphid` FROM `graphs`);
 SELECT `value_sysmapid` FROM `widget_field` WHERE `value_sysmapid` NOT IN (SELECT `sysmapid` FROM `sysmaps`);
-SELECT `value_serviceid` FROM `widget_field` WHERE `value_serviceid` NOT IN (SELECT `serviceid` FROM `services`);
-SELECT `value_slaid` FROM `widget_field` WHERE `value_slaid` NOT IN (SELECT `slaid` FROM `sla`);
