@@ -347,3 +347,10 @@ WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;
 
+--identify item membership. usefull if that is master item
+SELECT proxy.host AS proxy, hosts.host, items.name, items.key_, items.delay
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+JOIN items ON (items.hostid=hosts.hostid)
+WHERE items.itemid IN (12345,5678);
+
