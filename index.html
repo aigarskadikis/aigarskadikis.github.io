@@ -276,10 +276,20 @@ Delete child events which was closed by global correlation<pre><code>DELETE e FR
 LEFT JOIN event_recovery ON (event_recovery.eventid=e.eventid) 
 WHERE event_recovery.c_eventid IS NOT NULL 
 AND e.clock < 1234;</code></pre>
-Delete dublicate values in table, keep the newest one. This is NOT discard and unchanged!<pre><code>DELETE t1 FROM history_text t1 
+Delete dublicate values per itemid. Keep the newest one. this is NOT discard and unchanged!<pre><code>DELETE t1 FROM history_text t1 
 INNER JOIN history_text t2 
 WHERE t1.itemid=382198 AND 
 t1.clock < t2.clock AND 
+t1.value = t2.value AND 
+t1.itemid = t2.itemid;</code></pre>
+Delete all dublicate metrics in history. Useful if table used for backups<pre><code>DELETE t1 FROM history_text t1 
+INNER JOIN history_text t2 
+WHERE t1.clock < t2.clock AND 
+t1.value = t2.value AND 
+t1.itemid = t2.itemid;</code></pre>
+Delete all dublicate metrics in history. Useful if table used for backups<pre><code>DELETE t1 FROM history_str t1 
+INNER JOIN history_str t2 
+WHERE t1.clock < t2.clock AND 
 t1.value = t2.value AND 
 t1.itemid = t2.itemid;</code></pre>
 <p>Download this section: <a href="src/delete.sql">https://aigarskadikis.github.io/src/delete.sql</a><br />
