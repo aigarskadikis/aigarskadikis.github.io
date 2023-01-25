@@ -4,6 +4,9 @@ ss --tcp --listen --numeric
 # listening TCP ports with process identification
 ss --tcp --listen --numeric --process
 
+# ensure service is listening on UDP 162
+ss --udp --listen --numeric --process | grep 162
+
 # check if tcp port listens. make sure it really listens on destination server before checking
 nc -v servername 3306
 

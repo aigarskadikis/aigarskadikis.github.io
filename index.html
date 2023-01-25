@@ -225,6 +225,7 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="supply"><label for="supply">supply</label><div class="tab">
 Listening TCP ports<pre><code>ss --tcp --listen --numeric</code></pre>
 Listening TCP ports with process identification<pre><code>ss --tcp --listen --numeric --process</code></pre>
+Ensure service is listening on UDP 162<pre><code>ss --udp --listen --numeric --process | grep 162</code></pre>
 Check if tcp port listens. Make sure it really listens on destination server before checking<pre><code>nc -v servername 3306</code></pre>
 Check if port is open without external tools. If it reports 0, the port is reachable and in the listening state<pre><code>{ echo >/dev/tcp/127.0.0.1/3306 ; } 2>/dev/null; echo $?</code></pre>
 Capture all SNMP traps traffic<pre><code>tcpdump -i any udp dst port 162 >> /var/log/zabbix/zabbix_traps.tcpdump</code></pre>
