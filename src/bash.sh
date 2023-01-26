@@ -20,7 +20,7 @@ dd if=/dev/urandom of=/db/mount/point/50GB bs=1M count=51200 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/65GB bs=1M count=65536 oflag=direct
 
 # erase dublicate data in table history_text
-mysql --database='zabbix' --silent --skip-column-names --batch --execute="SELECT itemid FROM items WHERE value_type=4 AND templateid" | \
+mysql --database='zabbix' --silent --skip-column-names --batch --execute="SELECT itemid FROM items WHERE value_type=4 AND templateid IS NULL" | \
 while IFS= read -r ITEMID
 do {
 echo $ITEMID
@@ -37,7 +37,7 @@ t1.itemid=$ITEMID;
 } done
 
 # erase dublicate data in table history_str
-mysql --database='zabbix' --silent --skip-column-names --batch --execute="SELECT itemid FROM items WHERE value_type=1 AND templateid" | \
+mysql --database='zabbix' --silent --skip-column-names --batch --execute="SELECT itemid FROM items WHERE value_type=1 AND templateid IS NULL" | \
 while IFS= read -r ITEMID
 do {
 echo $ITEMID

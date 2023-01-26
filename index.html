@@ -60,7 +60,7 @@ Test disk throughput<pre><code>dd if=/dev/urandom of=/db/mount/point/512M bs=1M 
 dd if=/dev/urandom of=/db/mount/point/5GB bs=1M count=5120 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/50GB bs=1M count=51200 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/65GB bs=1M count=65536 oflag=direct</code></pre>
-Erase dublicate data in table history_text<pre><code>mysql --database='zabbix' --silent --skip-column-names --batch --execute="SELECT itemid FROM items WHERE value_type=4 AND templateid" | \
+Erase dublicate data in table history_text<pre><code>mysql --database='zabbix' --silent --skip-column-names --batch --execute="SELECT itemid FROM items WHERE value_type=4 AND templateid IS NULL" | \
 while IFS= read -r ITEMID
 do {
 echo $ITEMID
@@ -75,7 +75,7 @@ t1.itemid = t2.itemid AND
 t1.itemid=$ITEMID;
 " | mysql zabbix
 } done</code></pre>
-Erase dublicate data in table history_str<pre><code>mysql --database='zabbix' --silent --skip-column-names --batch --execute="SELECT itemid FROM items WHERE value_type=1 AND templateid" | \
+Erase dublicate data in table history_str<pre><code>mysql --database='zabbix' --silent --skip-column-names --batch --execute="SELECT itemid FROM items WHERE value_type=1 AND templateid IS NULL" | \
 while IFS= read -r ITEMID
 do {
 echo $ITEMID
