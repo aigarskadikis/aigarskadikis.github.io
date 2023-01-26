@@ -60,7 +60,19 @@ Test disk throughput<pre><code>dd if=/dev/urandom of=/db/mount/point/512M bs=1M 
 dd if=/dev/urandom of=/db/mount/point/5GB bs=1M count=5120 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/50GB bs=1M count=51200 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/65GB bs=1M count=65536 oflag=direct</code></pre>
-Erase dublicate data in table history_text<pre><code>mysql --database='zabbix' --silent --skip-column-names --batch --execute="SELECT itemid FROM items WHERE value_type=4 AND templateid IS NULL" | \
+Erase dublicate data in table 'history_text'. This does NOT work like discard unchanged<pre><code>mysql \
+--database='zabbix' \
+--silent \
+--skip-column-names \
+--batch \
+--execute="
+SELECT items.itemid
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status IN (0,1)
+AND items.value_type=4
+AND items.flags IN (0,4)
+" | \
 while IFS= read -r ITEMID
 do {
 echo $ITEMID
@@ -70,12 +82,24 @@ DELETE t1 FROM history_text t1
 INNER JOIN history_text t2
 WHERE
 t1.clock < t2.clock AND
-t1.value = t2.value AND
-t1.itemid = t2.itemid AND
+t1.value=t2.value AND
+t1.itemid=t2.itemid AND
 t1.itemid=$ITEMID;
 " | mysql zabbix
 } done</code></pre>
-Erase dublicate data in table history_str<pre><code>mysql --database='zabbix' --silent --skip-column-names --batch --execute="SELECT itemid FROM items WHERE value_type=1 AND templateid IS NULL" | \
+Erase dublicate data in table 'history_str'. This does NOT work like discard unchanged<pre><code>mysql \
+--database='zabbix' \
+--silent \
+--skip-column-names \
+--batch \
+--execute="
+SELECT items.itemid
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status IN (0,1)
+AND items.value_type=1
+AND items.flags IN (0,4)
+" | \
 while IFS= read -r ITEMID
 do {
 echo $ITEMID
@@ -85,8 +109,8 @@ DELETE t1 FROM history_str t1
 INNER JOIN history_str t2
 WHERE
 t1.clock < t2.clock AND
-t1.value = t2.value AND
-t1.itemid = t2.itemid AND
+t1.value=t2.value AND
+t1.itemid=t2.itemid AND
 t1.itemid=$ITEMID;
 " | mysql zabbix
 } done</code></pre>
@@ -322,6 +346,26 @@ INNER JOIN history_str t2
 WHERE t1.clock < t2.clock AND 
 t1.value = t2.value AND 
 t1.itemid = t2.itemid;</code></pre>
+Remove data for 'history_text' for items where 'Do not keep history' is configred later than initially<pre><code>DELETE FROM history_text WHERE itemid IN ( 
+SELECT items.itemid FROM items, hosts 
+WHERE hosts.hostid=items.hostid 
+AND hosts.status IN (0,1) 
+AND items.value_type=4 
+AND items.flags IN (0,4) 
+AND items.history IN ('0') 
+);</code></pre>
+Remove data for 'history_str' for items where 'Do not keep history' is configred later than initially<pre><code>DELETE FROM history_str WHERE itemid IN ( 
+SELECT items.itemid FROM items, hosts 
+WHERE hosts.hostid=items.hostid 
+AND hosts.status IN (0,1) 
+AND items.value_type=1 
+AND items.flags IN (0,4) 
+AND items.history IN ('0') 
+);</code></pre>
+Scan 'history_text' table and accidentally stored integers, decimal numbers, log entries and short strings<pre><code>DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=4); 
+DELETE FROM history_text WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>4);</code></pre>
+Scan 'history_str' table and accidentally stored integers, decimal numbers, log entries and long text strings<pre><code>DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=1); 
+DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>1); 
 <p>Download this section: <a href="src/delete.sql">https://aigarskadikis.github.io/src/delete.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql</a></p>
 </div>

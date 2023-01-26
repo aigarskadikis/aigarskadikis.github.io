@@ -37,3 +37,30 @@ WHERE t1.clock < t2.clock AND
 t1.value = t2.value AND
 t1.itemid = t2.itemid;
 
+--remove data for 'history_text' for items where 'Do not keep history' is configred later than initially
+DELETE FROM history_text WHERE itemid IN (
+SELECT items.itemid FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status IN (0,1)
+AND items.value_type=4
+AND items.flags IN (0,4)
+AND items.history IN ('0')
+);
+
+--remove data for 'history_str' for items where 'Do not keep history' is configred later than initially
+DELETE FROM history_str WHERE itemid IN (
+SELECT items.itemid FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status IN (0,1)
+AND items.value_type=1
+AND items.flags IN (0,4)
+AND items.history IN ('0')
+);
+
+--scan 'history_text' table and accidentally stored integers, decimal numbers, log entries and short strings
+DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=4);
+DELETE FROM history_text WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>4);
+
+--scan 'history_str' table and accidentally stored integers, decimal numbers, log entries and long text strings
+DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=1);
+DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>1);
