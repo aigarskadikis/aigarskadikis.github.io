@@ -64,3 +64,4 @@ DELETE FROM history_text WHERE itemid IN (SELECT itemid FROM items WHERE value_t
 --scan 'history_str' table and accidentally stored integers, decimal numbers, log entries and long text strings
 DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=1);
 DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>1);
+
