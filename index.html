@@ -366,6 +366,36 @@ Scan 'history_text' table and accidentally stored integers, decimal numbers, log
 DELETE FROM history_text WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>4);</code></pre>
 Scan 'history_str' table and accidentally stored integers, decimal numbers, log entries and long text strings<pre><code>DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=1); 
 DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>1);</code></pre>
+Remove repeated values per one itemid in 'history_str'. Simulate discard unchanded<pre><code>DELETE FROM history_str WHERE itemid=343812 AND clock IN ( 
+SELECT clock FROM ( 
+SELECT clock, value, r, v2 FROM ( 
+SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2, 
+CASE 
+WHEN value <> LEAD(value,1) OVER (order by clock) 
+THEN value 
+ELSE 'zero' 
+END AS r 
+FROM history_str WHERE itemid=343812 
+) x2 
+WHERE r = 'zero' 
+) x3 
+WHERE v2 IS NOT NULL 
+);</code></pre>
+Remove repeated values per one itemid in 'history_text'. Simulate discard unchanded<pre><code>DELETE FROM history_text WHERE itemid=42702 AND clock IN ( 
+SELECT clock from ( 
+SELECT clock, value, r, v2 FROM ( 
+SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2, 
+CASE 
+WHEN value <> LEAD(value,1) OVER (order by clock) 
+THEN value 
+ELSE 'zero' 
+END AS r 
+FROM history_text WHERE itemid=42702 
+) x2 
+where r = 'zero' 
+) x3 
+WHERE v2 IS NOT NULL 
+);</code></pre>
 <p>Download this section: <a href="src/delete.sql">https://aigarskadikis.github.io/src/delete.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql</a></p>
 </div>

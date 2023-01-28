@@ -65,3 +65,37 @@ DELETE FROM history_text WHERE itemid IN (SELECT itemid FROM items WHERE value_t
 DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=1);
 DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>1);
 
+--Remove repeated values per one itemid in 'history_str'. Simulate discard unchanded
+DELETE FROM history_str WHERE itemid=343812 AND clock IN (
+SELECT clock FROM (
+SELECT clock, value, r, v2 FROM (
+SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2,
+CASE
+WHEN value <> LEAD(value,1) OVER (order by clock)
+THEN value
+ELSE 'zero'
+END AS r
+FROM history_str WHERE itemid=343812
+) x2
+WHERE r = 'zero'
+) x3
+WHERE v2 IS NOT NULL
+);
+
+--Remove repeated values per one itemid in 'history_text'. Simulate discard unchanded
+DELETE FROM history_text WHERE itemid=42702 AND clock IN (
+SELECT clock from (
+SELECT clock, value, r, v2 FROM (
+SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2,
+CASE
+WHEN value <> LEAD(value,1) OVER (order by clock)
+THEN value
+ELSE 'zero'
+END AS r
+FROM history_text WHERE itemid=42702
+) x2
+where r = 'zero'
+) x3
+WHERE v2 IS NOT NULL
+);
+
