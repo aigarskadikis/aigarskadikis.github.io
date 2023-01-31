@@ -18,24 +18,24 @@ AND e.clock < 1234;
 --delete dublicate values per itemid. keep the newest one. this is NOT discard and unchanged!
 DELETE t1 FROM history_text t1
 INNER JOIN history_text t2
-WHERE t1.itemid=382198 AND
-t1.clock < t2.clock AND
-t1.value = t2.value AND
-t1.itemid = t2.itemid;
+WHERE t1.itemid=382198
+AND t1.clock < t2.clock
+AND t1.value = t2.value
+AND t1.itemid = t2.itemid;
 
 --delete all dublicate metrics in history. useful if table used for backups
 DELETE t1 FROM history_text t1
 INNER JOIN history_text t2
-WHERE t1.clock < t2.clock AND
-t1.value = t2.value AND
-t1.itemid = t2.itemid;
+WHERE t1.clock < t2.clock
+AND t1.value = t2.value
+AND t1.itemid = t2.itemid;
 
 --delete all dublicate metrics in history. useful if table used for backups
 DELETE t1 FROM history_str t1
 INNER JOIN history_str t2
-WHERE t1.clock < t2.clock AND
-t1.value = t2.value AND
-t1.itemid = t2.itemid;
+WHERE t1.clock < t2.clock
+AND t1.value = t2.value
+AND t1.itemid = t2.itemid;
 
 --remove data for 'history_text' for items where 'Do not keep history' is configred later than initially
 DELETE FROM history_text WHERE itemid IN (

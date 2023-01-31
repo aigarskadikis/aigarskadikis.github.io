@@ -400,20 +400,20 @@ WHERE event_recovery.c_eventid IS NOT NULL
 AND e.clock < 1234;</code></pre>
 Delete dublicate values per itemid. Keep the newest one. this is NOT discard and unchanged!<pre><code>DELETE t1 FROM history_text t1
 INNER JOIN history_text t2
-WHERE t1.itemid=382198 AND
-t1.clock < t2.clock AND
-t1.value = t2.value AND
-t1.itemid = t2.itemid;</code></pre>
+WHERE t1.itemid=382198
+AND t1.clock < t2.clock
+AND t1.value = t2.value
+AND t1.itemid = t2.itemid;</code></pre>
 Delete all dublicate metrics in history. Useful if table used for backups<pre><code>DELETE t1 FROM history_text t1
 INNER JOIN history_text t2
-WHERE t1.clock < t2.clock AND
-t1.value = t2.value AND
-t1.itemid = t2.itemid;</code></pre>
+WHERE t1.clock < t2.clock
+AND t1.value = t2.value
+AND t1.itemid = t2.itemid;</code></pre>
 Delete all dublicate metrics in history. Useful if table used for backups<pre><code>DELETE t1 FROM history_str t1
 INNER JOIN history_str t2
-WHERE t1.clock < t2.clock AND
-t1.value = t2.value AND
-t1.itemid = t2.itemid;</code></pre>
+WHERE t1.clock < t2.clock
+AND t1.value = t2.value
+AND t1.itemid = t2.itemid;</code></pre>
 Remove data for 'history_text' for items where 'Do not keep history' is configred later than initially<pre><code>DELETE FROM history_text WHERE itemid IN (
 SELECT items.itemid FROM items, hosts
 WHERE hosts.hostid=items.hostid
