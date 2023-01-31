@@ -21,8 +21,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP'
 WHEN 3 THEN 'IPMI'
 WHEN 4 THEN 'JMX'
-END AS "type",
-hosts.error
+END AS "type", hosts.error
 FROM hosts
 JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
@@ -62,12 +61,7 @@ GROUP BY items.type
 ORDER BY COUNT(*) DESC;
 
 --all active data collector items on enabled hosts
-SELECT
-hosts.host,
-items.name,
-items.type,
-items.key_,
-items.delay
+SELECT hosts.host, items.name, items.type, items.key_, items.delay
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0

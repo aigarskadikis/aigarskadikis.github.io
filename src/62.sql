@@ -55,10 +55,15 @@ GROUP BY items.type
 ORDER BY COUNT(*) DESC;
 
 --owner of LLD dependent item. What is interval for owner
-SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items
+SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18
+WHERE items.flags=1
+AND hosts.status=0
+AND items.status=0
+AND master_itemid.status=0
+AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;
 
 --frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts

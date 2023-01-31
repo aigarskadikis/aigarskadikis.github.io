@@ -2,9 +2,7 @@
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --unreachable ZBX host
-SELECT proxy.host AS proxy,
-hosts.host,
-hosts.error AS hostError,
+SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -12,9 +10,7 @@ WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;
 
 --unreachable SNMP hosts
-SELECT proxy.host AS proxy,
-hosts.host,
-hosts.snmp_error AS hostError,
+SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -38,8 +34,8 @@ CASE object
 WHEN 0 THEN 'Trigger expression'
 WHEN 4 THEN 'Data collection'
 WHEN 5 THEN 'LLD rule'
-END AS object,
-objectid,value,name,COUNT(*) FROM events
+END AS object, objectid, value, name, COUNT(*)
+FROM events
 WHERE source=3 AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
@@ -56,8 +52,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP'
 WHEN 3 THEN 'IPMI'
 WHEN 4 THEN 'JMX'
-END AS "type",
-hosts.error
+END AS "type", hosts.error
 FROM hosts
 JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
@@ -97,11 +92,7 @@ GROUP BY items.type
 ORDER BY COUNT(*) DESC;
 
 --all events closed by global correlation rule
-SELECT
-repercussion.clock,
-repercussion.name,
-rootCause.clock,
-rootCause.name
+SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name
 FROM events repercussion
 JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid)
 JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
@@ -109,12 +100,7 @@ WHERE event_recovery.c_eventid IS NOT NULL
 ORDER BY repercussion.clock ASC;
 
 --all active data collector items on enabled hosts
-SELECT
-hosts.host,
-items.name,
-items.type,
-items.key_,
-items.delay
+SELECT hosts.host, items.name, items.type, items.key_, items.delay
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
@@ -122,10 +108,15 @@ AND items.status=0
 ORDER BY 1,2,3,4,5;
 
 --owner of LLD dependent item. What is interval for owner
-SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items
+SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18
+WHERE items.flags=1
+AND hosts.status=0
+AND items.status=0
+AND master_itemid.status=0
+AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;
 
 --frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts

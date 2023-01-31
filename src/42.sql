@@ -1,7 +1,5 @@
 --unreachable ZBX host
-SELECT proxy.host AS proxy,
-hosts.host,
-hosts.error AS hostError,
+SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -9,9 +7,7 @@ WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;
 
 --unreachable SNMP hosts
-SELECT proxy.host AS proxy,
-hosts.host,
-hosts.snmp_error AS hostError,
+SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -41,8 +37,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP'
 WHEN 3 THEN 'IPMI'
 WHEN 4 THEN 'JMX'
-END AS "type",
-hosts.error
+END AS "type", hosts.error
 FROM hosts
 JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
@@ -82,9 +77,14 @@ GROUP BY items.type
 ORDER BY COUNT(*) DESC;
 
 --owner of LLD dependent item. What is interval for owner
-SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items
+SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18
+WHERE items.flags=1
+AND hosts.status=0
+AND items.status=0
+AND master_itemid.status=0
+AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;
 

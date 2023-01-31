@@ -5,9 +5,7 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
-SELECT proxy.host AS proxy,
-hosts.host,
-hosts.error AS hostError,
+SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -15,9 +13,7 @@ WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;
 
 --unreachable SNMP hosts. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
-SELECT proxy.host AS proxy,
-hosts.host,
-hosts.snmp_error AS hostError,
+SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -25,9 +21,7 @@ WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;
 
 --ZBX hosts unreachable. Zabbix 6.0
-SELECT proxy.host AS proxy,
-hosts.host,
-interface.error,
+SELECT proxy.host AS proxy, hosts.host, interface.error,
 CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -36,9 +30,7 @@ WHERE LENGTH(interface.error) > 0
 AND interface.type=1;
 
 --SNMP hosts unreachable. Zabbix 6.0
-SELECT proxy.host AS proxy,
-hosts.host,
-interface.error,
+SELECT proxy.host AS proxy, hosts.host, interface.error,
 CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -76,28 +68,28 @@ CASE object
 WHEN 0 THEN 'Trigger expression'
 WHEN 4 THEN 'Data collection'
 WHEN 5 THEN 'LLD rule'
-END AS object,
-objectid,value,name,COUNT(*) FROM events
+END AS object, objectid, value, name, COUNT(*)
+FROM events
 WHERE source=3 AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
 
 --difference between installed macros between host VS template VS nested/child templates. Zabbix 5.0, 6.0
-SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue, parent.host AS OverrideInstalled, hm1.value AS OverrideValue FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid AND hm1.macro = hm2.macro AND parent.flags=0 AND child.flags=0 AND hm1.value <> hm2.value;
+SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue,
+parent.host AS OverrideInstalled, hm1.value AS OverrideValue
+FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
+WHERE parent.hostid=rel.hostid
+AND child.hostid=rel.templateid
+AND hm1.hostid = parent.hostid
+AND hm2.hostid = child.hostid
+AND hm1.macro = hm2.macro
+AND parent.flags=0
+AND child.flags=0
+AND hm1.value <> hm2.value;
 
 --detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates. Zabbix 5.0, 6.0
-SELECT b.host,
-hm2.macro,
-hm2.value AS templateValue,
-h.host,
-hm1.macro,
-hm1.value AS hostValue
-FROM hosts_templates,
-hosts h,
-hosts b,
-hostmacro hm1,
-hostmacro hm2,
-interface
+SELECT b.host, hm2.macro, hm2.value AS templateValue, h.host, hm1.macro, hm1.value AS hostValue
+FROM hosts_templates, hosts h, hosts b, hostmacro hm1, hostmacro hm2, interface
 WHERE hosts_templates.hostid = h.hostid
 AND hosts_templates.templateid = b.hostid
 AND interface.hostid = h.hostid
@@ -118,8 +110,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP'
 WHEN 3 THEN 'IPMI'
 WHEN 4 THEN 'JMX'
-END AS "type",
-hosts.error
+END AS "type", hosts.error
 FROM hosts
 JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
@@ -192,14 +183,8 @@ GROUP BY proxy.host, items.type
 ORDER BY 1,2,3 DESC;
 
 --exceptions in update interval. when a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates. Zabbix 5.0
-SELECT h1.host AS exceptionInstalled,
-i1.name,
-i1.key_,
-i1.delay,
-h2.host AS differesFromTemplate,
-i2.name,
-i2.key_,
-i2.delay
+SELECT h1.host AS exceptionInstalled, i1.name, i1.key_, i1.delay,
+h2.host AS differesFromTemplate, i2.name, i2.key_, i2.delay
 FROM items i1
 JOIN items i2 ON (i2.itemid=i1.templateid)
 JOIN hosts h1 ON (h1.hostid=i1.hostid)
@@ -207,11 +192,7 @@ JOIN hosts h2 ON (h2.hostid=i2.hostid)
 WHERE i1.delay <> i2.delay;
 
 --all events closed by global correlation rule. Zabbix 4.0, 5.0, 6.0
-SELECT
-repercussion.clock,
-repercussion.name,
-rootCause.clock,
-rootCause.name
+SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name
 FROM events repercussion
 JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid)
 JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
@@ -219,12 +200,7 @@ WHERE event_recovery.c_eventid IS NOT NULL
 ORDER BY repercussion.clock ASC;
 
 --all active data collector items on enabled hosts. Zabbix 3.0, 4.0, 5.0, 6.0
-SELECT
-hosts.host,
-items.name,
-items.type,
-items.key_,
-items.delay
+SELECT hosts.host, items.name, items.type, items.key_, items.delay
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
@@ -232,10 +208,7 @@ AND items.status=0
 ORDER BY 1,2,3,4,5;
 
 --determine which items report unsupported state:
-SELECT COUNT(items.key_),
-hosts.host,
-items.key_,
-item_rtdata.error
+SELECT COUNT(items.key_), hosts.host, items.key_, item_rtdata.error
 FROM events
 JOIN items ON (items.itemid=events.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -245,8 +218,7 @@ AND object=4
 AND items.status=0
 AND items.flags IN (0,1,4)
 AND LENGTH(item_rtdata.error) > 0
-GROUP BY hosts.host,items.key_,
-item_rtdata.error
+GROUP BY hosts.host, items.key_, item_rtdata.error
 ORDER BY COUNT(items.key_);
 
 --list all function names together with arguments
@@ -262,10 +234,15 @@ GROUP BY 1,2
 ORDER BY 1;
 
 --owner of LLD dependent item. What is interval for owner. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
-SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items
+SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18
+WHERE items.flags=1
+AND hosts.status=0
+AND items.status=0
+AND master_itemid.status=0
+AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;
 
 --frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts. Zabbix 4.0 => 6.2
@@ -322,15 +299,14 @@ JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
 
 --item is not discovered anymore and will be deleted in
-SELECT hosts.host,
-items.key_
+SELECT hosts.host, items.key_
 FROM items
 JOIN item_discovery ON (item_discovery.itemid=items.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE item_discovery.ts_delete > 0;
 
 --count of item is not discovered anymore and will be deleted
-SELECT hosts.host,COUNT(*)
+SELECT hosts.host, COUNT(*)
 FROM items
 JOIN item_discovery ON (item_discovery.itemid=items.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -392,7 +368,16 @@ GROUP BY 1 ORDER BY 2 ASC;
 SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;
 
 --MySQL. Zabbix 5.0, 5.2, 5.4, 6.0
-SELECT proxy.host AS proxy, hosts.host, GROUP_CONCAT(template.host SEPARATOR ', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;
+SELECT proxy.host AS proxy, hosts.host,
+GROUP_CONCAT(template.host SEPARATOR ', ') AS templates
+FROM hosts
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
+WHERE hosts.status IN (0,1)
+AND hosts.flags=0
+GROUP BY 1,2
+ORDER BY 1,3,2;
 
 --which action is responsible. Zabbix 5.0
 SELECT FROM_UNIXTIME(events.clock) AS 'time',
@@ -411,9 +396,7 @@ END AS acknowledged,
 CASE events.value
 WHEN 0 THEN 'OK'
 WHEN 1 THEN 'PROBLEM '
-END AS trigger_status,
-events.name AS 'event',
-actions.name AS 'action'
+END AS trigger_status, events.name AS 'event', actions.name AS 'action'
 FROM events
 JOIN alerts ON (alerts.eventid=events.eventid)
 JOIN actions ON (actions.actionid=alerts.actionid)
@@ -423,10 +406,7 @@ ORDER BY events.clock DESC
 LIMIT 10;
 
 --non-working LLD rules. Zabbix 5.0, 6.0
-SELECT
-hosts.name AS hostName,
-items.key_ AS itemKey,
-problem.name AS LLDerror,
+SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS LLDerror,
 CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
@@ -434,32 +414,28 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE problem.source > 0 AND problem.object=5;
 
 --non-working data collector items. Zabbix 5.0, 6.0
-SELECT
-hosts.name AS hostName,
-items.key_ AS itemKey,
-problem.name AS DataCollectorError,
+SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS DataCollectorError,
 CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE problem.source > 0 AND problem.object=4;
+WHERE problem.source > 0
+AND problem.object=4;
 
 --trigger evaluation problems. Zabbix 5.0, 6.0
 SELECT
 DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo,
-hosts.name AS hostName,
-triggers.description AS triggerTitle,
-problem.name AS TriggerEvaluationError
+hosts.name AS hostName, triggers.description AS triggerTitle, problem.name AS TriggerEvaluationError
 FROM problem
 JOIN triggers ON (triggers.triggerid=problem.objectid)
 JOIN functions ON (functions.triggerid=triggers.triggerid)
 JOIN items ON (items.itemid=functions.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE problem.source > 0 AND problem.object=0;
+WHERE problem.source > 0
+AND problem.object=0;
 
 --loneley item
-SELECT hosts.host,
-items.key_,
+SELECT hosts.host, items.key_,
 CONCAT('items.php?form=update&itemid=',items.itemid) AS goTo
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -470,7 +446,7 @@ AND items.templateid IS NULL
 AND items.flags=0;
 
 --user sessions. Zabbix 6.0
-SELECT COUNT(*),users.username
+SELECT COUNT(*), users.username
 FROM sessions
 JOIN users ON (users.userid=sessions.userid)
 GROUP BY 2 ORDER BY 1 ASC;
@@ -497,12 +473,7 @@ FROM problem GROUP BY 2,3
 ORDER BY 2 DESC;
 
 --item update frequency. Zabbix 5.0, 6.0
-SELECT h2.host AS Source,
-i2.name AS itemName,
-i2.key_ AS itemKey,
-i2.delay AS OriginalUpdateFrequency,
-h1.host AS exceptionInstalledOn,
-i1.delay AS FrequencyChild,
+SELECT h2.host AS Source, i2.name AS itemName, i2.key_ AS itemKey, i2.delay AS OriginalUpdateFrequency, h1.host AS exceptionInstalledOn, i1.delay AS FrequencyChild,
 CASE
 WHEN i1.flags=1 THEN 'LLD rule'
 WHEN i1.flags IN (0,4) THEN 'data collection'
@@ -521,9 +492,7 @@ WHERE i1.delay <> i2.delay;
 SELECT DISTINCT i.key_,COALESCE(ir.error,'') AS error FROM hosts h,items i LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid WHERE i.type<>9 AND i.flags IN (0,1,4) AND h.hostid=i.hostid AND h.status<>3 AND i.status=0 AND ir.state=1 LIMIT 5001;
 
 --which dashboard widgets are using wildcards. Zabbix 6.0
-SELECT value_str AS pattern,
-widget.name AS widgetName,
-dashboard.name AS dashboardName
+SELECT value_str AS pattern, widget.name AS widgetName, dashboard.name AS dashboardName
 FROM widget_field, widget, dashboard_page, dashboard
 WHERE widget_field.value_str like '%*%'
 AND widget.widgetid=widget_field.widgetid
@@ -581,12 +550,13 @@ JOIN items ON (items.hostid=hosts.hostid)
 WHERE items.itemid IN (12345,5678);
 
 --unique items keys behind proxy
-SELECT proxy.host AS proxy,
-items.key_, COUNT(*)
+SELECT proxy.host AS proxy, items.key_, COUNT(*)
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN items ON (items.hostid=hosts.hostid)
-WHERE hosts.status=0 AND items.status=0 AND items.flags<>2
+WHERE hosts.status=0
+AND items.status=0
+AND items.flags<>2
 GROUP BY 1,2
 ORDER BY 3 ASC;
 

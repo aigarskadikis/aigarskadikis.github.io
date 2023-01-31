@@ -1,5 +1,5 @@
 <html><head><style type='text/css'>
-.tabs .tab,.tabs input[type=radio]:checked+label{background:#fff}.tabs,.tabs label,body{display:flex}.tabs .tab,.tabs input[type=radio]{display:none}#searchResultDlg,#searchResultDlgContent{overflow:auto;overscroll-behavior:contain}#closeIcon,.tabs input[type=radio]:checked+label+.tab{display:block}.tabs{flex-wrap:wrap;width:100%}.tabs label{order:1;justify-content:center;align-items:center;padding:.1rem .5rem;margin:0;cursor:pointer}.tabs .tab{order:9;flex-grow:1;width:100%;height:1000rem;padding:.4rem}body{background:#dcdcdc;min-height:100vh;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-weight:300;line-height:1.5;font-size:100%}pre{padding:.2em;margin:0 0 1em;background-color:#FFF7F0;border-radius:3px;border:1px solid #CCCCCC}#searchInputArea{display:flex;position:absolute;right:50px;top:5px}#searchInput{margin-left:20px;border:0}#searchInput:focus{outline:0}#searchResultDlg{display:none;flex-direction:column;position:fixed;top:50px;left:100px;right:100px;bottom:50px;padding:10px;background-color:#dcdcdc}#searchResultDlgContent{display:grid;flex-direction:column;height:100%}#closeIcon{color:#778899;font-size:55px;position:fixed;top:20px;right:50px;cursor:pointer}.resultBlock{width:100%;border-bottom:1px solid #000}.resultBlock .tabName{font-size:1.2em;font-weight:700}.tog{width:100%;align:left}
+.tabs .tab,.tabs input[type=radio]:checked+label{background:#fff}.tabs,.tabs label,body{display:flex}.tabs .tab,.tabs input[type=radio]{display:none}#searchResultDlg,#searchResultDlgContent{overflow:auto;overscroll-behavior:contain}#closeIcon,.tabs input[type=radio]:checked+label+.tab{display:block}.tabs{flex-wrap:wrap;width:100%}.tabs label{order:1;justify-content:center;align-items:center;padding:.1rem .5rem;margin:0;cursor:pointer}.tabs .tab{order:9;flex-grow:1;width:100%;height:1000rem;padding:.4rem}body{background:#dcdcdc;min-height:100vh;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-weight:300;line-height:1.5;font-size:100%}pre{padding:.2em;margin:0 0 1em;background-color:#FFF7F0;border-radius:3px;border:1px solid #CCCCCC}#searchInputArea{display:flex;position:absolute;right:50px;top:5px}#searchInput{margin-left:20px;border:0}#searchInput:focus{outline:0}#searchResultDlg{display:none;flex-direction:column;position:fixed;top:50px;left:100px;right:100px;bottom:50px;padding:10px;background-color:#dcdcdc}#searchResultDlgContent{display:grid;flex-direction:column;height:100%}#closeIcon{color:#778899;font-size:55px;position:fixed;top:20px;right:50px;cursor:pointer}.resultBlock{width:100%;border-bottom:1px solid #000}.resultBlock .tabName{font-size:1.2em;font-weight:700}.tog{width:100%}
 </style></head><body onLoad='initDataArray()'><div class='tabs'>
 <input type="radio" name="tabs" id="30"><label for="30">30.sql</label><div class="tab">
 Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type 
@@ -22,8 +22,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP' 
 WHEN 3 THEN 'IPMI' 
 WHEN 4 THEN 'JMX' 
-END AS "type", 
-hosts.error 
+END AS "type", hosts.error 
 FROM hosts 
 JOIN interface ON interface.hostid=hosts.hostid 
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
@@ -59,12 +58,7 @@ WHERE hosts.status=0
 AND items.status=0  
 GROUP BY items.type  
 ORDER BY COUNT(*) DESC;</code></pre>
-All active data collector items on enabled hosts<pre><code>SELECT 
-hosts.host, 
-items.name, 
-items.type, 
-items.key_, 
-items.delay 
+All active data collector items on enabled hosts<pre><code>SELECT hosts.host, items.name, items.type, items.key_, items.delay 
 FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE hosts.status=0 
@@ -94,8 +88,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP' 
 WHEN 3 THEN 'IPMI' 
 WHEN 4 THEN 'JMX' 
-END AS "type", 
-hosts.error 
+END AS "type", hosts.error 
 FROM hosts 
 JOIN interface ON interface.hostid=hosts.hostid 
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
@@ -155,8 +148,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP' 
 WHEN 3 THEN 'IPMI' 
 WHEN 4 THEN 'JMX' 
-END AS "type", 
-hosts.error 
+END AS "type", hosts.error 
 FROM hosts 
 JOIN interface ON interface.hostid=hosts.hostid 
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
@@ -197,17 +189,13 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="40"><label for="40">40.sql</label><div class="tab">
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-hosts.error AS hostError, 
+Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError, 
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 WHERE hosts.status=0 
 AND LENGTH(hosts.error) > 0;</code></pre>
-Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-hosts.snmp_error AS hostError, 
+Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError, 
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
@@ -227,8 +215,8 @@ CASE object
 WHEN 0 THEN 'Trigger expression' 
 WHEN 4 THEN 'Data collection' 
 WHEN 5 THEN 'LLD rule' 
-END AS object, 
-objectid,value,name,COUNT(*) FROM events 
+END AS object, objectid, value, name, COUNT(*) 
+FROM events 
 WHERE source=3 AND LENGTH(name) > 0 
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
@@ -243,8 +231,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP' 
 WHEN 3 THEN 'IPMI' 
 WHEN 4 THEN 'JMX' 
-END AS "type", 
-hosts.error 
+END AS "type", hosts.error 
 FROM hosts 
 JOIN interface ON interface.hostid=hosts.hostid 
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
@@ -280,31 +267,27 @@ WHERE hosts.status=0
 AND items.status=0  
 GROUP BY items.type  
 ORDER BY COUNT(*) DESC;</code></pre>
-All events closed by global correlation rule<pre><code>SELECT 
-repercussion.clock, 
-repercussion.name, 
-rootCause.clock, 
-rootCause.name 
+All events closed by global correlation rule<pre><code>SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name 
 FROM events repercussion 
 JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) 
 JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) 
 WHERE event_recovery.c_eventid IS NOT NULL 
 ORDER BY repercussion.clock ASC;</code></pre>
-All active data collector items on enabled hosts<pre><code>SELECT 
-hosts.host, 
-items.name, 
-items.type, 
-items.key_, 
-items.delay 
+All active data collector items on enabled hosts<pre><code>SELECT hosts.host, items.name, items.type, items.key_, items.delay 
 FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE hosts.status=0 
 AND items.status=0 
 ORDER BY 1,2,3,4,5;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*) 
+FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+WHERE items.flags=1 
+AND hosts.status=0 
+AND items.status=0 
+AND master_itemid.status=0 
+AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts<pre><code>SELECT type,delay,COUNT(*) FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
@@ -314,17 +297,13 @@ GROUP BY 1,2 ORDER BY 1,2;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="42"><label for="42">42.sql</label><div class="tab">
-Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-hosts.error AS hostError, 
+Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError, 
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 WHERE hosts.status=0 
 AND LENGTH(hosts.error) > 0;</code></pre>
-Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-hosts.snmp_error AS hostError, 
+Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError, 
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
@@ -350,8 +329,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP' 
 WHEN 3 THEN 'IPMI' 
 WHEN 4 THEN 'JMX' 
-END AS "type", 
-hosts.error 
+END AS "type", hosts.error 
 FROM hosts 
 JOIN interface ON interface.hostid=hosts.hostid 
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
@@ -387,26 +365,27 @@ WHERE hosts.status=0
 AND items.status=0  
 GROUP BY items.type  
 ORDER BY COUNT(*) DESC;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*) 
+FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+WHERE items.flags=1 
+AND hosts.status=0 
+AND items.status=0 
+AND master_itemid.status=0 
+AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 <p>Download this section: <a href="src/42.sql">https://aigarskadikis.github.io/src/42.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="44"><label for="44">44.sql</label><div class="tab">
-Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-hosts.error AS hostError, 
+Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError, 
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 WHERE hosts.status=0 
 AND LENGTH(hosts.error) > 0;</code></pre>
-Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-hosts.snmp_error AS hostError, 
+Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError, 
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
@@ -432,8 +411,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP' 
 WHEN 3 THEN 'IPMI' 
 WHEN 4 THEN 'JMX' 
-END AS "type", 
-hosts.error 
+END AS "type", hosts.error 
 FROM hosts 
 JOIN interface ON interface.hostid=hosts.hostid 
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
@@ -469,10 +447,15 @@ WHERE hosts.status=0
 AND items.status=0  
 GROUP BY items.type  
 ORDER BY COUNT(*) DESC;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*) 
+FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+WHERE items.flags=1 
+AND hosts.status=0 
+AND items.status=0 
+AND master_itemid.status=0 
+AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata SET error='' WHERE itemid IN ( 
 SELECT items.itemid FROM item_rtdata, items, hosts 
@@ -496,17 +479,13 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="50" checked="checked"><label for="50">50.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-hosts.error AS hostError, 
+Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError, 
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 WHERE hosts.status=0 
 AND LENGTH(hosts.error) > 0;</code></pre>
-Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-hosts.snmp_error AS hostError, 
+Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError, 
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
@@ -526,24 +505,24 @@ CASE object
 WHEN 0 THEN 'Trigger expression' 
 WHEN 4 THEN 'Data collection' 
 WHEN 5 THEN 'LLD rule' 
-END AS object, 
-objectid,value,name,COUNT(*) FROM events 
+END AS object, objectid, value, name, COUNT(*) 
+FROM events 
 WHERE source=3 AND LENGTH(name) > 0 
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY) 
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
-Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue, parent.host AS OverrideInstalled, hm1.value AS OverrideValue FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid AND hm1.macro = hm2.macro AND parent.flags=0 AND child.flags=0 AND hm1.value <> hm2.value;</code></pre>
-Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT b.host, 
-hm2.macro, 
-hm2.value AS templateValue, 
-h.host, 
-hm1.macro, 
-hm1.value AS hostValue 
-FROM hosts_templates, 
-hosts h, 
-hosts b, 
-hostmacro hm1, 
-hostmacro hm2, 
-interface 
+Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue, 
+parent.host AS OverrideInstalled, hm1.value AS OverrideValue 
+FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 
+WHERE parent.hostid=rel.hostid 
+AND child.hostid=rel.templateid 
+AND hm1.hostid = parent.hostid 
+AND hm2.hostid = child.hostid 
+AND hm1.macro = hm2.macro 
+AND parent.flags=0 
+AND child.flags=0 
+AND hm1.value <> hm2.value;</code></pre>
+Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT b.host, hm2.macro, hm2.value AS templateValue, h.host, hm1.macro, hm1.value AS hostValue 
+FROM hosts_templates, hosts h, hosts b, hostmacro hm1, hostmacro hm2, interface 
 WHERE hosts_templates.hostid = h.hostid 
 AND hosts_templates.templateid = b.hostid 
 AND interface.hostid = h.hostid 
@@ -562,8 +541,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP' 
 WHEN 3 THEN 'IPMI' 
 WHEN 4 THEN 'JMX' 
-END AS "type", 
-hosts.error 
+END AS "type", hosts.error 
 FROM hosts 
 JOIN interface ON interface.hostid=hosts.hostid 
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
@@ -599,44 +577,34 @@ WHERE hosts.status=0
 AND items.status=0  
 GROUP BY items.type  
 ORDER BY COUNT(*) DESC;</code></pre>
-Exceptions in update interval. When a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates<pre><code>SELECT h1.host AS exceptionInstalled, 
-i1.name, 
-i1.key_, 
-i1.delay, 
-h2.host AS differesFromTemplate, 
-i2.name, 
-i2.key_, 
-i2.delay 
+Exceptions in update interval. When a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates<pre><code>SELECT h1.host AS exceptionInstalled, i1.name, i1.key_, i1.delay, 
+h2.host AS differesFromTemplate, i2.name, i2.key_, i2.delay 
 FROM items i1 
 JOIN items i2 ON (i2.itemid=i1.templateid) 
 JOIN hosts h1 ON (h1.hostid=i1.hostid) 
 JOIN hosts h2 ON (h2.hostid=i2.hostid) 
 WHERE i1.delay <> i2.delay;</code></pre>
-All events closed by global correlation rule<pre><code>SELECT 
-repercussion.clock, 
-repercussion.name, 
-rootCause.clock, 
-rootCause.name 
+All events closed by global correlation rule<pre><code>SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name 
 FROM events repercussion 
 JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) 
 JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) 
 WHERE event_recovery.c_eventid IS NOT NULL 
 ORDER BY repercussion.clock ASC;</code></pre>
-All active data collector items on enabled hosts<pre><code>SELECT 
-hosts.host, 
-items.name, 
-items.type, 
-items.key_, 
-items.delay 
+All active data collector items on enabled hosts<pre><code>SELECT hosts.host, items.name, items.type, items.key_, items.delay 
 FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE hosts.status=0 
 AND items.status=0 
 ORDER BY 1,2,3,4,5;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*) 
+FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+WHERE items.flags=1 
+AND hosts.status=0 
+AND items.status=0 
+AND master_itemid.status=0 
+AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
@@ -670,7 +638,16 @@ WHERE hosts.flags=0
 GROUP BY hosts.host 
 HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 PostgreSQL<pre><code>SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, GROUP_CONCAT(template.host SEPARATOR ', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
+MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, 
+GROUP_CONCAT(template.host SEPARATOR ', ') AS templates 
+FROM hosts 
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) 
+WHERE hosts.status IN (0,1) 
+AND hosts.flags=0 
+GROUP BY 1,2 
+ORDER BY 1,3,2;</code></pre>
 Which action is responsible<pre><code>SELECT FROM_UNIXTIME(events.clock) AS 'time', 
 CASE events.severity 
 WHEN 0 THEN 'NOT_CLASSIFIED' 
@@ -687,9 +664,7 @@ END AS acknowledged,
 CASE events.value 
 WHEN 0 THEN 'OK' 
 WHEN 1 THEN 'PROBLEM ' 
-END AS trigger_status, 
-events.name AS 'event', 
-actions.name AS 'action' 
+END AS trigger_status, events.name AS 'event', actions.name AS 'action' 
 FROM events 
 JOIN alerts ON (alerts.eventid=events.eventid) 
 JOIN actions ON (actions.actionid=alerts.actionid) 
@@ -697,35 +672,29 @@ WHERE events.source=0
 AND events.object=0 
 ORDER BY events.clock DESC 
 LIMIT 10;</code></pre>
-Non-working LLD rules<pre><code>SELECT 
-hosts.name AS hostName, 
-items.key_ AS itemKey, 
-problem.name AS LLDerror, 
+Non-working LLD rules<pre><code>SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS LLDerror, 
 CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo 
 FROM problem 
 JOIN items ON (items.itemid=problem.objectid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE problem.source > 0 AND problem.object=5;</code></pre>
-Non-working data collector items<pre><code>SELECT 
-hosts.name AS hostName, 
-items.key_ AS itemKey, 
-problem.name AS DataCollectorError, 
+Non-working data collector items<pre><code>SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS DataCollectorError, 
 CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo 
 FROM problem 
 JOIN items ON (items.itemid=problem.objectid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE problem.source > 0 AND problem.object=4;</code></pre>
+WHERE problem.source > 0 
+AND problem.object=4;</code></pre>
 Trigger evaluation problems<pre><code>SELECT 
 DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo, 
-hosts.name AS hostName, 
-triggers.description AS triggerTitle, 
-problem.name AS TriggerEvaluationError 
+hosts.name AS hostName, triggers.description AS triggerTitle, problem.name AS TriggerEvaluationError 
 FROM problem 
 JOIN triggers ON (triggers.triggerid=problem.objectid) 
 JOIN functions ON (functions.triggerid=triggers.triggerid) 
 JOIN items ON (items.itemid=functions.itemid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE problem.source > 0 AND problem.object=0;</code></pre>
+WHERE problem.source > 0 
+AND problem.object=0;</code></pre>
 User sessions<pre><code>SELECT COUNT(*),users.alias 
 FROM sessions 
 JOIN users ON (users.userid=sessions.userid) 
@@ -743,12 +712,7 @@ WHEN source=3 AND object=5 THEN 'low level discovery not perfect'
 END AS problemCategory 
 FROM problem GROUP BY 2,3 
 ORDER BY 2 DESC;</code></pre>
-Item update frequency<pre><code>SELECT h2.host AS Source, 
-i2.name AS itemName, 
-i2.key_ AS itemKey, 
-i2.delay AS OriginalUpdateFrequency, 
-h1.host AS exceptionInstalledOn, 
-i1.delay AS FrequencyChild, 
+Item update frequency<pre><code>SELECT h2.host AS Source, i2.name AS itemName, i2.key_ AS itemKey, i2.delay AS OriginalUpdateFrequency, h1.host AS exceptionInstalledOn, i1.delay AS FrequencyChild, 
 CASE 
 WHEN i1.flags=1 THEN 'LLD rule' 
 WHEN i1.flags IN (0,4) THEN 'data collection' 
@@ -789,17 +753,13 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="52"><label for="52">52.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
-Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-hosts.error AS hostError, 
+Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError, 
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 WHERE hosts.status=0 
 AND LENGTH(hosts.error) > 0;</code></pre>
-Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-hosts.snmp_error AS hostError, 
+Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError, 
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
@@ -825,8 +785,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP' 
 WHEN 3 THEN 'IPMI' 
 WHEN 4 THEN 'JMX' 
-END AS "type", 
-hosts.error 
+END AS "type", hosts.error 
 FROM hosts 
 JOIN interface ON interface.hostid=hosts.hostid 
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid 
@@ -862,10 +821,15 @@ WHERE hosts.status=0
 AND items.status=0  
 GROUP BY items.type  
 ORDER BY COUNT(*) DESC;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*) 
+FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+WHERE items.flags=1 
+AND hosts.status=0 
+AND items.status=0 
+AND master_itemid.status=0 
+AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
@@ -885,7 +849,16 @@ FROM autoreg_host
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid) 
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
 PostgreSQL<pre><code>SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, GROUP_CONCAT(template.host SEPARATOR ', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
+MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, 
+GROUP_CONCAT(template.host SEPARATOR ', ') AS templates 
+FROM hosts 
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) 
+WHERE hosts.status IN (0,1) 
+AND hosts.flags=0 
+GROUP BY 1,2 
+ORDER BY 1,3,2;</code></pre>
 For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata SET error='' WHERE itemid IN ( 
 SELECT items.itemid FROM item_rtdata, items, hosts 
 WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
@@ -955,10 +928,15 @@ WHERE hosts.status=0
 AND items.status=0  
 GROUP BY items.type  
 ORDER BY COUNT(*) DESC;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*) 
+FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+WHERE items.flags=1 
+AND hosts.status=0 
+AND items.status=0 
+AND master_itemid.status=0 
+AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
@@ -984,7 +962,16 @@ FROM autoreg_host
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid) 
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
 PostgreSQL<pre><code>SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, GROUP_CONCAT(template.host SEPARATOR ', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
+MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, 
+GROUP_CONCAT(template.host SEPARATOR ', ') AS templates 
+FROM hosts 
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) 
+WHERE hosts.status IN (0,1) 
+AND hosts.flags=0 
+GROUP BY 1,2 
+ORDER BY 1,3,2;</code></pre>
 For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata SET error='' WHERE itemid IN ( 
 SELECT items.itemid FROM item_rtdata, items, hosts 
 WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1 
@@ -1011,18 +998,14 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="60"><label for="60">60.sql</label><div class="tab">
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-ZBX hosts unreachable<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-interface.error, 
+ZBX hosts unreachable<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.error, 
 CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
 JOIN interface ON (interface.hostid=hosts.hostid) 
 WHERE LENGTH(interface.error) > 0 
 AND interface.type=1;</code></pre>
-SNMP hosts unreachable<pre><code>SELECT proxy.host AS proxy, 
-hosts.host, 
-interface.error, 
+SNMP hosts unreachable<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.error, 
 CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo 
 FROM hosts 
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
@@ -1044,19 +1027,19 @@ AND items.status = 0
 AND proxy.status IN (5,6) 
 GROUP BY 2,3 
 ORDER BY 2,3;</code></pre>
-Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue, parent.host AS OverrideInstalled, hm1.value AS OverrideValue FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 WHERE parent.hostid=rel.hostid AND child.hostid=rel.templateid AND hm1.hostid = parent.hostid AND hm2.hostid = child.hostid AND hm1.macro = hm2.macro AND parent.flags=0 AND child.flags=0 AND hm1.value <> hm2.value;</code></pre>
-Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT b.host, 
-hm2.macro, 
-hm2.value AS templateValue, 
-h.host, 
-hm1.macro, 
-hm1.value AS hostValue 
-FROM hosts_templates, 
-hosts h, 
-hosts b, 
-hostmacro hm1, 
-hostmacro hm2, 
-interface 
+Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue, 
+parent.host AS OverrideInstalled, hm1.value AS OverrideValue 
+FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2 
+WHERE parent.hostid=rel.hostid 
+AND child.hostid=rel.templateid 
+AND hm1.hostid = parent.hostid 
+AND hm2.hostid = child.hostid 
+AND hm1.macro = hm2.macro 
+AND parent.flags=0 
+AND child.flags=0 
+AND hm1.value <> hm2.value;</code></pre>
+Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT b.host, hm2.macro, hm2.value AS templateValue, h.host, hm1.macro, hm1.value AS hostValue 
+FROM hosts_templates, hosts h, hosts b, hostmacro hm1, hostmacro hm2, interface 
 WHERE hosts_templates.hostid = h.hostid 
 AND hosts_templates.templateid = b.hostid 
 AND interface.hostid = h.hostid 
@@ -1094,31 +1077,27 @@ WHERE hosts.status=0
 AND items.status=0  
 GROUP BY items.type  
 ORDER BY COUNT(*) DESC;</code></pre>
-All events closed by global correlation rule<pre><code>SELECT 
-repercussion.clock, 
-repercussion.name, 
-rootCause.clock, 
-rootCause.name 
+All events closed by global correlation rule<pre><code>SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name 
 FROM events repercussion 
 JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid) 
 JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid) 
 WHERE event_recovery.c_eventid IS NOT NULL 
 ORDER BY repercussion.clock ASC;</code></pre>
-All active data collector items on enabled hosts<pre><code>SELECT 
-hosts.host, 
-items.name, 
-items.type, 
-items.key_, 
-items.delay 
+All active data collector items on enabled hosts<pre><code>SELECT hosts.host, items.name, items.type, items.key_, items.delay 
 FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE hosts.status=0 
 AND items.status=0 
 ORDER BY 1,2,3,4,5;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*) 
+FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+WHERE items.flags=1 
+AND hosts.status=0 
+AND items.status=0 
+AND master_itemid.status=0 
+AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0 
@@ -1153,37 +1132,40 @@ WHERE hosts.flags=0
 GROUP BY hosts.host 
 HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 PostgreSQL<pre><code>SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, GROUP_CONCAT(template.host SEPARATOR ', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-Non-working LLD rules<pre><code>SELECT 
-hosts.name AS hostName, 
-items.key_ AS itemKey, 
-problem.name AS LLDerror, 
+MySQL<pre><code>SELECT proxy.host AS proxy, hosts.host, 
+GROUP_CONCAT(template.host SEPARATOR ', ') AS templates 
+FROM hosts 
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) 
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) 
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) 
+WHERE hosts.status IN (0,1) 
+AND hosts.flags=0 
+GROUP BY 1,2 
+ORDER BY 1,3,2;</code></pre>
+Non-working LLD rules<pre><code>SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS LLDerror, 
 CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo 
 FROM problem 
 JOIN items ON (items.itemid=problem.objectid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE problem.source > 0 AND problem.object=5;</code></pre>
-Non-working data collector items<pre><code>SELECT 
-hosts.name AS hostName, 
-items.key_ AS itemKey, 
-problem.name AS DataCollectorError, 
+Non-working data collector items<pre><code>SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS DataCollectorError, 
 CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo 
 FROM problem 
 JOIN items ON (items.itemid=problem.objectid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE problem.source > 0 AND problem.object=4;</code></pre>
+WHERE problem.source > 0 
+AND problem.object=4;</code></pre>
 Trigger evaluation problems<pre><code>SELECT 
 DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo, 
-hosts.name AS hostName, 
-triggers.description AS triggerTitle, 
-problem.name AS TriggerEvaluationError 
+hosts.name AS hostName, triggers.description AS triggerTitle, problem.name AS TriggerEvaluationError 
 FROM problem 
 JOIN triggers ON (triggers.triggerid=problem.objectid) 
 JOIN functions ON (functions.triggerid=triggers.triggerid) 
 JOIN items ON (items.itemid=functions.itemid) 
 JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE problem.source > 0 AND problem.object=0;</code></pre>
-User sessions<pre><code>SELECT COUNT(*),users.username 
+WHERE problem.source > 0 
+AND problem.object=0;</code></pre>
+User sessions<pre><code>SELECT COUNT(*), users.username 
 FROM sessions 
 JOIN users ON (users.userid=sessions.userid) 
 GROUP BY 2 ORDER BY 1 ASC;</code></pre>
@@ -1200,12 +1182,7 @@ WHEN source=3 AND object=5 THEN 'low level discovery not perfect'
 END AS problemCategory 
 FROM problem GROUP BY 2,3 
 ORDER BY 2 DESC;</code></pre>
-Item update frequency<pre><code>SELECT h2.host AS Source, 
-i2.name AS itemName, 
-i2.key_ AS itemKey, 
-i2.delay AS OriginalUpdateFrequency, 
-h1.host AS exceptionInstalledOn, 
-i1.delay AS FrequencyChild, 
+Item update frequency<pre><code>SELECT h2.host AS Source, i2.name AS itemName, i2.key_ AS itemKey, i2.delay AS OriginalUpdateFrequency, h1.host AS exceptionInstalledOn, i1.delay AS FrequencyChild, 
 CASE 
 WHEN i1.flags=1 THEN 'LLD rule' 
 WHEN i1.flags IN (0,4) THEN 'data collection' 
@@ -1219,9 +1196,7 @@ JOIN items i2 ON (i2.itemid=i1.templateid)
 JOIN hosts h1 ON (h1.hostid=i1.hostid) 
 JOIN hosts h2 ON (h2.hostid=i2.hostid) 
 WHERE i1.delay <> i2.delay;</code></pre>
-Which dashboard widgets are using wildcards<pre><code>SELECT value_str AS pattern, 
-widget.name AS widgetName, 
-dashboard.name AS dashboardName 
+Which dashboard widgets are using wildcards<pre><code>SELECT value_str AS pattern, widget.name AS widgetName, dashboard.name AS dashboardName 
 FROM widget_field, widget, dashboard_page, dashboard 
 WHERE widget_field.value_str like '%*%' 
 AND widget.widgetid=widget_field.widgetid 
@@ -1315,10 +1290,15 @@ WHERE hosts.status=0
 AND items.status=0  
 GROUP BY items.type  
 ORDER BY COUNT(*) DESC;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_,master_itemid.delay,COUNT(*) FROM items 
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*) 
+FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid) 
-WHERE items.flags=1 AND hosts.status=0 AND items.status=0 AND master_itemid.status=0 AND items.type=18 
+WHERE items.flags=1 
+AND hosts.status=0 
+AND items.status=0 
+AND master_itemid.status=0 
+AND items.type=18 
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts<pre><code>SELECT type,delay,COUNT(*) FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 

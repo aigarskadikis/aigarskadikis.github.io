@@ -21,8 +21,7 @@ WHEN 1 THEN 'ZBX'
 WHEN 2 THEN 'SNMP'
 WHEN 3 THEN 'IPMI'
 WHEN 4 THEN 'JMX'
-END AS "type",
-hosts.error
+END AS "type", hosts.error
 FROM hosts
 JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
