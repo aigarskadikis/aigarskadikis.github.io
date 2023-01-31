@@ -11,7 +11,7 @@ echo "<html><head><style type='text/css'>" >> ../index.html
 cat css.css >> ../index.html
 
 # start body and all tabs
-echo "</style></head><body onLoad='initDataArray()'><div class='tabs'>" >> ../index.html
+echo "</style></head><body onLoad='initDataArray()'><div style='display:block'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label></div><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=\"singleLine.togglerIE.js\"><\/script>')}else{document.write('<script src=\"singleLine.toggler.js\"><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script><div class='tabs'>" >> ../index.html
 
 ########
 # bash #
@@ -144,7 +144,7 @@ cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "
 
 
 # put footer
-echo "</div><div id='searchInputArea'><span>SEARCH</span><input type='text' id='searchInput' placeholder='Type at least 1 characters...' onkeyup='onTypeSearchInput(event)' /></div><div id='searchResultDlg'><div id='closeIcon' onclick='onCloseDlg()'>&times;</div><div id='searchResultDlgContent'></div></div><script src='searcher.js'></script></body></html>" >> ../index.html
+echo "</div><div id='searchInputArea'><span>SEARCH</span><input type='text' id='searchInput' placeholder='Type at least 1 characters...' onkeyup='onTypeSearchInput(event)' /></div><div id='searchResultDlg'><div id='closeIcon' onclick='onCloseDlg()'>&times;</div><div id='searchResultDlgContent'></div></div><script src='searcher.js'></script></div></body></html>" >> ../index.html
 
 # remove unnecessarry space
 sed -i 's| </code></pre>|</code></pre>|' ../index.html
