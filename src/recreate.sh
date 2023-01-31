@@ -142,12 +142,14 @@ cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "
 
 
 
-
 # put footer
 echo "</div><div id='searchInputArea'><span>SEARCH</span><input type='text' id='searchInput' placeholder='Type at least 1 characters...' onkeyup='onTypeSearchInput(event)' /></div><div id='searchResultDlg'><div id='closeIcon' onclick='onCloseDlg()'>&times;</div><div id='searchResultDlgContent'></div></div><script src='searcher.js'></script></div></body></html>" >> ../index.html
 
 # remove unnecessarry space
 sed -i 's| </code></pre>|</code></pre>|' ../index.html
+
+# remove trailing spaces
+sed -i 's/^[ \t]*//;s/[ \t]*$//' ../index.html
 
 # install extra link to create users using wizard
 sed -i 's|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab">|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab"><p>Create MySQL users using wizard: <a href="./u/index.html">https://aigarskadikis.github.io/u</a></p>|' ../index.html
