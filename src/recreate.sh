@@ -119,8 +119,8 @@ echo -e "${OUT^}\n<pre><code>" >> $NAME.inc
 else
 # blindly assume this is line having useful code
 echo -n '.'
-# echo -n "$LINE " >> $NAME.inc
-echo "$LINE " >> $NAME.inc
+# echo -n "$LINE" >> $NAME.inc
+echo "$LINE" >> $NAME.inc
 
 fi
 
