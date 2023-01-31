@@ -40,11 +40,10 @@ sleep 0.01
 echo "
 DELETE t1 FROM history_text t1
 INNER JOIN history_text t2
-WHERE
-t1.clock < t2.clock AND
-t1.value=t2.value AND
-t1.itemid=t2.itemid AND
-t1.itemid=$ITEMID;
+WHERE t1.clock < t2.clock
+AND t1.value=t2.value
+AND t1.itemid=t2.itemid
+AND t1.itemid=$ITEMID
 " | mysql zabbix
 } done
 
@@ -69,11 +68,10 @@ sleep 0.01
 echo "
 DELETE t1 FROM history_str t1
 INNER JOIN history_str t2
-WHERE
-t1.clock < t2.clock AND
-t1.value=t2.value AND
-t1.itemid=t2.itemid AND
-t1.itemid=$ITEMID;
+WHERE t1.clock < t2.clock
+AND t1.value=t2.value
+AND t1.itemid=t2.itemid
+AND t1.itemid=$ITEMID
 " | mysql zabbix
 } done
 
