@@ -47,7 +47,7 @@ Backup all frontend modules with 'xz' compression<pre><code>tar --create --verbo
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="bash"><label for="bash">bash</label><div class="tab">
-Hog processes<pre><code>ps -eo pcpu,pmem,pid,ppid,user,stat,args | sort -k 1 -r | head -6 | sed 's/$/\n/'</code></pre>
+Hog processes, hog<pre><code>ps -eo pcpu,pmem,pid,ppid,user,stat,args | sort -k 1 -r | head -6 | sed 's/$/\n/'</code></pre>
 Rotate between values<pre><code>echo "
 one
 two
@@ -470,26 +470,32 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="proxy"><label for="proxy">proxy.sql</label><div class="tab">
 How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1) FROM proxy_history;</code></pre>
-Optimal query to identify data overload<pre><code>SELECT itemid, COUNT(*), AVG(LENGTH(value)) FROM proxy_history
+Optimal query to identify data overload<pre><code>SELECT itemid,
+COUNT(*),
+AVG(LENGTH(value))
+FROM proxy_history
 WHERE proxy_history.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1 ORDER BY 2,3 DESC;</code></pre>
 Proxy with MySQL. Print URLs for latest data page for the incomming big data<pre><code>SELECT LENGTH(value),
-CONCAT('history.php?itemids%5B0%5D=',proxy_history.itemid ,'&action=showlatest' ) AS 'URL'
+CONCAT('history.php?itemids%5B0%5D=',proxy_history.itemid,'&action=showlatest' ) AS 'URL'
 FROM proxy_history
 JOIN items ON (items.itemid=proxy_history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE LENGTH(value) > 60000;</code></pre>
-Check big LLD rules and its frequency based on clock<pre><code>SELECT clock,
-hosts.host,
-items.key_,
+Check big LLD rules and its frequency based on clock<pre><code>SELECT clock, hosts.host, items.key_,
 LENGTH(value)
 FROM proxy_history
 JOIN items ON (items.itemid=proxy_history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE items.flags=1
 AND LENGTH(value) > 6000;</code></pre>
-LLD rules<pre><code>SELECT items.key_,COUNT(*),AVG(LENGTH(value)) FROM proxy_history, items
-WHERE proxy_history.itemid=items.itemid AND items.flags=1 GROUP BY 1 ORDER BY 3,2;</code></pre>
+LLD rules<pre><code>SELECT items.key_,
+COUNT(*),
+AVG(LENGTH(value))
+FROM proxy_history, items
+WHERE proxy_history.itemid=items.itemid
+AND items.flags=1
+GROUP BY 1 ORDER BY 3,2;</code></pre>
 <p>Download this section: <a href="src/proxy.sql">https://aigarskadikis.github.io/src/proxy.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/proxy.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/proxy.sql</a></p>
 </div>
