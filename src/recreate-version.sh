@@ -85,8 +85,8 @@ sed -i 's|input type="radio" name="tabs" id="50"|input type="radio" name="tabs" 
 # remove unnecessarry space
 sed -i 's| </code></pre>|</code></pre>|' ../v/index.html
 
-# convert MySQL to PostgreSQL
-# sed "s|UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)|EXTRACT(epoch FROM NOW()-INTERVAL '30 MINUTE')|g"
+# remove trailing spaces
+sed -i 's/^[ \t]*//;s/[ \t]*$//' ../v/index.html
 
 # remove includes (a source for tabs)
 rm -rf *inc
