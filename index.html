@@ -47,6 +47,7 @@ Backup all frontend modules with 'xz' compression<pre><code>tar --create --verbo
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="bash"><label for="bash">bash</label><div class="tab">
+Hog processes<pre><code>ps -eo pcpu,pmem,pid,ppid,user,stat,args | sort -k 1 -r | head -6 | sed 's/$/\n/'</code></pre>
 Rotate between values<pre><code>echo "
 one
 two
