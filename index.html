@@ -402,18 +402,18 @@ Delete dublicate values per itemid. Keep the newest one. this is NOT discard and
 INNER JOIN history_text t2
 WHERE t1.itemid=382198
 AND t1.clock < t2.clock
-AND t1.value = t2.value
-AND t1.itemid = t2.itemid;</code></pre>
+AND t1.value=t2.value
+AND t1.itemid=t2.itemid;</code></pre>
 Delete all dublicate metrics in history. Useful if table used for backups<pre><code>DELETE t1 FROM history_text t1
 INNER JOIN history_text t2
 WHERE t1.clock < t2.clock
-AND t1.value = t2.value
-AND t1.itemid = t2.itemid;</code></pre>
+AND t1.value=t2.value
+AND t1.itemid=t2.itemid;</code></pre>
 Delete all dublicate metrics in history. Useful if table used for backups<pre><code>DELETE t1 FROM history_str t1
 INNER JOIN history_str t2
 WHERE t1.clock < t2.clock
-AND t1.value = t2.value
-AND t1.itemid = t2.itemid;</code></pre>
+AND t1.value=t2.value
+AND t1.itemid=t2.itemid;</code></pre>
 Remove data for 'history_text' for items where 'Do not keep history' is configred later than initially<pre><code>DELETE FROM history_text WHERE itemid IN (
 SELECT items.itemid FROM items, hosts
 WHERE hosts.hostid=items.hostid
@@ -445,7 +445,7 @@ ELSE 'zero'
 END AS r
 FROM history_str WHERE itemid=343812
 ) x2
-WHERE r = 'zero'
+WHERE r='zero'
 ) x3
 WHERE v2 IS NOT NULL
 );</code></pre>
@@ -460,7 +460,7 @@ ELSE 'zero'
 END AS r
 FROM history_text WHERE itemid=42702
 ) x2
-where r = 'zero'
+where r='zero'
 ) x3
 WHERE v2 IS NOT NULL
 );</code></pre>
@@ -468,23 +468,23 @@ WHERE v2 IS NOT NULL
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="proxy"><label for="proxy">proxy.sql</label><div class="tab">
-How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name = "proxy_history" LIMIT 1) FROM proxy_history;</code></pre>
+How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1) FROM proxy_history;</code></pre>
 Optimal query to identify data overload<pre><code>SELECT itemid, COUNT(*), AVG(LENGTH(value)) FROM proxy_history
 WHERE proxy_history.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1 ORDER BY 2,3 DESC;</code></pre>
 Proxy with MySQL. Print URLs for latest data page for the incomming big data<pre><code>SELECT LENGTH(value),
 CONCAT('history.php?itemids%5B0%5D=',proxy_history.itemid ,'&action=showlatest' ) AS 'URL'
 FROM proxy_history
-JOIN items ON (items.itemid = proxy_history.itemid)
-JOIN hosts ON (hosts.hostid = items.hostid)
+JOIN items ON (items.itemid=proxy_history.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE LENGTH(value) > 60000;</code></pre>
 Check big LLD rules and its frequency based on clock<pre><code>SELECT clock,
 hosts.host,
 items.key_,
 LENGTH(value)
 FROM proxy_history
-JOIN items ON (items.itemid = proxy_history.itemid)
-JOIN hosts ON (hosts.hostid = items.hostid)
+JOIN items ON (items.itemid=proxy_history.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE items.flags=1
 AND LENGTH(value) > 6000;</code></pre>
 LLD rules<pre><code>SELECT items.key_,COUNT(*),AVG(LENGTH(value)) FROM proxy_history, items
@@ -532,8 +532,8 @@ Show items by proxy. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE hosts.status = 0
-AND items.status = 0
+WHERE hosts.status=0
+AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
@@ -552,20 +552,20 @@ parent.host AS OverrideInstalled, hm1.value AS OverrideValue
 FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
 WHERE parent.hostid=rel.hostid
 AND child.hostid=rel.templateid
-AND hm1.hostid = parent.hostid
-AND hm2.hostid = child.hostid
-AND hm1.macro = hm2.macro
+AND hm1.hostid=parent.hostid
+AND hm2.hostid=child.hostid
+AND hm1.macro=hm2.macro
 AND parent.flags=0
 AND child.flags=0
 AND hm1.value <> hm2.value;</code></pre>
 Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates. Zabbix 5.0, 6.0<pre><code>SELECT b.host, hm2.macro, hm2.value AS templateValue, h.host, hm1.macro, hm1.value AS hostValue
 FROM hosts_templates, hosts h, hosts b, hostmacro hm1, hostmacro hm2, interface
-WHERE hosts_templates.hostid = h.hostid
-AND hosts_templates.templateid = b.hostid
-AND interface.hostid = h.hostid
-AND hm1.hostid = h.hostid
-AND hm2.hostid = hosts_templates.templateid
-AND hm1.macro = hm2.macro
+WHERE hosts_templates.hostid=h.hostid
+AND hosts_templates.templateid=b.hostid
+AND interface.hostid=h.hostid
+AND hm1.hostid=h.hostid
+AND hm2.hostid=hosts_templates.templateid
+AND hm1.macro=hm2.macro
 AND hm1.value <> hm2.value;</code></pre>
 Devices and it's status. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
 CASE hosts.available
@@ -678,8 +678,8 @@ GROUP BY hosts.host, items.key_, item_rtdata.error
 ORDER BY COUNT(items.key_);</code></pre>
 List all function names together with arguments<pre><code>SELECT functions.name, functions.parameter, COUNT(*)
 FROM functions
-JOIN items ON (items.itemid = functions.itemid)
-JOIN hosts ON (items.hostid = hosts.hostid)
+JOIN items ON (items.itemid=functions.itemid)
+JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN triggers ON (triggers.triggerid=functions.triggerid)
 WHERE hosts.status=0
 AND items.status=0
@@ -858,7 +858,7 @@ JOIN users ON (users.userid=sessions.userid)
 GROUP BY 2 ORDER BY 1 ASC;</code></pre>
 Open problems. Zabbix 5.0, 6.0<pre><code>SELECT COUNT(*) AS count,
 CASE
-WHEN source = 0 THEN 'surface'
+WHEN source=0 THEN 'surface'
 WHEN source > 0 THEN 'internal'
 END AS level,
 CASE

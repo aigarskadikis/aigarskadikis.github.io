@@ -22,8 +22,8 @@ SELECT COUNT(*),proxy.host AS proxy,items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE hosts.status = 0
-AND items.status = 0
+WHERE hosts.status=0
+AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;

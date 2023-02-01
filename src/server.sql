@@ -56,8 +56,8 @@ SELECT COUNT(*),proxy.host AS proxy,items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE hosts.status = 0
-AND items.status = 0
+WHERE hosts.status=0
+AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;
@@ -80,9 +80,9 @@ parent.host AS OverrideInstalled, hm1.value AS OverrideValue
 FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
 WHERE parent.hostid=rel.hostid
 AND child.hostid=rel.templateid
-AND hm1.hostid = parent.hostid
-AND hm2.hostid = child.hostid
-AND hm1.macro = hm2.macro
+AND hm1.hostid=parent.hostid
+AND hm2.hostid=child.hostid
+AND hm1.macro=hm2.macro
 AND parent.flags=0
 AND child.flags=0
 AND hm1.value <> hm2.value;
@@ -90,12 +90,12 @@ AND hm1.value <> hm2.value;
 --detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates. Zabbix 5.0, 6.0
 SELECT b.host, hm2.macro, hm2.value AS templateValue, h.host, hm1.macro, hm1.value AS hostValue
 FROM hosts_templates, hosts h, hosts b, hostmacro hm1, hostmacro hm2, interface
-WHERE hosts_templates.hostid = h.hostid
-AND hosts_templates.templateid = b.hostid
-AND interface.hostid = h.hostid
-AND hm1.hostid = h.hostid
-AND hm2.hostid = hosts_templates.templateid
-AND hm1.macro = hm2.macro
+WHERE hosts_templates.hostid=h.hostid
+AND hosts_templates.templateid=b.hostid
+AND interface.hostid=h.hostid
+AND hm1.hostid=h.hostid
+AND hm2.hostid=hosts_templates.templateid
+AND hm1.macro=hm2.macro
 AND hm1.value <> hm2.value;
 
 --devices and it's status. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2
@@ -224,8 +224,8 @@ ORDER BY COUNT(items.key_);
 --list all function names together with arguments
 SELECT functions.name, functions.parameter, COUNT(*)
 FROM functions
-JOIN items ON (items.itemid = functions.itemid)
-JOIN hosts ON (items.hostid = hosts.hostid)
+JOIN items ON (items.itemid=functions.itemid)
+JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN triggers ON (triggers.triggerid=functions.triggerid)
 WHERE hosts.status=0
 AND items.status=0
@@ -460,7 +460,7 @@ GROUP BY 2 ORDER BY 1 ASC;
 --open problems. Zabbix 5.0, 6.0
 SELECT COUNT(*) AS count,
 CASE
-WHEN source = 0 THEN 'surface'
+WHEN source=0 THEN 'surface'
 WHEN source > 0 THEN 'internal'
 END AS level,
 CASE
