@@ -5,7 +5,10 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --unreachable ZBX host
-SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError,
+SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -13,7 +16,10 @@ WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;
 
 --unreachable SNMP hosts
-SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError,
+SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.snmp_error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -21,7 +27,9 @@ WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;
 
 --show items by proxy
-SELECT COUNT(*),proxy.host AS proxy,items.type
+SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -37,15 +45,23 @@ CASE object
 WHEN 0 THEN 'Trigger expression'
 WHEN 4 THEN 'Data collection'
 WHEN 5 THEN 'LLD rule'
-END AS object, objectid, value, name, COUNT(*)
+END AS object,
+objectid,
+value,
+name,
+COUNT(*)
 FROM events
 WHERE source=3 AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
 
 --difference between installed macros between host VS template VS nested/child templates
-SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue,
-parent.host AS OverrideInstalled, hm1.value AS OverrideValue
+SELECT
+hm1.macro AS Macro,
+child.host AS owner,
+hm2.value AS defaultValue,
+parent.host AS OverrideInstalled,
+hm1.value AS OverrideValue
 FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
 WHERE parent.hostid=rel.hostid
 AND child.hostid=rel.templateid
@@ -57,7 +73,13 @@ AND child.flags=0
 AND hm1.value <> hm2.value;
 
 --detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates
-SELECT b.host, hm2.macro, hm2.value AS templateValue, h.host, hm1.macro, hm1.value AS hostValue
+SELECT
+b.host,
+hm2.macro,
+hm2.value AS templateValue,
+h.host,
+hm1.macro,
+hm1.value AS hostValue
 FROM hosts_templates, hosts h, hosts b, hostmacro hm1, hostmacro hm2, interface
 WHERE hosts_templates.hostid=h.hostid
 AND hosts_templates.templateid=b.hostid
@@ -68,7 +90,12 @@ AND hm1.macro=hm2.macro
 AND hm1.value <> hm2.value;
 
 --devices and it's status
-SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown' 
 WHEN 1 THEN 'available'
@@ -87,7 +114,8 @@ WHERE hosts.status=0
 AND interface.main=1;
 
 --items in use
-SELECT CASE items.type 
+SELECT
+CASE items.type 
 WHEN 0 THEN 'Zabbix agent' 
 WHEN 1 THEN 'SNMPv1 agent' 
 WHEN 2 THEN 'Zabbix trapper' 
@@ -110,7 +138,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent' 
 WHEN 20 THEN 'SNMP agent' 
 WHEN 21 THEN 'Script item' 
-END AS type,COUNT(*) 
+END AS type,
+COUNT(*) 
 FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE hosts.status=0 
@@ -119,8 +148,15 @@ GROUP BY items.type
 ORDER BY COUNT(*) DESC;
 
 --exceptions in update interval. when a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates
-SELECT h1.host AS exceptionInstalled, i1.name, i1.key_, i1.delay,
-h2.host AS differesFromTemplate, i2.name, i2.key_, i2.delay
+SELECT
+h1.host AS exceptionInstalled,
+i1.name,
+i1.key_,
+i1.delay,
+h2.host AS differesFromTemplate,
+i2.name,
+i2.key_,
+i2.delay AS delay
 FROM items i1
 JOIN items i2 ON (i2.itemid=i1.templateid)
 JOIN hosts h1 ON (h1.hostid=i1.hostid)
@@ -128,7 +164,11 @@ JOIN hosts h2 ON (h2.hostid=i2.hostid)
 WHERE i1.delay <> i2.delay;
 
 --all events closed by global correlation rule
-SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name
+SELECT
+repercussion.clock,
+repercussion.name,
+rootCause.clock,
+rootCause.name AS name
 FROM events repercussion
 JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid)
 JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)

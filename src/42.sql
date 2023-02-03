@@ -1,5 +1,8 @@
 --unreachable ZBX host
-SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError,
+SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -7,7 +10,10 @@ WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;
 
 --unreachable SNMP hosts
-SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError,
+SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.snmp_error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -15,7 +21,9 @@ WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;
 
 --show items by proxy
-SELECT COUNT(*),proxy.host AS proxy,items.type
+SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -26,7 +34,12 @@ GROUP BY 2,3
 ORDER BY 2,3;
 
 --devices and it's status
-SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown' 
 WHEN 1 THEN 'available'
@@ -45,7 +58,8 @@ WHERE hosts.status=0
 AND interface.main=1;
 
 --items in use
-SELECT CASE items.type 
+SELECT
+CASE items.type 
 WHEN 0 THEN 'Zabbix agent' 
 WHEN 1 THEN 'SNMPv1 agent' 
 WHEN 2 THEN 'Zabbix trapper' 
@@ -68,7 +82,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent' 
 WHEN 20 THEN 'SNMP agent' 
 WHEN 21 THEN 'Script item' 
-END AS type,COUNT(*) 
+END AS type,
+COUNT(*) 
 FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE hosts.status=0 

@@ -2,7 +2,9 @@
 .tabs .tab,.tabs input[type=radio]:checked+label{background:#fff}.tabs,.tabs label,body{display:flex}.tabs .tab,.tabs input[type=radio]{display:none}#searchResultDlg,#searchResultDlgContent{overflow:auto;overscroll-behavior:contain}#closeIcon,.tabs input[type=radio]:checked+label+.tab{display:block}.tabs{flex-wrap:wrap;width:100%}.tabs label{order:1;justify-content:center;align-items:center;padding:.1rem .5rem;margin:0;cursor:pointer}.tabs .tab{order:9;flex-grow:1;width:100%;height:1000rem;padding:.4rem}body{background:#dcdcdc;min-height:100vh;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-weight:300;line-height:1.5;font-size:100%}pre{padding:.2em;margin:0 0 1em;background-color:#FFF7F0;border-radius:3px;border:1px solid #CCCCCC}#searchInputArea{display:flex;position:absolute;right:50px;top:5px}#searchInput{margin-left:20px;border:0}#searchInput:focus{outline:0}#searchResultDlg{display:none;flex-direction:column;position:fixed;top:50px;left:100px;right:100px;bottom:50px;padding:10px;background-color:#dcdcdc}#searchResultDlgContent{display:grid;flex-direction:column;height:100%}#closeIcon{color:#778899;font-size:55px;position:fixed;top:20px;right:50px;cursor:pointer}.resultBlock{width:100%;border-bottom:1px solid #000}.resultBlock .tabName{font-size:1.2em;font-weight:700}.tog{width:100%}
 </style></head><body onLoad='initDataArray()'><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=../singleLine.togglerIE.js><\/script>')}else{document.write('<script src=../singleLine.toggler.js><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>
 <input type="radio" name="tabs" id="30"><label for="30">30.sql</label><div class="tab">
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -11,7 +13,12 @@ AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
-Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+Devices and it's status<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown'
 WHEN 1 THEN 'available'
@@ -28,7 +35,8 @@ JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE hosts.status=0
 AND interface.main=1;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -51,7 +59,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
@@ -68,7 +77,9 @@ ORDER BY 1,2,3,4,5;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/30.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/30.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="32"><label for="32">32.sql</label><div class="tab">
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -77,7 +88,12 @@ AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
-Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+Devices and it's status<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown'
 WHEN 1 THEN 'available'
@@ -94,7 +110,8 @@ JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE hosts.status=0
 AND interface.main=1;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -117,7 +134,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
@@ -128,7 +146,9 @@ ORDER BY COUNT(*) DESC;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/32.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/32.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="34"><label for="34">34.sql</label><div class="tab">
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -137,7 +157,12 @@ AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
-Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+Devices and it's status<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown'
 WHEN 1 THEN 'available'
@@ -154,7 +179,8 @@ JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE hosts.status=0
 AND interface.main=1;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -177,7 +203,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
@@ -189,19 +216,27 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="40"><label for="40">40.sql</label><div class="tab">
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError,
+Unreachable ZBX host<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;</code></pre>
-Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError,
+Unreachable SNMP hosts<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.snmp_error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -215,12 +250,21 @@ CASE object
 WHEN 0 THEN 'Trigger expression'
 WHEN 4 THEN 'Data collection'
 WHEN 5 THEN 'LLD rule'
-END AS object, objectid, value, name, COUNT(*)
+END AS object,
+objectid,
+value,
+name,
+COUNT(*)
 FROM events
 WHERE source=3 AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
-Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+Devices and it's status<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown'
 WHEN 1 THEN 'available'
@@ -237,7 +281,8 @@ JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE hosts.status=0
 AND interface.main=1;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -260,14 +305,19 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-All events closed by global correlation rule<pre><code>SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name
+All events closed by global correlation rule<pre><code>SELECT
+repercussion.clock,
+repercussion.name,
+rootCause.clock,
+rootCause.name AS name
 FROM events repercussion
 JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid)
 JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
@@ -297,19 +347,27 @@ GROUP BY 1,2 ORDER BY 1,2;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/40.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="42"><label for="42">42.sql</label><div class="tab">
-Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError,
+Unreachable ZBX host<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;</code></pre>
-Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError,
+Unreachable SNMP hosts<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.snmp_error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -318,7 +376,12 @@ AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
-Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+Devices and it's status<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown'
 WHEN 1 THEN 'available'
@@ -335,7 +398,8 @@ JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE hosts.status=0
 AND interface.main=1;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -358,7 +422,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
@@ -379,19 +444,27 @@ GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/42.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="44"><label for="44">44.sql</label><div class="tab">
-Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError,
+Unreachable ZBX host<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;</code></pre>
-Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError,
+Unreachable SNMP hosts<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.snmp_error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -400,7 +473,12 @@ AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
-Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+Devices and it's status<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown'
 WHEN 1 THEN 'available'
@@ -417,7 +495,8 @@ JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE hosts.status=0
 AND interface.main=1;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -440,7 +519,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
@@ -479,19 +559,27 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="50" checked="checked"><label for="50">50.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError,
+Unreachable ZBX host<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;</code></pre>
-Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError,
+Unreachable SNMP hosts<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.snmp_error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -505,13 +593,21 @@ CASE object
 WHEN 0 THEN 'Trigger expression'
 WHEN 4 THEN 'Data collection'
 WHEN 5 THEN 'LLD rule'
-END AS object, objectid, value, name, COUNT(*)
+END AS object,
+objectid,
+value,
+name,
+COUNT(*)
 FROM events
 WHERE source=3 AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
-Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue,
-parent.host AS OverrideInstalled, hm1.value AS OverrideValue
+Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT
+hm1.macro AS Macro,
+child.host AS owner,
+hm2.value AS defaultValue,
+parent.host AS OverrideInstalled,
+hm1.value AS OverrideValue
 FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
 WHERE parent.hostid=rel.hostid
 AND child.hostid=rel.templateid
@@ -521,7 +617,13 @@ AND hm1.macro=hm2.macro
 AND parent.flags=0
 AND child.flags=0
 AND hm1.value <> hm2.value;</code></pre>
-Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT b.host, hm2.macro, hm2.value AS templateValue, h.host, hm1.macro, hm1.value AS hostValue
+Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT
+b.host,
+hm2.macro,
+hm2.value AS templateValue,
+h.host,
+hm1.macro,
+hm1.value AS hostValue
 FROM hosts_templates, hosts h, hosts b, hostmacro hm1, hostmacro hm2, interface
 WHERE hosts_templates.hostid=h.hostid
 AND hosts_templates.templateid=b.hostid
@@ -530,7 +632,12 @@ AND hm1.hostid=h.hostid
 AND hm2.hostid=hosts_templates.templateid
 AND hm1.macro=hm2.macro
 AND hm1.value <> hm2.value;</code></pre>
-Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+Devices and it's status<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown'
 WHEN 1 THEN 'available'
@@ -547,7 +654,8 @@ JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE hosts.status=0
 AND interface.main=1;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -570,21 +678,33 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Exceptions in update interval. When a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates<pre><code>SELECT h1.host AS exceptionInstalled, i1.name, i1.key_, i1.delay,
-h2.host AS differesFromTemplate, i2.name, i2.key_, i2.delay
+Exceptions in update interval. When a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates<pre><code>SELECT
+h1.host AS exceptionInstalled,
+i1.name,
+i1.key_,
+i1.delay,
+h2.host AS differesFromTemplate,
+i2.name,
+i2.key_,
+i2.delay AS delay
 FROM items i1
 JOIN items i2 ON (i2.itemid=i1.templateid)
 JOIN hosts h1 ON (h1.hostid=i1.hostid)
 JOIN hosts h2 ON (h2.hostid=i2.hostid)
 WHERE i1.delay <> i2.delay;</code></pre>
-All events closed by global correlation rule<pre><code>SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name
+All events closed by global correlation rule<pre><code>SELECT
+repercussion.clock,
+repercussion.name,
+rootCause.clock,
+rootCause.name AS name
 FROM events repercussion
 JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid)
 JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
@@ -753,19 +873,27 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="52"><label for="52">52.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
-Unreachable ZBX host<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.error AS hostError,
+Unreachable ZBX host<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;</code></pre>
-Unreachable SNMP hosts<pre><code>SELECT proxy.host AS proxy, hosts.host, hosts.snmp_error AS hostError,
+Unreachable SNMP hosts<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+hosts.snmp_error AS hostError,
 CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -774,7 +902,12 @@ AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
-Devices and it's status<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.ip, interface.dns, interface.useip,
+Devices and it's status<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
 CASE hosts.available
 WHEN 0 THEN 'unknown'
 WHEN 1 THEN 'available'
@@ -791,7 +924,8 @@ JOIN interface ON interface.hostid=hosts.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE hosts.status=0
 AND interface.main=1;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -814,7 +948,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
@@ -884,12 +1019,18 @@ WHERE items.itemid IN (12345,5678);</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="54"><label for="54">54.sql</label><div class="tab">
-Non-working external scripts<pre><code>SELECT hosts.host,items.key_,item_rtdata.error FROM items
+Non-working external scripts<pre><code>SELECT
+hosts.host,
+items.key_,
+item_rtdata.error AS error
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
 WHERE hosts.status=0 AND items.status=0 AND items.type=10
 AND LENGTH(item_rtdata.error) > 0;</code></pre>
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -898,7 +1039,8 @@ AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -921,7 +1063,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
@@ -998,27 +1141,39 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="60"><label for="60">60.sql</label><div class="tab">
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-ZBX hosts unreachable<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.error,
-CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+ZBX hosts unreachable<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.error,
+CONCAT('zabbix.php?action=host.edit&hostid=', hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN interface ON (interface.hostid=hosts.hostid)
 WHERE LENGTH(interface.error) > 0
 AND interface.type=1;</code></pre>
-SNMP hosts unreachable<pre><code>SELECT proxy.host AS proxy, hosts.host, interface.error,
+SNMP hosts unreachable<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.error,
 CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN interface ON (interface.hostid=hosts.hostid)
 WHERE LENGTH(interface.error) > 0
 AND interface.type=2;</code></pre>
-Non-working external scripts<pre><code>SELECT hosts.host,items.key_,item_rtdata.error FROM items
+Non-working external scripts<pre><code>SELECT
+hosts.host,
+items.key_,
+item_rtdata.error AS error
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
 WHERE hosts.status=0 AND items.status=0 AND items.type=10
 AND LENGTH(item_rtdata.error) > 0;</code></pre>
 Check native HA heartbeat<pre><code>SELECT * FROM ha_node;</code></pre>
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -1027,8 +1182,12 @@ AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
-Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT hm1.macro AS Macro, child.host AS owner, hm2.value AS defaultValue,
-parent.host AS OverrideInstalled, hm1.value AS OverrideValue
+Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT
+hm1.macro AS Macro,
+child.host AS owner,
+hm2.value AS defaultValue,
+parent.host AS OverrideInstalled,
+hm1.value AS OverrideValue
 FROM hosts parent, hosts child, hosts_templates rel, hostmacro hm1, hostmacro hm2
 WHERE parent.hostid=rel.hostid
 AND child.hostid=rel.templateid
@@ -1038,7 +1197,13 @@ AND hm1.macro=hm2.macro
 AND parent.flags=0
 AND child.flags=0
 AND hm1.value <> hm2.value;</code></pre>
-Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT b.host, hm2.macro, hm2.value AS templateValue, h.host, hm1.macro, hm1.value AS hostValue
+Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT
+b.host,
+hm2.macro,
+hm2.value AS templateValue,
+h.host,
+hm1.macro,
+hm1.value AS hostValue
 FROM hosts_templates, hosts h, hosts b, hostmacro hm1, hostmacro hm2, interface
 WHERE hosts_templates.hostid=h.hostid
 AND hosts_templates.templateid=b.hostid
@@ -1047,7 +1212,8 @@ AND hm1.hostid=h.hostid
 AND hm2.hostid=hosts_templates.templateid
 AND hm1.macro=hm2.macro
 AND hm1.value <> hm2.value;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -1070,14 +1236,19 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-All events closed by global correlation rule<pre><code>SELECT repercussion.clock, repercussion.name, rootCause.clock, rootCause.name
+All events closed by global correlation rule<pre><code>SELECT
+repercussion.clock,
+repercussion.name,
+rootCause.clock,
+rootCause.name AS name
 FROM events repercussion
 JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid)
 JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
@@ -1245,13 +1416,19 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="62"><label for="62">62.sql</label><div class="tab">
 Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
-Non-working external scripts<pre><code>SELECT hosts.host,items.key_,item_rtdata.error FROM items
+Non-working external scripts<pre><code>SELECT
+hosts.host,
+items.key_,
+item_rtdata.error AS error
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
 WHERE hosts.status=0 AND items.status=0 AND items.type=10
 AND LENGTH(item_rtdata.error) > 0;</code></pre>
 Check native HA heartbeat<pre><code>SELECT * FROM ha_node;</code></pre>
-Show items by proxy<pre><code>SELECT COUNT(*),proxy.host AS proxy,items.type
+Show items by proxy<pre><code>SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -1260,7 +1437,8 @@ AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
-Items in use<pre><code>SELECT CASE items.type
+Items in use<pre><code>SELECT
+CASE items.type
 WHEN 0 THEN 'Zabbix agent'
 WHEN 1 THEN 'SNMPv1 agent'
 WHEN 2 THEN 'Zabbix trapper'
@@ -1283,7 +1461,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent'
 WHEN 20 THEN 'SNMP agent'
 WHEN 21 THEN 'Script item'
-END AS type,COUNT(*)
+END AS type,
+COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0

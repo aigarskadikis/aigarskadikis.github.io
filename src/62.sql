@@ -2,7 +2,11 @@
 SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --non-working external scripts
-SELECT hosts.host,items.key_,item_rtdata.error FROM items
+SELECT
+hosts.host,
+items.key_,
+item_rtdata.error AS error
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
 WHERE hosts.status=0 AND items.status=0 AND items.type=10
@@ -12,7 +16,9 @@ AND LENGTH(item_rtdata.error) > 0;
 SELECT * FROM ha_node;
 
 --show items by proxy
-SELECT COUNT(*),proxy.host AS proxy,items.type
+SELECT COUNT(*),
+proxy.host AS proxy,
+items.type
 FROM items
 JOIN hosts ON (items.hostid=hosts.hostid)
 JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -23,7 +29,8 @@ GROUP BY 2,3
 ORDER BY 2,3;
 
 --items in use
-SELECT CASE items.type 
+SELECT
+CASE items.type 
 WHEN 0 THEN 'Zabbix agent' 
 WHEN 1 THEN 'SNMPv1 agent' 
 WHEN 2 THEN 'Zabbix trapper' 
@@ -46,7 +53,8 @@ WHEN 18 THEN 'Dependent item'
 WHEN 19 THEN 'HTTP agent' 
 WHEN 20 THEN 'SNMP agent' 
 WHEN 21 THEN 'Script item' 
-END AS type,COUNT(*) 
+END AS type,
+COUNT(*) 
 FROM items 
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE hosts.status=0 
