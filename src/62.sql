@@ -96,24 +96,40 @@ WHERE interface.available=2 AND proxy.host IS NOT NULL
 ORDER BY 1,2,3;
 
 --For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why
-UPDATE item_rtdata SET error='' WHERE itemid IN (
-SELECT items.itemid FROM item_rtdata, items, hosts
-WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+UPDATE item_rtdata
+SET error=''
+WHERE itemid IN (
+SELECT items.itemid
+FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=1
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid
 );
 
 --For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled
-UPDATE item_rtdata SET state=0 WHERE itemid IN (
-SELECT items.itemid FROM item_rtdata, items, hosts
-WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+UPDATE item_rtdata
+SET state=0
+WHERE itemid IN (
+SELECT items.itemid
+FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=1
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid
 );
 
 --print error message for enabled hosts and enabled data collector items
-SELECT hosts.host, items.name, item_rtdata.error FROM item_rtdata, items, hosts
-WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=0
+SELECT
+hosts.host,
+items.name,
+item_rtdata.error AS error
+FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;
 

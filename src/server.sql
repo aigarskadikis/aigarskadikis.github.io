@@ -382,7 +382,8 @@ JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
 WHERE widget_field.value_groupid IN (2);
 
 --Zabbix agent hitting the central server. Zabbix 5.0, 5.2, 5.4, 6.0
-SELECT hosts.host AS proxy,
+SELECT
+hosts.host AS proxy,
 CASE autoreg_host.flags
 WHEN 0 THEN 'IP address, do not update host interface'
 WHEN 1 THEN 'IP address, update default host interface'
@@ -418,10 +419,22 @@ WHERE item_discovery.ts_delete > 0
 GROUP BY 1 ORDER BY 2 ASC;
 
 --PostgreSQL. Zabbix 5.0, 5.2, 5.4, 6.0
-SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;
+SELECT
+proxy.host AS proxy,
+hosts.host,
+ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates
+FROM hosts
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
+WHERE hosts.status IN (0,1)
+AND hosts.flags=0
+GROUP BY 1,2 ORDER BY 1,3,2;
 
 --MySQL. Zabbix 5.0, 5.2, 5.4, 6.0
-SELECT proxy.host AS proxy, hosts.host,
+SELECT
+proxy.host AS proxy,
+hosts.host,
 GROUP_CONCAT(template.host SEPARATOR ', ') AS templates
 FROM hosts
 JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
@@ -429,11 +442,10 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
 WHERE hosts.status IN (0,1)
 AND hosts.flags=0
-GROUP BY 1,2
-ORDER BY 1,3,2;
+GROUP BY 1,2 ORDER BY 1,3,2;
 
 --which action is responsible. Zabbix 5.0
-SELECT FROM_UNIXTIME(events.clock) AS 'time',
+SELECTFROM_UNIXTIME(events.clock) AS 'time',
 CASE events.severity
 WHEN 0 THEN 'NOT_CLASSIFIED'
 WHEN 1 THEN 'INFORMATION'
@@ -449,7 +461,9 @@ END AS acknowledged,
 CASE events.value
 WHEN 0 THEN 'OK'
 WHEN 1 THEN 'PROBLEM '
-END AS trigger_status, events.name AS 'event', actions.name AS 'action'
+END AS trigger_status,
+events.name AS 'event',
+actions.name AS 'action'
 FROM events
 JOIN alerts ON (alerts.eventid=events.eventid)
 JOIN actions ON (actions.actionid=alerts.actionid)
@@ -467,7 +481,8 @@ CONCAT('host_discovery.php?form=update&itemid=', problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE problem.source > 0 AND problem.object=5;
+WHERE problem.source > 0
+AND problem.object=5;
 
 --non-working data collector items. Zabbix 5.0, 6.0
 SELECT
@@ -541,14 +556,20 @@ FROM problem GROUP BY 2,3
 ORDER BY 2 DESC;
 
 --item update frequency. Zabbix 5.0, 6.0
-SELECT h2.host AS Source, i2.name AS itemName, i2.key_ AS itemKey, i2.delay AS OriginalUpdateFrequency, h1.host AS exceptionInstalledOn, i1.delay AS FrequencyChild,
+SELECT
+h2.host AS Source,
+i2.name AS itemName,
+i2.key_ AS itemKey,
+i2.delay AS OriginalUpdateFrequency,
+h1.host AS exceptionInstalledOn,
+i1.delay AS FrequencyChild,
 CASE
 WHEN i1.flags=1 THEN 'LLD rule'
 WHEN i1.flags IN (0,4) THEN 'data collection'
 END AS itemCategory,
 CASE
-WHEN i1.flags=1 THEN CONCAT('host_discovery.php?form=update&context=host&itemid=',i1.itemid)
-WHEN i1.flags IN (0,4) THEN CONCAT('items.php?form=update&context=host&hostid=',h1.hostid,'&itemid=',i1.itemid)
+WHEN i1.flags=1 THEN CONCAT('host_discovery.php?form=update&context=host&itemid=', i1.itemid)
+WHEN i1.flags IN (0,4) THEN CONCAT('items.php?form=update&context=host&hostid=', h1.hostid, '&itemid=',i1.itemid)
 END AS goTo
 FROM items i1
 JOIN items i2 ON (i2.itemid=i1.templateid)
@@ -557,10 +578,23 @@ JOIN hosts h2 ON (h2.hostid=i2.hostid)
 WHERE i1.delay <> i2.delay;
 
 --unsupported items and LLD rules. Zabbix 5.0
-SELECT DISTINCT i.key_,COALESCE(ir.error,'') AS error FROM hosts h,items i LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid WHERE i.type<>9 AND i.flags IN (0,1,4) AND h.hostid=i.hostid AND h.status<>3 AND i.status=0 AND ir.state=1 LIMIT 5001;
+SELECT
+DISTINCT i.key_,COALESCE(ir.error,'') AS error
+FROM hosts h, items i
+LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid
+WHERE i.type<>9
+AND i.flags IN (0,1,4)
+AND h.hostid=i.hostid
+AND h.status<>3
+AND i.status=0
+AND ir.state=1
+LIMIT 5001;
 
 --which dashboard widgets are using wildcards. Zabbix 6.0
-SELECT value_str AS pattern, widget.name AS widgetName, dashboard.name AS dashboardName
+SELECT
+value_str AS pattern,
+widget.name AS widgetName,
+dashboard.name AS dashboardName
 FROM widget_field, widget, dashboard_page, dashboard
 WHERE widget_field.value_str like '%*%'
 AND widget.widgetid=widget_field.widgetid
@@ -572,12 +606,14 @@ ORDER BY 3,2,1;
 DELETE FROM profiles WHERE idx='web.dashboard.widget.rf_rate';
 
 --print all online users with rights group ID: 13. Zabbix 6.0
-SELECT users.username, CASE
+SELECT
+users.username,
+CASE
 WHEN permission=0 THEN 'DENY'
 WHEN permission=2 THEN 'READ_ONLY'
 WHEN permission=3 THEN 'READ_WRITE'
 END AS permission,
-hstgrp.name
+hstgrp.name AS name
 FROM users, users_groups, sessions, usrgrp, rights, hstgrp
 WHERE sessions.status=0
 AND rights.groupid=13
@@ -589,36 +625,60 @@ AND usrgrp.usrgrpid=rights.groupid
 AND rights.id=hstgrp.groupid;
 
 --For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
-UPDATE item_rtdata SET error='' WHERE itemid IN (
-SELECT items.itemid FROM item_rtdata, items, hosts
-WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+UPDATE item_rtdata
+SET error=''
+WHERE itemid IN (
+SELECT items.itemid
+FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=1
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid
 );
 
 --For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
-UPDATE item_rtdata SET state=0 WHERE itemid IN (
-SELECT items.itemid FROM item_rtdata, items, hosts
-WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+UPDATE item_rtdata
+SET state=0
+WHERE itemid IN (
+SELECT items.itemid
+FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=1
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid
 );
 
 --print error message for enabled hosts and enabled data collector items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
-SELECT hosts.host, items.name, item_rtdata.error FROM item_rtdata, items, hosts
-WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=0
+SELECT
+hosts.host,
+items.name,
+item_rtdata.error AS error
+FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;
 
 --identify item membership. usefull if that is master item. Zabbix 5.0, 5.2, 5.4, 6.0
-SELECT proxy.host AS proxy, hosts.host, items.name, items.key_, items.delay
+SELECT
+proxy.host AS proxy,
+hosts.host,
+items.name,
+items.key_,
+items.delay AS delay
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN items ON (items.hostid=hosts.hostid)
 WHERE items.itemid IN (12345,5678);
 
 --unique items keys behind proxy
-SELECT proxy.host AS proxy, items.key_, COUNT(*)
+SELECT
+proxy.host AS proxy,
+items.key_,
+COUNT(*)
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN items ON (items.hostid=hosts.hostid)

@@ -208,7 +208,8 @@ JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
 WHERE widget_field.value_groupid IN (2);
 
 --Zabbix agent hitting the central server
-SELECT hosts.host AS proxy,
+SELECT
+hosts.host AS proxy,
 CASE autoreg_host.flags
 WHEN 0 THEN 'IP address, do not update host interface'
 WHEN 1 THEN 'IP address, update default host interface'
@@ -237,10 +238,22 @@ GROUP BY hosts.host
 HAVING COUNT(interface.interfaceid) > 1;
 
 --PostgreSQL
-SELECT proxy.host AS proxy, hosts.host, ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates FROM hosts JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid) WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 ORDER BY 1,3,2;
+SELECT
+proxy.host AS proxy,
+hosts.host,
+ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates
+FROM hosts
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
+WHERE hosts.status IN (0,1)
+AND hosts.flags=0
+GROUP BY 1,2 ORDER BY 1,3,2;
 
 --MySQL
-SELECT proxy.host AS proxy, hosts.host,
+SELECT
+proxy.host AS proxy,
+hosts.host,
 GROUP_CONCAT(template.host SEPARATOR ', ') AS templates
 FROM hosts
 JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
@@ -248,11 +261,10 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
 WHERE hosts.status IN (0,1)
 AND hosts.flags=0
-GROUP BY 1,2
-ORDER BY 1,3,2;
+GROUP BY 1,2 ORDER BY 1,3,2;
 
 --which action is responsible
-SELECT FROM_UNIXTIME(events.clock) AS 'time',
+SELECTFROM_UNIXTIME(events.clock) AS 'time',
 CASE events.severity
 WHEN 0 THEN 'NOT_CLASSIFIED'
 WHEN 1 THEN 'INFORMATION'
@@ -268,7 +280,9 @@ END AS acknowledged,
 CASE events.value
 WHEN 0 THEN 'OK'
 WHEN 1 THEN 'PROBLEM '
-END AS trigger_status, events.name AS 'event', actions.name AS 'action'
+END AS trigger_status,
+events.name AS 'event',
+actions.name AS 'action'
 FROM events
 JOIN alerts ON (alerts.eventid=events.eventid)
 JOIN actions ON (actions.actionid=alerts.actionid)
@@ -286,7 +300,8 @@ CONCAT('host_discovery.php?form=update&itemid=', problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE problem.source > 0 AND problem.object=5;
+WHERE problem.source > 0
+AND problem.object=5;
 
 --non-working data collector items
 SELECT
@@ -339,14 +354,20 @@ FROM problem GROUP BY 2,3
 ORDER BY 2 DESC;
 
 --item update frequency
-SELECT h2.host AS Source, i2.name AS itemName, i2.key_ AS itemKey, i2.delay AS OriginalUpdateFrequency, h1.host AS exceptionInstalledOn, i1.delay AS FrequencyChild,
+SELECT
+h2.host AS Source,
+i2.name AS itemName,
+i2.key_ AS itemKey,
+i2.delay AS OriginalUpdateFrequency,
+h1.host AS exceptionInstalledOn,
+i1.delay AS FrequencyChild,
 CASE
 WHEN i1.flags=1 THEN 'LLD rule'
 WHEN i1.flags IN (0,4) THEN 'data collection'
 END AS itemCategory,
 CASE
-WHEN i1.flags=1 THEN CONCAT('host_discovery.php?form=update&context=host&itemid=',i1.itemid)
-WHEN i1.flags IN (0,4) THEN CONCAT('items.php?form=update&context=host&hostid=',h1.hostid,'&itemid=',i1.itemid)
+WHEN i1.flags=1 THEN CONCAT('host_discovery.php?form=update&context=host&itemid=', i1.itemid)
+WHEN i1.flags IN (0,4) THEN CONCAT('items.php?form=update&context=host&hostid=', h1.hostid, '&itemid=',i1.itemid)
 END AS goTo
 FROM items i1
 JOIN items i2 ON (i2.itemid=i1.templateid)
@@ -355,32 +376,63 @@ JOIN hosts h2 ON (h2.hostid=i2.hostid)
 WHERE i1.delay <> i2.delay;
 
 --unsupported items and LLD rules
-SELECT DISTINCT i.key_,COALESCE(ir.error,'') AS error FROM hosts h,items i LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid WHERE i.type<>9 AND i.flags IN (0,1,4) AND h.hostid=i.hostid AND h.status<>3 AND i.status=0 AND ir.state=1 LIMIT 5001;
+SELECT
+DISTINCT i.key_,COALESCE(ir.error,'') AS error
+FROM hosts h, items i
+LEFT JOIN item_rtdata ir ON i.itemid=ir.itemid
+WHERE i.type<>9
+AND i.flags IN (0,1,4)
+AND h.hostid=i.hostid
+AND h.status<>3
+AND i.status=0
+AND ir.state=1
+LIMIT 5001;
 
 --For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why
-UPDATE item_rtdata SET error='' WHERE itemid IN (
-SELECT items.itemid FROM item_rtdata, items, hosts
-WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+UPDATE item_rtdata
+SET error=''
+WHERE itemid IN (
+SELECT items.itemid
+FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=1
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid
 );
 
 --For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled
-UPDATE item_rtdata SET state=0 WHERE itemid IN (
-SELECT items.itemid FROM item_rtdata, items, hosts
-WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=1
+UPDATE item_rtdata
+SET state=0
+WHERE itemid IN (
+SELECT items.itemid
+FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=1
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid
 );
 
 --print error message for enabled hosts and enabled data collector items
-SELECT hosts.host, items.name, item_rtdata.error FROM item_rtdata, items, hosts
-WHERE item_rtdata.state=1 AND hosts.status=0 AND items.status=0
+SELECT
+hosts.host,
+items.name,
+item_rtdata.error AS error
+FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;
 
 --identify item membership. usefull if that is master item
-SELECT proxy.host AS proxy, hosts.host, items.name, items.key_, items.delay
+SELECT
+proxy.host AS proxy,
+hosts.host,
+items.name,
+items.key_,
+items.delay AS delay
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN items ON (items.hostid=hosts.hostid)
