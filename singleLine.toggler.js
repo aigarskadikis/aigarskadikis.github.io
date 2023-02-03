@@ -83,7 +83,7 @@ function processBlock(block, i) {
         }
         
         // Rule 4, if line contains ' AS '
-        if (/^.* AS .*$/.test(line)) {
+        if (/^.* AS .*$/.test(line) && !/^END AS/.test(line)) {
             containsAS = true;
             line = line + ' ';
             shouldMerge = true;

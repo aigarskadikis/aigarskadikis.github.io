@@ -86,7 +86,7 @@ function processBlock(block, i) {
     }
     
         // Rule 4, if line contains ' AS '
-        if (/^.* AS .*$/.test(line)) {
+        if (/^.* AS .*$/.test(line) && !/^END AS/.test(line)) {
             containsAS = true;
             line = line + ' ';
             shouldMerge = true;
@@ -120,9 +120,6 @@ function processBlock(block, i) {
     index: i,
     text: finalLine
   };
-  if (block.id == "sql2tsvCode") {
-    console.log(converted[i].text);
-  }
   block.innerText = converted[i].text;
 }
 
