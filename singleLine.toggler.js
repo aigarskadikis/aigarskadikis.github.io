@@ -81,6 +81,19 @@ function processBlock(block, i) {
             }
 
         }
+        
+        // Rule 4, if line contains ' AS '
+        if (/^.* AS .*$/.test(line)) {
+            containsAS = true;
+            line = line + ' ';
+            shouldMerge = true;
+        }
+        // Rule 5, if line ends with ',' and there are no double spaces. Rule 5 cannot be active together with Rule 4.
+        else if (/^.*,$/.test(line) && /^\S+$/.test(line)) {
+            noComaNoSpaces = true;
+            line = line + ' ';
+            shouldMerge = true;
+        }
 
 
 
@@ -125,5 +138,6 @@ function processBlock(block, i) {
     block.innerHTML = converted[i].text;
 
 }
+
 
 

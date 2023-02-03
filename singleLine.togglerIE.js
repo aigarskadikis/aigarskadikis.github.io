@@ -84,6 +84,20 @@ function processBlock(block, i) {
         shouldMerge = true;
       }
     }
+    
+        // Rule 4, if line contains ' AS '
+        if (/^.* AS .*$/.test(line)) {
+            containsAS = true;
+            line = line + ' ';
+            shouldMerge = true;
+        }
+        // Rule 5, if line ends with ',' and there are no double spaces. Rule 5 cannot be active together with Rule 4.
+        else if (/^.*,$/.test(line) && /^\S+$/.test(line)) {
+            noComaNoSpaces = true;
+            line = line + ' ';
+            shouldMerge = true;
+        }    
+    
     if (shouldMerge || doubleQuote) {
       result.push(line);
       result.push('MergeMark');
@@ -111,4 +125,5 @@ function processBlock(block, i) {
   }
   block.innerText = converted[i].text;
 }
+
 
