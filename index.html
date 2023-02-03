@@ -876,14 +876,20 @@ WHERE events.source=0
 AND events.object=0
 ORDER BY events.clock DESC
 LIMIT 10;</code></pre>
-Non-working LLD rules. Zabbix 5.0, 6.0<pre><code>SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS LLDerror,
-CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo
+Non-working LLD rules. Zabbix 5.0, 6.0<pre><code>SELECT
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS LLDerror,
+CONCAT('host_discovery.php?form=update&itemid=', problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE problem.source > 0 AND problem.object=5;</code></pre>
-Non-working data collector items. Zabbix 5.0, 6.0<pre><code>SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS DataCollectorError,
-CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo
+Non-working data collector items. Zabbix 5.0, 6.0<pre><code>SELECT
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS DataCollectorError,
+CONCAT('items.php?form=update&itemid=', problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -891,7 +897,9 @@ WHERE problem.source > 0
 AND problem.object=4;</code></pre>
 Trigger evaluation problems. Zabbix 5.0, 6.0<pre><code>SELECT
 DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo,
-hosts.name AS hostName, triggers.description AS triggerTitle, problem.name AS TriggerEvaluationError
+hosts.name AS hostName,
+triggers.description AS triggerTitle,
+problem.name AS TriggerEvaluationError
 FROM problem
 JOIN triggers ON (triggers.triggerid=problem.objectid)
 JOIN functions ON (functions.triggerid=triggers.triggerid)
@@ -899,7 +907,9 @@ JOIN items ON (items.itemid=functions.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE problem.source > 0
 AND problem.object=0;</code></pre>
-Loneley item<pre><code>SELECT hosts.host, items.key_,
+Loneley item<pre><code>SELECT
+hosts.host,
+items.key_,
 CONCAT('items.php?form=update&itemid=',items.itemid) AS goTo
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -908,15 +918,20 @@ AND hosts.flags=0
 AND items.status=0
 AND items.templateid IS NULL
 AND items.flags=0;</code></pre>
-User sessions. Zabbix 6.0<pre><code>SELECT COUNT(*), users.username
+User sessions. Zabbix 6.0<pre><code>SELECT
+COUNT(*),
+users.username
 FROM sessions
 JOIN users ON (users.userid=sessions.userid)
 GROUP BY 2 ORDER BY 1 ASC;</code></pre>
-User sessions. Zabbix 5.0<pre><code>SELECT COUNT(*),users.alias
+User sessions. Zabbix 5.0<pre><code>SELECT
+COUNT(*),
+users.alias
 FROM sessions
 JOIN users ON (users.userid=sessions.userid)
 GROUP BY 2 ORDER BY 1 ASC;</code></pre>
-Open problems. Zabbix 5.0, 6.0<pre><code>SELECT COUNT(*) AS count,
+Open problems. Zabbix 5.0, 6.0<pre><code>SELECT
+COUNT(*) AS count,
 CASE
 WHEN source=0 THEN 'surface'
 WHEN source > 0 THEN 'internal'

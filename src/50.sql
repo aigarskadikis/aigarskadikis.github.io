@@ -278,16 +278,22 @@ ORDER BY events.clock DESC
 LIMIT 10;
 
 --non-working LLD rules
-SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS LLDerror,
-CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo
+SELECT
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS LLDerror,
+CONCAT('host_discovery.php?form=update&itemid=', problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE problem.source > 0 AND problem.object=5;
 
 --non-working data collector items
-SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS DataCollectorError,
-CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo
+SELECT
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS DataCollectorError,
+CONCAT('items.php?form=update&itemid=', problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -297,7 +303,9 @@ AND problem.object=4;
 --trigger evaluation problems
 SELECT
 DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo,
-hosts.name AS hostName, triggers.description AS triggerTitle, problem.name AS TriggerEvaluationError
+hosts.name AS hostName,
+triggers.description AS triggerTitle,
+problem.name AS TriggerEvaluationError
 FROM problem
 JOIN triggers ON (triggers.triggerid=problem.objectid)
 JOIN functions ON (functions.triggerid=triggers.triggerid)
@@ -307,13 +315,16 @@ WHERE problem.source > 0
 AND problem.object=0;
 
 --user sessions
-SELECT COUNT(*),users.alias
+SELECT
+COUNT(*),
+users.alias
 FROM sessions
 JOIN users ON (users.userid=sessions.userid)
 GROUP BY 2 ORDER BY 1 ASC;
 
 --open problems
-SELECT COUNT(*) AS count,
+SELECT
+COUNT(*) AS count,
 CASE
 WHEN source=0 THEN 'surface'
 WHEN source > 0 THEN 'internal'

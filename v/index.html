@@ -792,14 +792,20 @@ WHERE events.source=0
 AND events.object=0
 ORDER BY events.clock DESC
 LIMIT 10;</code></pre>
-Non-working LLD rules<pre><code>SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS LLDerror,
-CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo
+Non-working LLD rules<pre><code>SELECT
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS LLDerror,
+CONCAT('host_discovery.php?form=update&itemid=', problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE problem.source > 0 AND problem.object=5;</code></pre>
-Non-working data collector items<pre><code>SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS DataCollectorError,
-CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo
+Non-working data collector items<pre><code>SELECT
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS DataCollectorError,
+CONCAT('items.php?form=update&itemid=', problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -807,7 +813,9 @@ WHERE problem.source > 0
 AND problem.object=4;</code></pre>
 Trigger evaluation problems<pre><code>SELECT
 DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo,
-hosts.name AS hostName, triggers.description AS triggerTitle, problem.name AS TriggerEvaluationError
+hosts.name AS hostName,
+triggers.description AS triggerTitle,
+problem.name AS TriggerEvaluationError
 FROM problem
 JOIN triggers ON (triggers.triggerid=problem.objectid)
 JOIN functions ON (functions.triggerid=triggers.triggerid)
@@ -815,11 +823,14 @@ JOIN items ON (items.itemid=functions.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE problem.source > 0
 AND problem.object=0;</code></pre>
-User sessions<pre><code>SELECT COUNT(*),users.alias
+User sessions<pre><code>SELECT
+COUNT(*),
+users.alias
 FROM sessions
 JOIN users ON (users.userid=sessions.userid)
 GROUP BY 2 ORDER BY 1 ASC;</code></pre>
-Open problems<pre><code>SELECT COUNT(*) AS count,
+Open problems<pre><code>SELECT
+COUNT(*) AS count,
 CASE
 WHEN source=0 THEN 'surface'
 WHEN source > 0 THEN 'internal'
@@ -1313,14 +1324,20 @@ WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2
 ORDER BY 1,3,2;</code></pre>
-Non-working LLD rules<pre><code>SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS LLDerror,
-CONCAT('host_discovery.php?form=update&itemid=',problem.objectid) AS goTo
+Non-working LLD rules<pre><code>SELECT
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS LLDerror,
+CONCAT('host_discovery.php?form=update&itemid=', problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE problem.source > 0 AND problem.object=5;</code></pre>
-Non-working data collector items<pre><code>SELECT hosts.name AS hostName, items.key_ AS itemKey, problem.name AS DataCollectorError,
-CONCAT('items.php?form=update&itemid=',problem.objectid) AS goTo
+Non-working data collector items<pre><code>SELECT
+hosts.name AS hostName,
+items.key_ AS itemKey,
+problem.name AS DataCollectorError,
+CONCAT('items.php?form=update&itemid=', problem.objectid) AS goTo
 FROM problem
 JOIN items ON (items.itemid=problem.objectid)
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -1328,7 +1345,9 @@ WHERE problem.source > 0
 AND problem.object=4;</code></pre>
 Trigger evaluation problems<pre><code>SELECT
 DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo,
-hosts.name AS hostName, triggers.description AS triggerTitle, problem.name AS TriggerEvaluationError
+hosts.name AS hostName,
+triggers.description AS triggerTitle,
+problem.name AS TriggerEvaluationError
 FROM problem
 JOIN triggers ON (triggers.triggerid=problem.objectid)
 JOIN functions ON (functions.triggerid=triggers.triggerid)
@@ -1336,11 +1355,14 @@ JOIN items ON (items.itemid=functions.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE problem.source > 0
 AND problem.object=0;</code></pre>
-User sessions<pre><code>SELECT COUNT(*), users.username
+User sessions<pre><code>SELECT
+COUNT(*),
+users.username
 FROM sessions
 JOIN users ON (users.userid=sessions.userid)
 GROUP BY 2 ORDER BY 1 ASC;</code></pre>
-Open problems<pre><code>SELECT COUNT(*) AS count,
+Open problems<pre><code>SELECT
+COUNT(*) AS count,
 CASE
 WHEN source=0 THEN 'surface'
 WHEN source > 0 THEN 'internal'
