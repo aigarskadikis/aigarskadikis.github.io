@@ -5,7 +5,7 @@ clear
 > ../index.html
 
 # put header
-echo "<html><head><link rel='stylesheet' type='text/css' href='../src/css.css' />" >> ../index.html
+echo "<html><head><link rel='stylesheet' type='text/css' href='css.css' />" >> ../index.html
 
 # install css
 cat css.css >> ../index.html
