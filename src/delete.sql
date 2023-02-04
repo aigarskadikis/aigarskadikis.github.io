@@ -94,7 +94,7 @@ ELSE 'zero'
 END AS r
 FROM history_text WHERE itemid=42702
 ) x2
-where r='zero'
+WHERE r='zero'
 ) x3
 WHERE v2 IS NOT NULL
 );
