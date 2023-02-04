@@ -490,7 +490,7 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
-Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 Unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -569,7 +569,7 @@ WHERE source=3
 AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
-Difference between installed macros between host VS template VS nested/child templates. Zabbix 5.0, 6.0<pre><code>SELECT
+Nested objects and macro overrides. Zabbix 5.0, 6.0<pre><code>SELECT
 hm1.macro AS Macro,
 child.host AS owner,
 hm2.value AS defaultValue,
@@ -584,7 +584,7 @@ AND hm1.macro=hm2.macro
 AND parent.flags=0
 AND child.flags=0
 AND hm1.value <> hm2.value;</code></pre>
-Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates. Zabbix 5.0, 6.0<pre><code>SELECT
+Difference between template macro and host macro. Zabbix 5.0, 6.0<pre><code>SELECT
 b.host,
 hm2.macro,
 hm2.value AS templateValue,
@@ -687,7 +687,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY proxy.host, items.type
 ORDER BY 1,2,3 DESC;</code></pre>
-Exceptions in update interval. When a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates. Zabbix 5.0<pre><code>SELECT
+Exceptions in update interval. Zabbix 5.0<pre><code>SELECT
 h1.host AS exceptionInstalled,
 i1.name,
 i1.key_,
@@ -739,7 +739,7 @@ AND items.status=0
 AND triggers.status=0
 GROUP BY 1,2
 ORDER BY 1;</code></pre>
-Update interval of owner in case LLD is dependent item. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD rule is dependent item. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -881,7 +881,7 @@ JOIN item_discovery ON (item_discovery.itemid=items.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE item_discovery.ts_delete > 0
 GROUP BY 1 ORDER BY 2 ASC;</code></pre>
-PostgreSQL. Zabbix 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
+Linked template objects PostgreSQL. Zabbix 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates
@@ -892,7 +892,7 @@ LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
 WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-MySQL. Zabbix 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
+Linked templates objects MySQL. Zabbix 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 GROUP_CONCAT(template.host SEPARATOR ', ') AS templates

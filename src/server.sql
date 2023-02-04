@@ -1,7 +1,7 @@
 --how many user groups has debug mode 1. Zabbix 5.0, 5.2
 SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 
---active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2
+--active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2
 SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
@@ -100,7 +100,7 @@ AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
 
---difference between installed macros between host VS template VS nested/child templates. Zabbix 5.0, 6.0
+--nested objects and macro overrides. Zabbix 5.0, 6.0
 SELECT
 hm1.macro AS Macro,
 child.host AS owner,
@@ -117,7 +117,7 @@ AND parent.flags=0
 AND child.flags=0
 AND hm1.value <> hm2.value;
 
---detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates. Zabbix 5.0, 6.0
+--difference between template macro and host macro. Zabbix 5.0, 6.0
 SELECT
 b.host,
 hm2.macro,
@@ -228,7 +228,7 @@ AND items.status=0
 GROUP BY proxy.host, items.type 
 ORDER BY 1,2,3 DESC;
 
---exceptions in update interval. when a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates. Zabbix 5.0
+--exceptions in update interval. Zabbix 5.0
 SELECT
 h1.host AS exceptionInstalled,
 i1.name,
@@ -290,7 +290,7 @@ AND triggers.status=0
 GROUP BY 1,2
 ORDER BY 1;
 
---update interval of owner in case LLD is dependent item. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
+--update interval of owner in case LLD rule is dependent item. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
 SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -468,7 +468,7 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE item_discovery.ts_delete > 0
 GROUP BY 1 ORDER BY 2 ASC;
 
---PostgreSQL. Zabbix 5.0, 5.2, 5.4, 6.0
+--linked template objects PostgreSQL. Zabbix 5.0, 5.2, 5.4, 6.0
 SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -481,7 +481,7 @@ WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;
 
---MySQL. Zabbix 5.0, 5.2, 5.4, 6.0
+--linked templates objects MySQL. Zabbix 5.0, 5.2, 5.4, 6.0
 SELECT
 proxy.host AS proxy,
 hosts.host,

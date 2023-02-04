@@ -1,4 +1,4 @@
---active problems, including Zabbix internal problems (item unsupported, trigger unsupported)
+--active problems including internal
 SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --non-working external scripts
@@ -65,7 +65,7 @@ AND items.status=0
 GROUP BY items.type 
 ORDER BY COUNT(*) DESC;
 
---update interval of owner in case LLD is dependent item
+--update interval of owner in case LLD rule is dependent item
 SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)

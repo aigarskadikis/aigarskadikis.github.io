@@ -1,7 +1,7 @@
 --how many user groups has debug mode 1
 SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 
---active problems, including Zabbix internal problems (item unsupported, trigger unsupported)
+--active problems including internal
 SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --unreachable ZBX host
@@ -57,7 +57,7 @@ AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
 
---difference between installed macros between host VS template VS nested/child templates
+--nested objects and macro overrides
 SELECT
 hm1.macro AS Macro,
 child.host AS owner,
@@ -74,7 +74,7 @@ AND parent.flags=0
 AND child.flags=0
 AND hm1.value <> hm2.value;
 
---detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates
+--difference between template macro and host macro
 SELECT
 b.host,
 hm2.macro,
@@ -149,7 +149,7 @@ AND items.status=0
 GROUP BY items.type 
 ORDER BY COUNT(*) DESC;
 
---exceptions in update interval. when a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates
+--exceptions in update interval
 SELECT
 h1.host AS exceptionInstalled,
 i1.name,
@@ -185,7 +185,7 @@ WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;
 
---update interval of owner in case LLD is dependent item
+--update interval of owner in case LLD rule is dependent item
 SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -258,7 +258,7 @@ WHERE hosts.flags=0
 GROUP BY hosts.host
 HAVING COUNT(interface.interfaceid) > 1;
 
---PostgreSQL
+--linked template objects PostgreSQL
 SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -271,7 +271,7 @@ WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;
 
---MySQL
+--linked templates objects MySQL
 SELECT
 proxy.host AS proxy,
 hosts.host,

@@ -1,4 +1,4 @@
---active problems, including Zabbix internal problems (item unsupported, trigger unsupported)
+--active problems including internal
 SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --ZBX hosts unreachable
@@ -55,7 +55,7 @@ AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;
 
---difference between installed macros between host VS template VS nested/child templates
+--nested objects and macro overrides
 SELECT
 hm1.macro AS Macro,
 child.host AS owner,
@@ -72,7 +72,7 @@ AND parent.flags=0
 AND child.flags=0
 AND hm1.value <> hm2.value;
 
---detect if there is difference between template macro and host macro. this is surface level detection. it does not take care of values between nested templates
+--difference between template macro and host macro
 SELECT
 b.host,
 hm2.macro,
@@ -143,7 +143,7 @@ WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;
 
---update interval of owner in case LLD is dependent item
+--update interval of owner in case LLD rule is dependent item
 SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -217,7 +217,7 @@ WHERE hosts.flags=0
 GROUP BY hosts.host
 HAVING COUNT(interface.interfaceid) > 1;
 
---PostgreSQL
+--linked template objects PostgreSQL
 SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -230,7 +230,7 @@ WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;
 
---MySQL
+--linked templates objects MySQL
 SELECT
 proxy.host AS proxy,
 hosts.host,

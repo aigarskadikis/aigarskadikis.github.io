@@ -95,7 +95,7 @@ AND items.status=0
 GROUP BY items.type 
 ORDER BY COUNT(*) DESC;
 
---update interval of owner in case LLD is dependent item
+--update interval of owner in case LLD rule is dependent item
 SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -137,7 +137,7 @@ FROM autoreg_host
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
 GROUP BY 1,2,3 ORDER BY 1,2,3;
 
---PostgreSQL
+--linked template objects PostgreSQL
 SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -150,7 +150,7 @@ WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;
 
---MySQL
+--linked templates objects MySQL
 SELECT
 proxy.host AS proxy,
 hosts.host,

@@ -218,7 +218,7 @@ ORDER BY COUNT(*) DESC;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/34.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/34.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="40"><label for="40">40.sql</label><div class="tab">
-Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Active problems including internal<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 Unreachable ZBX host<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -334,7 +334,7 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;</code></pre>
-Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD rule is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -436,7 +436,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD rule is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -534,7 +534,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD rule is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -579,7 +579,7 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="50" checked="checked"><label for="50">50.sql</label><div class="tab">
 How many user groups has debug mode 1<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
-Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Active problems including internal<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 Unreachable ZBX host<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -625,7 +625,7 @@ WHERE source=3
 AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
-Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT
+Nested objects and macro overrides<pre><code>SELECT
 hm1.macro AS Macro,
 child.host AS owner,
 hm2.value AS defaultValue,
@@ -640,7 +640,7 @@ AND hm1.macro=hm2.macro
 AND parent.flags=0
 AND child.flags=0
 AND hm1.value <> hm2.value;</code></pre>
-Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT
+Difference between template macro and host macro<pre><code>SELECT
 b.host,
 hm2.macro,
 hm2.value AS templateValue,
@@ -709,7 +709,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Exceptions in update interval. When a user install a custom update frequency in a host level and the frequency differs from template level. This query also detects difference between nested templates<pre><code>SELECT
+Exceptions in update interval<pre><code>SELECT
 h1.host AS exceptionInstalled,
 i1.name,
 i1.key_,
@@ -739,7 +739,7 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;</code></pre>
-Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD rule is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -800,7 +800,7 @@ JOIN hosts ON (hosts.hostid=interface.hostid)
 WHERE hosts.flags=0
 GROUP BY hosts.host
 HAVING COUNT(interface.interfaceid) > 1;</code></pre>
-PostgreSQL<pre><code>SELECT
+Linked template objects PostgreSQL<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates
@@ -811,7 +811,7 @@ LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
 WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-MySQL<pre><code>SELECT
+Linked templates objects MySQL<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 GROUP_CONCAT(template.host SEPARATOR ', ') AS templates
@@ -1074,7 +1074,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD rule is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -1110,7 +1110,7 @@ COUNT(*) AS "amount of hosts"
 FROM autoreg_host
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
-PostgreSQL<pre><code>SELECT
+Linked template objects PostgreSQL<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates
@@ -1121,7 +1121,7 @@ LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
 WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-MySQL<pre><code>SELECT
+Linked templates objects MySQL<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 GROUP_CONCAT(template.host SEPARATOR ', ') AS templates
@@ -1244,7 +1244,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD rule is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -1289,7 +1289,7 @@ COUNT(*) AS "amount of hosts"
 FROM autoreg_host
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
-PostgreSQL<pre><code>SELECT
+Linked template objects PostgreSQL<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates
@@ -1300,7 +1300,7 @@ LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
 WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-MySQL<pre><code>SELECT
+Linked templates objects MySQL<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 GROUP_CONCAT(template.host SEPARATOR ', ') AS templates
@@ -1368,7 +1368,7 @@ ORDER BY 3 ASC;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="60"><label for="60">60.sql</label><div class="tab">
-Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Active problems including internal<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 ZBX hosts unreachable<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -1413,7 +1413,7 @@ AND items.status=0
 AND proxy.status IN (5,6)
 GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
-Difference between installed macros between host VS template VS nested/child templates<pre><code>SELECT
+Nested objects and macro overrides<pre><code>SELECT
 hm1.macro AS Macro,
 child.host AS owner,
 hm2.value AS defaultValue,
@@ -1428,7 +1428,7 @@ AND hm1.macro=hm2.macro
 AND parent.flags=0
 AND child.flags=0
 AND hm1.value <> hm2.value;</code></pre>
-Detect if there is difference between template macro and host macro. This is surface level detection. it does not take care of values between nested templates<pre><code>SELECT
+Difference between template macro and host macro<pre><code>SELECT
 b.host,
 hm2.macro,
 hm2.value AS templateValue,
@@ -1491,7 +1491,7 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;</code></pre>
-Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD rule is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -1553,7 +1553,7 @@ JOIN hosts ON (hosts.hostid=interface.hostid)
 WHERE hosts.flags=0
 GROUP BY hosts.host
 HAVING COUNT(interface.interfaceid) > 1;</code></pre>
-PostgreSQL<pre><code>SELECT
+Linked template objects PostgreSQL<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates
@@ -1564,7 +1564,7 @@ LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
 WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-MySQL<pre><code>SELECT
+Linked templates objects MySQL<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 GROUP_CONCAT(template.host SEPARATOR ', ') AS templates
@@ -1732,7 +1732,7 @@ ORDER BY 3 ASC;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="62"><label for="62">62.sql</label><div class="tab">
-Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Active problems including internal<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 Non-working external scripts<pre><code>SELECT
 hosts.host,
 items.key_,
@@ -1789,7 +1789,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD rule is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
