@@ -56,7 +56,7 @@ do {
 echo $LINE
 } done</code></pre>
 Remove leading and trailing space with sed<pre><code>sed 's/^[\t ]*//g;s/[\t ]*$//g'</code></pre>
-Endless loop to deliver metric<pre><code>while true; do zabbix_sender  -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done</code></pre>
+Endless loop to deliver metric<pre><code>while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done</code></pre>
 Test disk throughput<pre><code>dd if=/dev/urandom of=/db/mount/point/512M bs=1M count=512 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/5GB bs=1M count=5120 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/50GB bs=1M count=51200 oflag=direct
@@ -321,22 +321,6 @@ Summarize configuration file<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server
 Restart and follow log<pre><code>systemctl restart zabbix-server && tail -f /var/log/zabbix/zabbix_server.log</code></pre>
 <p>Download this section: <a href="src/sed.sh">https://aigarskadikis.github.io/src/sed.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sed.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sed.sh</a></p>
-</div>
-<input type="radio" name="tabs" id="sql2tsv"><label for="sql2tsv">sql2tsv</label><div class="tab">
-MySQL<pre><code>echo "SELECT alias,
-attempt_failed,
-attempt_ip,
-FROM_UNIXTIME(attempt_clock)
-FROM users" | mysql \
---host='127.0.0.1' \
---user='zbx_web' \
---password='zabbix' \
---database='zabbix' \
---silent \
---skip-column-names \
---batch > /tmp/queue.tsv</code></pre>
-<p>Download this section: <a href="src/sql2tsv.sh">https://aigarskadikis.github.io/src/sql2tsv.sh</a><br />
-Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sql2tsv.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sql2tsv.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="sudoers"><label for="sudoers">sudoers</label><div class="tab">
 Allow to reload cache from Zabbix frontend<pre><code>cd /etc/sudoers.d

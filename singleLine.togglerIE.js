@@ -107,7 +107,16 @@ function processBlock(block, i) {
                 line = line + ' ';
                 shouldMerge = true;
             }
-        } 
+        } else
+        if (/^[a-z]+\.[a-z]+$/.test(line)) {
+			tableAndColumn = true;
+            shouldMerge = true;
+	    } else
+	    if (/^\)\s+\S+$/.test(line)) {
+			parentacyAndAlias = true;
+            line = line + ' ';
+            shouldMerge = true;
+		}
 
 
     if (shouldMerge || doubleQuote) {

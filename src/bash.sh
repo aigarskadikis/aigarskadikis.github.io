@@ -14,7 +14,7 @@ echo $LINE
 sed 's/^[\t ]*//g;s/[\t ]*$//g'
 
 # endless loop to deliver metric
-while true; do zabbix_sender  -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done
+while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done
 
 # test disk throughput
 dd if=/dev/urandom of=/db/mount/point/512M bs=1M count=512 oflag=direct
