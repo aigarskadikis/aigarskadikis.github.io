@@ -69,12 +69,23 @@ AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;
 
 --enabled and disabled LLD items, its key
-SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
-JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
+SELECT
+items.type,
+items.key_,
+items.delay,
+items.status,
+COUNT(*) AS count
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND items.flags=1
+AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
 
 --which dashboard has been using host group id:2 for the input
-SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field
+SELECT
+DISTINCT dashboard.name,
+hstgrp.name
+FROM widget_field
 JOIN widget ON (widget.widgetid=widget_field.widgetid)
 JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
 JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid)

@@ -196,12 +196,23 @@ AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;
 
 --enabled and disabled LLD items, its key
-SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
-JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
+SELECT
+items.type,
+items.key_,
+items.delay,
+items.status,
+COUNT(*) AS count
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND items.flags=1
+AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
 
 --which dashboard has been using host group id:2 for the input
-SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field
+SELECT
+DISTINCT dashboard.name,
+hstgrp.name
+FROM widget_field
 JOIN widget ON (widget.widgetid=widget_field.widgetid)
 JOIN dashboard ON (dashboard.dashboardid=widget.dashboardid)
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
@@ -225,13 +236,21 @@ JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
 GROUP BY 1,2,3 ORDER BY 1,2,3;
 
 --items without a template
-SELECT hosts.host, items.key_ FROM items
+SELECT
+hosts.host,
+items.key_
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE hosts.status=0 AND hosts.flags=0
-AND items.status=0 AND items.templateid IS NULL AND items.flags=0;
+WHERE hosts.status=0
+AND hosts.flags=0
+AND items.status=0
+AND items.templateid IS NULL
+AND items.flags=0;
 
 --hosts with multiple interfaces
-SELECT hosts.host FROM interface
+SELECT
+hosts.host
+FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 WHERE hosts.flags=0
 GROUP BY hosts.host

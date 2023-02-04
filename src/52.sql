@@ -107,8 +107,16 @@ AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;
 
 --enabled and disabled LLD items, its key
-SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
-JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
+SELECT
+items.type,
+items.key_,
+items.delay,
+items.status,
+COUNT(*) AS count
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND items.flags=1
+AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
 
 --Zabbix agent hitting the central server

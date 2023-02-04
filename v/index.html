@@ -742,10 +742,21 @@ AND items.status=0
 AND master_itemid.status=0
 AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
-Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
-JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
+Enabled and disabled LLD items, its key<pre><code>SELECT
+items.type,
+items.key_,
+items.delay,
+items.status,
+COUNT(*) AS count
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND items.flags=1
+AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
-Which dashboard has been using host group id:2 for the input<pre><code>SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field
+Which dashboard has been using host group id:2 for the input<pre><code>SELECT
+DISTINCT dashboard.name,
+hstgrp.name
+FROM widget_field
 JOIN widget ON (widget.widgetid=widget_field.widgetid)
 JOIN dashboard ON (dashboard.dashboardid=widget.dashboardid)
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
@@ -765,11 +776,19 @@ COUNT(*) AS "amount of hosts"
 FROM autoreg_host
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
-Items without a template<pre><code>SELECT hosts.host, items.key_ FROM items
+Items without a template<pre><code>SELECT
+hosts.host,
+items.key_
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE hosts.status=0 AND hosts.flags=0
-AND items.status=0 AND items.templateid IS NULL AND items.flags=0;</code></pre>
-Hosts with multiple interfaces<pre><code>SELECT hosts.host FROM interface
+WHERE hosts.status=0
+AND hosts.flags=0
+AND items.status=0
+AND items.templateid IS NULL
+AND items.flags=0;</code></pre>
+Hosts with multiple interfaces<pre><code>SELECT
+hosts.host
+FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 WHERE hosts.flags=0
 GROUP BY hosts.host
@@ -1046,8 +1065,16 @@ AND items.status=0
 AND master_itemid.status=0
 AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
-Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
-JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
+Enabled and disabled LLD items, its key<pre><code>SELECT
+items.type,
+items.key_,
+items.delay,
+items.status,
+COUNT(*) AS count
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND items.flags=1
+AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
 Zabbix agent hitting the central server<pre><code>SELECT
 hosts.host AS proxy,
@@ -1194,10 +1221,21 @@ AND items.status=0
 AND master_itemid.status=0
 AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
-Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
-JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
+Enabled and disabled LLD items, its key<pre><code>SELECT
+items.type,
+items.key_,
+items.delay,
+items.status,
+COUNT(*) AS count
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND items.flags=1
+AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
-Which dashboard has been using host group id:2 for the input<pre><code>SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field
+Which dashboard has been using host group id:2 for the input<pre><code>SELECT
+DISTINCT dashboard.name,
+hstgrp.name
+FROM widget_field
 JOIN widget ON (widget.widgetid=widget_field.widgetid)
 JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
 JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid)
@@ -1416,10 +1454,21 @@ AND items.status=0
 AND master_itemid.status=0
 AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
-Enabled and disabled LLD items, its key<pre><code>SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
-JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
+Enabled and disabled LLD items, its key<pre><code>SELECT
+items.type,
+items.key_,
+items.delay,
+items.status,
+COUNT(*) AS count
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND items.flags=1
+AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
-Which dashboard has been using host group id:2 for the input<pre><code>SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field
+Which dashboard has been using host group id:2 for the input<pre><code>SELECT
+DISTINCT dashboard.name,
+hstgrp.name
+FROM widget_field
 JOIN widget ON (widget.widgetid=widget_field.widgetid)
 JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
 JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid)
@@ -1440,11 +1489,19 @@ COUNT(*) AS "amount of hosts"
 FROM autoreg_host
 JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
 GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
-Items without a template<pre><code>SELECT hosts.host, items.key_ FROM items
+Items without a template<pre><code>SELECT
+hosts.host,
+items.key_
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE hosts.status=0 AND hosts.flags=0
-AND items.status=0 AND items.templateid IS NULL AND items.flags=0;</code></pre>
-Hosts with multiple interfaces<pre><code>SELECT hosts.host FROM interface
+WHERE hosts.status=0
+AND hosts.flags=0
+AND items.status=0
+AND items.templateid IS NULL
+AND items.flags=0;</code></pre>
+Hosts with multiple interfaces<pre><code>SELECT
+hosts.host
+FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 WHERE hosts.flags=0
 GROUP BY hosts.host
@@ -1685,16 +1742,24 @@ Frequency of LLD rule for enabled hosts and enabled items discoveries for only m
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE items.flags=1 AND hosts.status=0 AND items.status=0
 GROUP BY 1,2 ORDER BY 1,2;</code></pre>
-Host behind proxy 'z62prx' where interface is not healthy. Host is down<pre><code>SELECT hosts.host, interface.error
+Host behind proxy 'z62prx' where interface is not healthy. Host is down<pre><code>SELECT
+hosts.host,
+interface.error
 FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE interface.available=2 AND hosts.status=0 AND proxy.host='z62prx';</code></pre>
-Host/interface errors per all hosts behind proxy<pre><code>SELECT proxy.host, hosts.host, interface.error
+WHERE interface.available=2
+AND hosts.status=0
+AND proxy.host='z62prx';</code></pre>
+Host/interface errors per all hosts behind proxy<pre><code>SELECT
+proxy.host,
+hosts.host,
+interface.error
 FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE interface.available=2 AND proxy.host IS NOT NULL
+WHERE interface.available=2
+AND proxy.host IS NOT NULL
 ORDER BY 1,2,3;</code></pre>
 For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata
 SET error=''

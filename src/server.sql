@@ -326,40 +326,69 @@ ALTER TABLE history_uint DROP PARTITION p2018_06_06;
 SET SESSION SQL_LOG_BIN=0;
 
 --Few MySQL key settings
-SELECT @@hostname, @@version, @@datadir,
-@@innodb_file_per_table, @@innodb_buffer_pool_size, @@innodb_buffer_pool_instances,
-@@innodb_flush_method, @@innodb_log_file_size, @@max_connections,
-@@open_files_limit, @@innodb_flush_log_at_trx_commit, @@log_bin\G
+SELECT
+@@hostname,
+@@version,
+@@datadir,
+@@innodb_file_per_table,
+@@innodb_buffer_pool_size,
+@@innodb_buffer_pool_instances,
+@@innodb_flush_method,
+@@innodb_log_file_size,
+@@max_connections,
+@@open_files_limit,
+@@innodb_flush_log_at_trx_commit,
+@@log_bin\G
 
 --Host behind proxy 'z62prx' where interface is not healthy. Host is down. Zabbix 6.2
-SELECT hosts.host, interface.error
+SELECT
+hosts.host,
+interface.error
 FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE interface.available=2 AND hosts.status=0 AND proxy.host='z62prx';
+WHERE interface.available=2
+AND hosts.status=0
+AND proxy.host='z62prx';
 
 --Host/interface errors per all hosts behind proxy. Zabbix 6.2
-SELECT proxy.host, hosts.host, interface.error
+SELECT
+proxy.host,
+hosts.host,
+interface.error
 FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE interface.available=2 AND proxy.host IS NOT NULL
+WHERE interface.available=2
+AND proxy.host IS NOT NULL
 ORDER BY 1,2,3;
 
 --enabled and disabled LLD items, its key. Zabbix 5.0, 5.2, 5.4, 6.0
-SELECT items.type,items.key_,items.delay,items.status,COUNT(*) FROM items
-JOIN hosts ON (hosts.hostid=items.hostid) WHERE items.flags=1 AND hosts.status=0
+SELECT
+items.type,
+items.key_,
+items.delay,
+items.status,
+COUNT(*) AS count
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND items.flags=1
+AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
 
 --item is not discovered anymore and will be deleted in
-SELECT hosts.host, items.key_
+SELECT
+hosts.host,
+items.key_
 FROM items
 JOIN item_discovery ON (item_discovery.itemid=items.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE item_discovery.ts_delete > 0;
 
 --count of item is not discovered anymore and will be deleted
-SELECT hosts.host, COUNT(*)
+SELECT
+hosts.host,
+COUNT(*) AS count
 FROM items
 JOIN item_discovery ON (item_discovery.itemid=items.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -367,14 +396,20 @@ WHERE item_discovery.ts_delete > 0
 GROUP BY 1 ORDER BY 2 DESC LIMIT 30;
 
 --which dashboard has been using host group id:2 for the input. Zabbix 5.0,5.2
-SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field
+SELECT
+DISTINCT dashboard.name,
+hstgrp.name
+FROM widget_field
 JOIN widget ON (widget.widgetid=widget_field.widgetid)
 JOIN dashboard ON (dashboard.dashboardid=widget.dashboardid)
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
 WHERE widget_field.value_groupid IN (2);
 
 --which dashboard has been using host group id:2 for the input. Zabbix 5.4, 6.0
-SELECT DISTINCT dashboard.name,hstgrp.name FROM widget_field
+SELECT
+DISTINCT dashboard.name,
+hstgrp.name
+FROM widget_field
 JOIN widget ON (widget.widgetid=widget_field.widgetid)
 JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
 JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid)
@@ -399,20 +434,31 @@ JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
 GROUP BY 1,2,3 ORDER BY 1,2,3;
 
 --items without a template. Zabbix 5.0, 6.0
-SELECT hosts.host, items.key_ FROM items
+SELECT
+hosts.host,
+items.key_
+FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
-WHERE hosts.status=0 AND hosts.flags=0
-AND items.status=0 AND items.templateid IS NULL AND items.flags=0;
+WHERE hosts.status=0
+AND hosts.flags=0
+AND items.status=0
+AND items.templateid IS NULL
+AND items.flags=0;
 
 --hosts with multiple interfaces. Zabbix 5.0, 6.0
-SELECT hosts.host FROM interface
+SELECT
+hosts.host
+FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 WHERE hosts.flags=0
 GROUP BY hosts.host
 HAVING COUNT(interface.interfaceid) > 1;
 
 --amount of items not discovered anymore
-SELECT hosts.host, COUNT(*) FROM items
+SELECT
+hosts.host,
+COUNT(*) AS count
+FROM items
 JOIN item_discovery ON (item_discovery.itemid=items.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid) 
 WHERE item_discovery.ts_delete > 0

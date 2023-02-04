@@ -81,18 +81,26 @@ WHERE items.flags=1 AND hosts.status=0 AND items.status=0
 GROUP BY 1,2 ORDER BY 1,2;
 
 --Host behind proxy 'z62prx' where interface is not healthy. Host is down
-SELECT hosts.host, interface.error
+SELECT
+hosts.host,
+interface.error
 FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE interface.available=2 AND hosts.status=0 AND proxy.host='z62prx';
+WHERE interface.available=2
+AND hosts.status=0
+AND proxy.host='z62prx';
 
 --Host/interface errors per all hosts behind proxy
-SELECT proxy.host, hosts.host, interface.error
+SELECT
+proxy.host,
+hosts.host,
+interface.error
 FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-WHERE interface.available=2 AND proxy.host IS NOT NULL
+WHERE interface.available=2
+AND proxy.host IS NOT NULL
 ORDER BY 1,2,3;
 
 --For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why
