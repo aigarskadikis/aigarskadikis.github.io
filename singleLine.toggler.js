@@ -66,7 +66,7 @@ function processBlock(block, i) {
               line = line + ' ';
               shouldMerge = true;
             } else {
-		      containsAS = true;
+	      containsAS = true;
               line = line + ' ';
               shouldMerge = true;
 			}
@@ -88,15 +88,15 @@ function processBlock(block, i) {
             }
         } else
         if (/^[a-z_]+\.[a-z_]+$/.test(line)) {
-			tableAndColumn = true;
-		line = line + ' ';
-            shouldMerge = true;
-	    } else
-	    if (/^\)\s+\S+$/.test(line)) {
-			parentacyAndAlias = true;
-            line = line + ' ';
-            shouldMerge = true;
-		}
+          tableAndColumn = true;
+	  line = line + ' ';
+          shouldMerge = true;
+        } else
+	if (/^\)\s+\S+$/.test(line)) {
+	  parentacyAndAlias = true;
+          line = line + ' ';
+          shouldMerge = true;
+	}
 
 
 
