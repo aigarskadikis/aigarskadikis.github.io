@@ -1,0 +1,170 @@
+<html><head><style type='text/css'>
+.tabs .tab,.tabs input[type=radio]:checked+label{background:#fff}.tabs,.tabs label,body{display:flex}.tabs .tab,.tabs input[type=radio]{display:none}#searchResultDlg,#searchResultDlgContent{overflow:auto;overscroll-behavior:contain}#closeIcon,.tabs input[type=radio]:checked+label+.tab{display:block}.tabs{flex-wrap:wrap;width:100%}.tabs label{order:1;justify-content:center;align-items:center;padding:.1rem .5rem;margin:0;cursor:pointer}.tabs .tab{order:9;flex-grow:1;width:100%;height:1000rem;padding:.4rem}body{background:#dcdcdc;min-height:100vh;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-weight:300;line-height:1.5;font-size:100%}pre{padding:.2em;margin:0 0 1em;background-color:#FFF7F0;border-radius:3px;border:1px solid #CCCCCC}#searchInputArea{display:flex;position:absolute;right:50px;top:5px}#searchInput{margin-left:20px;border:0}#searchInput:focus{outline:0}#searchResultDlg{display:none;flex-direction:column;position:fixed;top:50px;left:100px;right:100px;bottom:50px;padding:10px;background-color:#dcdcdc}#searchResultDlgContent{display:grid;flex-direction:column;height:100%}#closeIcon{color:#778899;font-size:55px;position:fixed;top:20px;right:50px;cursor:pointer}.resultBlock{width:100%;border-bottom:1px solid #000}.resultBlock .tabName{font-size:1.2em;font-weight:700}.tog{width:100%}
+</style></head><body onLoad='initDataArray()'><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=../singleLine.togglerIE.js><\/script>')}else{document.write('<script src=../singleLine.toggler.js><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>
+<input type="radio" name="tabs" id="54"><label for="54">54.sql</label><div class="tab">
+Non-working external scripts<pre><code>SELECT
+hosts.host,
+items.key_,
+item_rtdata.error
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
+WHERE hosts.status=0
+AND items.status=0
+AND items.type=10
+AND LENGTH(item_rtdata.error) > 0;</code></pre>
+Show items by proxy<pre><code>SELECT
+COUNT(*) AS count,
+proxy.host AS proxy,
+items.type
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND items.status=0
+AND proxy.status IN (5,6)
+GROUP BY 2,3
+ORDER BY 2,3;</code></pre>
+Items in use<pre><code>SELECT
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status=0
+AND items.status=0
+GROUP BY items.type
+ORDER BY COUNT(*) DESC;</code></pre>
+Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
+WHERE items.flags=1
+AND hosts.status=0
+AND items.status=0
+AND master_itemid.status=0
+AND items.type=18
+GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
+Enabled and disabled LLD items, its key<pre><code>SELECT
+items.type,
+items.key_,
+items.delay,
+items.status,
+COUNT(*) AS count
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND items.flags=1
+AND hosts.status=0
+GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
+Which dashboard has been using host group id:2 for the input<pre><code>SELECT
+DISTINCT dashboard.name,
+hstgrp.name
+FROM widget_field
+JOIN widget ON (widget.widgetid=widget_field.widgetid)
+JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
+JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid)
+JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
+WHERE widget_field.value_groupid IN (2);</code></pre>
+Zabbix agent hitting the central server<pre><code>SELECT
+hosts.host AS proxy,
+CASE autoreg_host.flags
+WHEN 0 THEN 'IP address, do not update host interface'
+WHEN 1 THEN 'IP address, update default host interface'
+WHEN 2 THEN 'DNS name, update default host interface'
+END AS "connect using",
+CASE autoreg_host.tls_accepted
+WHEN 1 THEN 'Unencrypted'
+WHEN 2 THEN 'TLS with PSK'
+END AS "Encryption",
+COUNT(*) AS "amount of hosts"
+FROM autoreg_host
+JOIN hosts ON (hosts.hostid=autoreg_host.proxy_hostid)
+GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
+PostgreSQL<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates
+FROM hosts
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
+WHERE hosts.status IN (0,1)
+AND hosts.flags=0
+GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
+MySQL<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+GROUP_CONCAT(template.host SEPARATOR ', ') AS templates
+FROM hosts
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
+WHERE hosts.status IN (0,1)
+AND hosts.flags=0
+GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
+For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata
+SET error=''
+WHERE state=1
+AND itemid IN (
+SELECT items.itemid
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0
+AND items.status=1
+);</code></pre>
+For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata
+SET state=0
+WHERE state=1
+AND itemid IN (
+SELECT items.itemid
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0
+AND items.status=1
+);</code></pre>
+Print error message for enabled hosts and enabled data collector items<pre><code>SELECT
+hosts.host,
+items.name,
+item_rtdata.error AS error
+FROM item_rtdata, items, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=0
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid;</code></pre>
+Identify item membership. Usefull if that is master item<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+items.name,
+items.key_,
+items.delay AS delay
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+JOIN items ON (items.hostid=hosts.hostid)
+WHERE items.itemid IN (12345,5678);</code></pre>
+<p>Download this section: <a href="src/54.sql">https://aigarskadikis.github.io/src/54.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql</a></p>
+</div>
+</div><div id='searchInputArea'><span>SEARCH</span><input type='text' id='searchInput' placeholder='Type at least 1 characters...' onkeyup='onTypeSearchInput(event)' /></div><div id='searchResultDlg'><div id='closeIcon' onclick='onCloseDlg()'>&times;</div><div id='searchResultDlgContent'></div></div><script src='../searcher.js'></script></body></html>
