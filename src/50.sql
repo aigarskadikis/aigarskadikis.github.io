@@ -264,7 +264,8 @@ AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;
 
 --which action is responsible
-SELECTFROM_UNIXTIME(events.clock) AS 'time',
+SELECT
+FROM_UNIXTIME(events.clock) AS 'time',
 CASE events.severity
 WHEN 0 THEN 'NOT_CLASSIFIED'
 WHEN 1 THEN 'INFORMATION'
@@ -317,7 +318,7 @@ AND problem.object=4;
 
 --trigger evaluation problems
 SELECT
-DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo,
+DISTINCT CONCAT('triggers.php?form=update&triggerid=', problem.objectid) AS goTo,
 hosts.name AS hostName,
 triggers.description AS triggerTitle,
 problem.name AS TriggerEvaluationError

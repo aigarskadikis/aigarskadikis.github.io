@@ -247,7 +247,7 @@ AND problem.object=4;
 
 --trigger evaluation problems
 SELECT
-DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo,
+DISTINCT CONCAT('triggers.php?form=update&triggerid=', problem.objectid) AS goTo,
 hosts.name AS hostName,
 triggers.description AS triggerTitle,
 problem.name AS TriggerEvaluationError

@@ -445,7 +445,8 @@ AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;
 
 --which action is responsible. Zabbix 5.0
-SELECTFROM_UNIXTIME(events.clock) AS 'time',
+SELECT
+FROM_UNIXTIME(events.clock) AS 'time',
 CASE events.severity
 WHEN 0 THEN 'NOT_CLASSIFIED'
 WHEN 1 THEN 'INFORMATION'
@@ -498,7 +499,7 @@ AND problem.object=4;
 
 --trigger evaluation problems. Zabbix 5.0, 6.0
 SELECT
-DISTINCT CONCAT('triggers.php?form=update&triggerid=',problem.objectid) AS goTo,
+DISTINCT CONCAT('triggers.php?form=update&triggerid=', problem.objectid) AS goTo,
 hosts.name AS hostName,
 triggers.description AS triggerTitle,
 problem.name AS TriggerEvaluationError
@@ -514,7 +515,7 @@ AND problem.object=0;
 SELECT
 hosts.host,
 items.key_,
-CONCAT('items.php?form=update&itemid=',items.itemid) AS goTo
+CONCAT('items.php?form=update&itemid=', items.itemid) AS goTo
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
@@ -678,7 +679,7 @@ WHERE items.itemid IN (12345,5678);
 SELECT
 proxy.host AS proxy,
 items.key_,
-COUNT(*)
+COUNT(*) AS count
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN items ON (items.hostid=hosts.hostid)
