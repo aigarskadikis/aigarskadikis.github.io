@@ -137,7 +137,7 @@ function processBlock(block, i) {
   // simply replace merge marge with empty line = merge
   var prefinalLine = combined.replaceAll(/\nMergeMark\n/g, '');
   // clean up last occurance if merged with last line
-  var finalLine = prefinalLine.replace('\nMergeMark', '').replace(' )', ')').replace('( SELECT ', '(SELECT ');;
+  var finalLine = prefinalLine.replace('\nMergeMark', '').replace(' )', ')').replace(/\( SELECT /g, '(SELECT ');
   converted[i] = {
     index: i,
     text: finalLine
