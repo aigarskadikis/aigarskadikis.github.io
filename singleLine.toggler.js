@@ -89,6 +89,7 @@ function processBlock(block, i) {
         } else
         if (/^[a-z_]+\.[a-z_]+$/.test(line)) {
 			tableAndColumn = true;
+		line = line + ' ';
             shouldMerge = true;
 	    } else
 	    if (/^\)\s+\S+$/.test(line)) {
