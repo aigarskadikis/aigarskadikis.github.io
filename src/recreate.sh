@@ -8,7 +8,7 @@ clear
 echo "<html><head><link rel='stylesheet' type='text/css' href='css.css' />" >> ../index.html
 
 # install css
-cat css.css >> ../index.html
+# cat css.css >> ../index.html
 
 # start body and all tabs
 echo "</head><body onLoad='initDataArray()'><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src="singleLine.togglerIE.js"><\/script>')}else{document.write('<script src="singleLine.toggler.js"><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>" >> ../index.html
