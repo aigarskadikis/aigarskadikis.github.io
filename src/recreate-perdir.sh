@@ -99,7 +99,7 @@ sed -i 's| </code></pre>|</code></pre>|' "$INDEX"
 sed -i 's/^[ \t]*//;s/[ \t]*$//' "$INDEX"
 
 # install index
-sed -i "s%<div class=\"tab\">%<ol>$(cat goto.inc | tr -cd "[:print:]")</ol>%" "$INDEX"
+sed -i "s%<div class=\"tab\">%<div class=\"tab\"><ol>$(cat goto.inc | tr -cd "[:print:]")</ol>%" "$INDEX"
 
 # remove includes (a source for tabs)
 rm -rf *inc
