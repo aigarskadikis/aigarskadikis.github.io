@@ -38,7 +38,7 @@ echo "</style></head><body onLoad='initDataArray()'><div class='tabs'><div class
 # this is master block for "TAB"
 echo "<input type=\"radio\" name=\"tabs\" id=\"$NAME\" checked=\"checked\"><label for=\"$NAME\">$FILE</label><div class=\"tab\">" > $NAME.inc
 
-> goto.lst
+> goto.inc
 
 # analyze the original "TEXT" file, blindly remove first 2 lines
 cat $FILE | while IFS= read -r LINE
@@ -60,7 +60,7 @@ OUT=$(echo "$LINE" | sed 's|^--||' | sed 's/\. ./\U&/')
 # convert line first letter to uppercase
 GOTO=$(echo "${OUT^}" | md5sum | grep -Eo "^\S+")
 
-echo "<li><a href=\"#$GOTO\">${OUT^}</a></li>" >> goto.lst
+echo "<li><a href=\"#$GOTO\">${OUT^}</a></li>" >> goto.inc
 echo "$INDEXLST"
 echo -e "<p id=\"$GOTO\">${OUT^}</p>\n<pre><code>" >> $NAME.inc
 else
@@ -99,7 +99,7 @@ sed -i 's| </code></pre>|</code></pre>|' "$INDEX"
 sed -i 's/^[ \t]*//;s/[ \t]*$//' "$INDEX"
 
 # install index
-sed -i "s%<div class=\"tab\">%<ol>$(cat goto.lst | tr -cd "[:print:]")</ol>%" "$INDEX"
+sed -i "s%<div class=\"tab\">%<ol>$(cat goto.inc | tr -cd "[:print:]")</ol>%" "$INDEX"
 
 # remove includes (a source for tabs)
 rm -rf *inc
