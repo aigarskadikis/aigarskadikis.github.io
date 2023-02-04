@@ -115,4 +115,23 @@ p,li,ol{
 ol{
     padding:0 0 1em
 }
+.tab #index{
+padding: 10px;
+    border: 1px solid silver;
+    float: right;
+    min-width: 20%;
+    display: flex;
+    background-color: #fff;
+    z-index: 9
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 70%;
+    right: 0;
+    bottom: 0;
+    padding: 10px;
+    background-color: #dcdcdc;
+    overflow: auto;
+    overscroll-behavior: contain;
+    }
  

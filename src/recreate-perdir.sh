@@ -84,13 +84,7 @@ echo "</div>" >> $NAME.inc
 # save some new line characters for '<pre><code></code></pre>'
 cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "H;1h;\${g;s|\n</code></pre>|</code></pre>|g;p}" >> "$INDEX"
 
-#} done
-
-
-
-
 # put footer
-# echo "</div><div id='searchInputArea'><span>SEARCH</span><input type='text' id='searchInput' placeholder='Type at least 1 characters...' onkeyup='onTypeSearchInput(event)' /></div><div id='searchResultDlg'><div id='closeIcon' onclick='onCloseDlg()'>&times;</div><div id='searchResultDlgContent'></div></div><script src='../searcher.js'></script></body></html>" >> "$INDEX"
 echo "</div></body></html>" >> "$INDEX"
 
 # remove unnecessarry space
@@ -100,7 +94,7 @@ sed -i 's| </code></pre>|</code></pre>|' "$INDEX"
 sed -i 's/^[ \t]*//;s/[ \t]*$//' "$INDEX"
 
 # install index
-sed -i "s%<div class=\"tab\">%<div class=\"tab\"><ol>$(cat goto.inc | tr -cd "[:print:]")</ol>%" "$INDEX"
+sed -i "s%<div class=\"tab\">%<div class=\"tab\"><div id=\"index\"><ol>$(cat goto.inc | tr -cd "[:print:]")</ol></div>%" "$INDEX"
 
 # remove includes (a source for tabs)
 rm -rf *inc
