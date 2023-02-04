@@ -1,0 +1,12 @@
+<li><a href="#ca58b3c2f168159fe72689b1878a5794">Active problems, including Zabbix internal problems (item unsupported, trigger unsupported)</a></li>
+<li><a href="#27d4e096992b4449576e8e526ebfac0b">Non-working external scripts</a></li>
+<li><a href="#f16cb58e4b510dd3b89f08ceccb54789">Check native HA heartbeat</a></li>
+<li><a href="#3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</a></li>
+<li><a href="#5fdf0d3b15ae4ca17ba8cbd05ea30a52">Items in use</a></li>
+<li><a href="#515bb880e1666408ef79e9655e448ed5">Owner of LLD dependent item. What is interval for owner</a></li>
+<li><a href="#e09f1718e8f0d561ca652e2ccf21101c">Frequency of LLD rule for enabled hosts and enabled items discoveries for only monitored hosts</a></li>
+<li><a href="#5ea279232fa8c6cb29820f8b4c97635c">Host behind proxy 'z62prx' where interface is not healthy. Host is down</a></li>
+<li><a href="#7057ba8e9206fdcdc7a8c1272c72b335">Host/interface errors per all hosts behind proxy</a></li>
+<li><a href="#69964261e9a48cd7e569e256bf7e7ff3">For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why</a></li>
+<li><a href="#f48c29ddfb46d241bfca2ec8062fce56">For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled</a></li>
+<li><a href="#c27d849693910935510c58a688d95c18">Print error message for enabled hosts and enabled data collector items</a></li>
