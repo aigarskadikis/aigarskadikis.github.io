@@ -27,13 +27,13 @@ INDEX="$DEST/index.html"
 > "$INDEX"
 
 # put header
-echo "<html><head><style type='text/css'>" >> "$INDEX"
+echo "<html><head><link rel='stylesheet' type='text/css' href='../src/css.css' />" >> "$INDEX"
 
 # install css
-cat css.css >> "$INDEX"
+# cat css.css >> "$INDEX"
 
 # start body and all tabs
-echo "</style></head><body><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src="../singleLine.togglerIE.js"><\/script>')}else{document.write('<script src="../singleLine.toggler.js"><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>" >> "$INDEX"
+echo "</head><body><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src="../singleLine.togglerIE.js"><\/script>')}else{document.write('<script src="../singleLine.toggler.js"><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>" >> "$INDEX"
 
 # this is master block for "TAB"
 echo "<input type=\"radio\" name=\"tabs\" id=\"$NAME\" checked=\"checked\"><label for=\"$NAME\">$FILE</label><div class=\"tab\">" > $NAME.inc
