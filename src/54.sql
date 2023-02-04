@@ -2,7 +2,7 @@
 SELECT
 hosts.host,
 items.key_,
-item_rtdata.error AS error
+item_rtdata.error
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)

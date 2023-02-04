@@ -460,20 +460,25 @@ AVG(LENGTH(value))
 FROM proxy_history
 WHERE proxy_history.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1 ORDER BY 2,3 DESC;</code></pre>
-Proxy with MySQL. Print URLs for latest data page for the incomming big data<pre><code>SELECT LENGTH(value),
-CONCAT('history.php?itemids%5B0%5D=',proxy_history.itemid,'&action=showlatest' ) AS 'URL'
+Proxy with MySQL. Print URLs for latest data page for the incomming big data<pre><code>SELECT
+LENGTH(value),
+CONCAT('history.php?itemids%5B0%5D=', proxy_history.itemid,'&action=showlatest') AS 'URL'
 FROM proxy_history
 JOIN items ON (items.itemid=proxy_history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE LENGTH(value) > 60000;</code></pre>
-Check big LLD rules and its frequency based on clock<pre><code>SELECT clock, hosts.host, items.key_,
+Check big LLD rules and its frequency based on clock<pre><code>SELECT
+clock,
+hosts.host,
+items.key_,
 LENGTH(value)
 FROM proxy_history
 JOIN items ON (items.itemid=proxy_history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE items.flags=1
 AND LENGTH(value) > 6000;</code></pre>
-LLD rules<pre><code>SELECT items.key_,
+LLD rules<pre><code>SELECT
+items.key_,
 COUNT(*),
 AVG(LENGTH(value))
 FROM proxy_history, items
@@ -499,7 +504,7 @@ Unreachable SNMP hosts. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 hosts.snmp_error AS hostError,
-CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
+CONCAT('hosts.php?form=update&hostid=', hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
@@ -518,7 +523,7 @@ SNMP hosts unreachable. Zabbix 6.0<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 interface.error,
-CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+CONCAT('zabbix.php?action=host.edit&hostid=', hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN interface ON (interface.hostid=hosts.hostid)
@@ -527,7 +532,7 @@ AND interface.type=2;</code></pre>
 Non-working external scripts. Zabbix 5.4, 6.0, 6.2<pre><code>SELECT
 hosts.host,
 items.key_,
-item_rtdata.error AS error
+item_rtdata.error
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)

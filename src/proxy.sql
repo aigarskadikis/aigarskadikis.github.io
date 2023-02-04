@@ -10,15 +10,19 @@ WHERE proxy_history.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1 ORDER BY 2,3 DESC;
 
 --proxy with MySQL. print URLs for latest data page for the incomming big data
-SELECT LENGTH(value),
-CONCAT('history.php?itemids%5B0%5D=',proxy_history.itemid,'&action=showlatest' ) AS 'URL'
+SELECT
+LENGTH(value),
+CONCAT('history.php?itemids%5B0%5D=', proxy_history.itemid,'&action=showlatest') AS 'URL'
 FROM proxy_history
 JOIN items ON (items.itemid=proxy_history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE LENGTH(value) > 60000;
 
 --check big LLD rules and its frequency based on clock
-SELECT clock, hosts.host, items.key_,
+SELECT
+clock,
+hosts.host,
+items.key_,
 LENGTH(value)
 FROM proxy_history
 JOIN items ON (items.itemid=proxy_history.itemid)
@@ -27,7 +31,8 @@ WHERE items.flags=1
 AND LENGTH(value) > 6000;
 
 --LLD rules
-SELECT items.key_,
+SELECT
+items.key_,
 COUNT(*),
 AVG(LENGTH(value))
 FROM proxy_history, items

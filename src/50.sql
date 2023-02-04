@@ -20,7 +20,7 @@ SELECT
 proxy.host AS proxy,
 hosts.host,
 hosts.snmp_error AS hostError,
-CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
+CONCAT('hosts.php?form=update&hostid=', hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0

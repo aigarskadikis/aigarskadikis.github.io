@@ -18,7 +18,7 @@ SELECT
 proxy.host AS proxy,
 hosts.host,
 interface.error,
-CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+CONCAT('zabbix.php?action=host.edit&hostid=', hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN interface ON (interface.hostid=hosts.hostid)
@@ -29,7 +29,7 @@ AND interface.type=2;
 SELECT
 hosts.host,
 items.key_,
-item_rtdata.error AS error
+item_rtdata.error
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
