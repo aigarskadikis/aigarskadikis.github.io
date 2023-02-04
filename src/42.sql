@@ -3,7 +3,7 @@ SELECT
 proxy.host AS proxy,
 hosts.host,
 hosts.error AS hostError,
-CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
+CONCAT('hosts.php?form=update&hostid=', hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
@@ -21,7 +21,8 @@ WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;
 
 --show items by proxy
-SELECT COUNT(*),
+SELECT
+COUNT(*) AS count,
 proxy.host AS proxy,
 items.type
 FROM items

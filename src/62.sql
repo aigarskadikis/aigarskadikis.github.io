@@ -1,5 +1,5 @@
 --active problems, including Zabbix internal problems (item unsupported, trigger unsupported)
-SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
+SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --non-working external scripts
 SELECT
@@ -9,14 +9,17 @@ item_rtdata.error
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
-WHERE hosts.status=0 AND items.status=0 AND items.type=10
+WHERE hosts.status=0
+AND items.status=0
+AND items.type=10
 AND LENGTH(item_rtdata.error) > 0;
 
 --Check native HA heartbeat
 SELECT * FROM ha_node;
 
 --show items by proxy
-SELECT COUNT(*),
+SELECT
+COUNT(*) AS count,
 proxy.host AS proxy,
 items.type
 FROM items

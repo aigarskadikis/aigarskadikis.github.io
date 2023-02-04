@@ -490,12 +490,12 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
-Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 Unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 hosts.error AS hostError,
-CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
+CONCAT('hosts.php?form=update&hostid=', hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
@@ -536,11 +536,14 @@ item_rtdata.error
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
-WHERE hosts.status=0 AND items.status=0 AND items.type=10
+WHERE hosts.status=0
+AND items.status=0
+AND items.type=10
 AND LENGTH(item_rtdata.error) > 0;</code></pre>
 Check native HA heartbeat. Zabbix 6.0, 6.2<pre><code>SELECT * FROM ha_node;</code></pre>
 Count of events. All version of Zabbix<pre><code>SELECT COUNT(*),source FROM events GROUP BY source;</code></pre>
-Show items by proxy. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT COUNT(*),
+Show items by proxy. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT
+COUNT(*) AS count,
 proxy.host AS proxy,
 items.type
 FROM items
@@ -562,7 +565,8 @@ value,
 name,
 COUNT(*)
 FROM events
-WHERE source=3 AND LENGTH(name) > 0
+WHERE source=3
+AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;</code></pre>
 Difference between installed macros between host VS template VS nested/child templates. Zabbix 5.0, 6.0<pre><code>SELECT

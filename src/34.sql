@@ -1,5 +1,6 @@
 --show items by proxy
-SELECT COUNT(*),
+SELECT
+COUNT(*) AS count,
 proxy.host AS proxy,
 items.type
 FROM items

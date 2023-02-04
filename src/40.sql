@@ -1,12 +1,12 @@
 --active problems, including Zabbix internal problems (item unsupported, trigger unsupported)
-SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
+SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --unreachable ZBX host
 SELECT
 proxy.host AS proxy,
 hosts.host,
 hosts.error AS hostError,
-CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
+CONCAT('hosts.php?form=update&hostid=', hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
@@ -24,7 +24,8 @@ WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;
 
 --show items by proxy
-SELECT COUNT(*),
+SELECT
+COUNT(*) AS count,
 proxy.host AS proxy,
 items.type
 FROM items
@@ -48,7 +49,8 @@ value,
 name,
 COUNT(*)
 FROM events
-WHERE source=3 AND LENGTH(name) > 0
+WHERE source=3
+AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
 

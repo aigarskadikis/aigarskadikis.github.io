@@ -2,14 +2,14 @@
 SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 
 --active problems, including Zabbix internal problems (item unsupported, trigger unsupported). Zabbix 4.0, 5.0, 6.0, 6.2
-SELECT COUNT(*),source,object,severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
+SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
 --unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
 SELECT
 proxy.host AS proxy,
 hosts.host,
 hosts.error AS hostError,
-CONCAT('hosts.php?form=update&hostid=',hosts.hostid) AS goTo
+CONCAT('hosts.php?form=update&hostid=', hosts.hostid) AS goTo
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
@@ -58,7 +58,9 @@ item_rtdata.error
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN item_rtdata ON (items.itemid=item_rtdata.itemid)
-WHERE hosts.status=0 AND items.status=0 AND items.type=10
+WHERE hosts.status=0
+AND items.status=0
+AND items.type=10
 AND LENGTH(item_rtdata.error) > 0;
 
 --Check native HA heartbeat. Zabbix 6.0, 6.2
@@ -68,7 +70,8 @@ SELECT * FROM ha_node;
 SELECT COUNT(*),source FROM events GROUP BY source;
 
 --show items by proxy. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
-SELECT COUNT(*),
+SELECT
+COUNT(*) AS count,
 proxy.host AS proxy,
 items.type
 FROM items
@@ -92,7 +95,8 @@ value,
 name,
 COUNT(*)
 FROM events
-WHERE source=3 AND LENGTH(name) > 0
+WHERE source=3
+AND LENGTH(name) > 0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 10 DAY)
 GROUP BY 1,2,3,4 ORDER BY 5 DESC LIMIT 20;
 
