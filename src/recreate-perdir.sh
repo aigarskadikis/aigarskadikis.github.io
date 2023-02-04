@@ -56,7 +56,8 @@ if [ $? -eq 0 ]; then
 # If sentence endis with dot and space '. ', then uppercase the letter of next sentence
 OUT=$(echo "$LINE" | sed 's|^--||' | sed 's/\. ./\U&/')
 # convert line first letter to uppercase
-echo -e "${OUT^}\n<pre><code>" >> $NAME.inc
+GOTO=$(echo "${OUT^}" | md5sum | grep -Eo "^\S+")
+echo -e "<p id=\"$GOTO\">${OUT^}</p>\n<pre><code>" >> $NAME.inc
 else
 # blindly assume this is line having useful code
 echo -n '.'
