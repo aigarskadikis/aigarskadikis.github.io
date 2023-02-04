@@ -155,7 +155,7 @@ sed -i 's/^[ \t]*//;s/[ \t]*$//' ../index.html
 sed -i 's|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab">|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab"><p>Create MySQL users using wizard: <a href="./u/index.html">https://aigarskadikis.github.io/u</a></p>|' ../index.html
 
 # install extra link under 'server.sql' to have quries per version
-sed -i 's|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab">|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>|' ../index.html
+# sed -i 's|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab">|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>|' ../index.html
 
 # install default block
 sed -i 's|input type="radio" name="tabs" id="server"|input type="radio" name="tabs" id="server" checked="checked"|' ../index.html
