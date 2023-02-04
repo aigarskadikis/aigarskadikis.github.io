@@ -36,7 +36,7 @@ cat css.css >> "$INDEX"
 echo "</style></head><body onLoad='initDataArray()'><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src="../singleLine.togglerIE.js"><\/script>')}else{document.write('<script src="../singleLine.toggler.js"><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>" >> "$INDEX"
 
 # this is master block for "TAB"
-echo "<input type=\"radio\" name=\"tabs\" id=\"$NAME\"><label for=\"$NAME\">$FILE</label><div class=\"tab\">" > $NAME.inc
+echo "<input type=\"radio\" name=\"tabs\" id=\"$NAME\" checked=\"checked\"><label for=\"$NAME\">$FILE</label><div class=\"tab\">" > $NAME.inc
 
 # analyze the original "TEXT" file, blindly remove first 2 lines
 cat $FILE | while IFS= read -r LINE
@@ -85,9 +85,6 @@ cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "
 
 # put footer
 echo "</div><div id='searchInputArea'><span>SEARCH</span><input type='text' id='searchInput' placeholder='Type at least 1 characters...' onkeyup='onTypeSearchInput(event)' /></div><div id='searchResultDlg'><div id='closeIcon' onclick='onCloseDlg()'>&times;</div><div id='searchResultDlgContent'></div></div><script src='../searcher.js'></script></body></html>" >> "$INDEX"
-
-# install default block
-sed -i 's|input type="radio" name="tabs" id="50"|input type="radio" name="tabs" id="50" checked="checked"|' "$INDEX"
 
 # remove unnecessarry space
 sed -i 's| </code></pre>|</code></pre>|' "$INDEX"
