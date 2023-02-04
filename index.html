@@ -739,7 +739,7 @@ AND items.status=0
 AND triggers.status=0
 GROUP BY 1,2
 ORDER BY 1;</code></pre>
-Owner of LLD dependent item. What is interval for owner. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD is dependent item. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -824,7 +824,7 @@ JOIN item_discovery ON (item_discovery.itemid=items.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE item_discovery.ts_delete > 0
 GROUP BY 1 ORDER BY 2 DESC LIMIT 30;</code></pre>
-Which dashboard has been using host group id:2 for the input. Zabbix 5.0,5.2<pre><code>SELECT
+Which dashboard has been using host group. Zabbix 5.0,5.2<pre><code>SELECT
 DISTINCT dashboard.name,
 hstgrp.name
 FROM widget_field
@@ -841,7 +841,7 @@ JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
 JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid)
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
 WHERE widget_field.value_groupid IN (2);</code></pre>
-Zabbix agent hitting the central server. Zabbix 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
+Zabbix agent auto-registration probes. Zabbix 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
 hosts.host AS proxy,
 CASE autoreg_host.flags
 WHEN 0 THEN 'IP address, do not update host interface'
@@ -1058,7 +1058,7 @@ AND users_groups.usrgrpid=usrgrp.usrgrpid
 AND users_groups.userid=users.userid
 AND usrgrp.usrgrpid=rights.groupid
 AND rights.id=hstgrp.groupid;</code></pre>
-For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>UPDATE item_rtdata
+Clear error message for disabled items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>UPDATE item_rtdata
 SET error=''
 WHERE state=1
 AND itemid IN (
@@ -1068,7 +1068,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>UPDATE item_rtdata
+Set state as supported for disabled items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>UPDATE item_rtdata
 SET state=0
 WHERE state=1
 AND itemid IN (
@@ -1078,7 +1078,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-Print error message for enabled hosts and enabled data collector items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT
+Print error active data collector items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT
 hosts.host,
 items.name,
 item_rtdata.error AS error
@@ -1088,17 +1088,18 @@ AND hosts.status=0
 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;</code></pre>
-Identify item membership. Usefull if that is master item. Zabbix 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
+Show host object and proxy the item belongs to. Zabbix 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 items.name,
 items.key_,
-items.delay AS delay
-FROM hosts
+items.delay
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-JOIN items ON (items.hostid=hosts.hostid)
-WHERE items.itemid IN (12345,5678);</code></pre>
-Unique items keys behind proxy<pre><code>SELECT
+WHERE hosts.status=0
+AND items.status=0;</code></pre>
+Unique items keys behind proxy. Zabbix 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT
 proxy.host AS proxy,
 items.key_,
 COUNT(*) AS count

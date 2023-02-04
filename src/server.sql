@@ -290,7 +290,7 @@ AND triggers.status=0
 GROUP BY 1,2
 ORDER BY 1;
 
---owner of LLD dependent item. What is interval for owner. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
+--update interval of owner in case LLD is dependent item. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
 SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -399,7 +399,7 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE item_discovery.ts_delete > 0
 GROUP BY 1 ORDER BY 2 DESC LIMIT 30;
 
---which dashboard has been using host group id:2 for the input. Zabbix 5.0,5.2
+--which dashboard has been using host group. Zabbix 5.0,5.2
 SELECT
 DISTINCT dashboard.name,
 hstgrp.name
@@ -420,7 +420,7 @@ JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid)
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
 WHERE widget_field.value_groupid IN (2);
 
---Zabbix agent hitting the central server. Zabbix 5.0, 5.2, 5.4, 6.0
+--Zabbix agent auto-registration probes. Zabbix 5.0, 5.2, 5.4, 6.0
 SELECT
 hosts.host AS proxy,
 CASE autoreg_host.flags
@@ -675,7 +675,7 @@ AND users_groups.userid=users.userid
 AND usrgrp.usrgrpid=rights.groupid
 AND rights.id=hstgrp.groupid;
 
---For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
+--clear error message for disabled items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
 UPDATE item_rtdata
 SET error=''
 WHERE state=1
@@ -687,7 +687,7 @@ AND hosts.status=0
 AND items.status=1
 );
 
---For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
+--set state as supported for disabled items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
 UPDATE item_rtdata
 SET state=0
 WHERE state=1
@@ -699,7 +699,7 @@ AND hosts.status=0
 AND items.status=1
 );
 
---print error message for enabled hosts and enabled data collector items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
+--print error active data collector items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2
 SELECT
 hosts.host,
 items.name,
@@ -711,19 +711,20 @@ AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;
 
---identify item membership. usefull if that is master item. Zabbix 5.0, 5.2, 5.4, 6.0
+--show host object and proxy the item belongs to. Zabbix 5.0, 5.2, 5.4, 6.0
 SELECT
 proxy.host AS proxy,
 hosts.host,
 items.name,
 items.key_,
-items.delay AS delay
-FROM hosts
+items.delay
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
-JOIN items ON (items.hostid=hosts.hostid)
-WHERE items.itemid IN (12345,5678);
+WHERE hosts.status=0
+AND items.status=0;
 
---unique items keys behind proxy
+--unique items keys behind proxy. Zabbix 5.0, 5.2, 5.4, 6.0, 6.2
 SELECT
 proxy.host AS proxy,
 items.key_,

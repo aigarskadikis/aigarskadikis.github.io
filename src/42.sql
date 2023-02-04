@@ -92,7 +92,7 @@ AND items.status=0
 GROUP BY items.type 
 ORDER BY COUNT(*) DESC;
 
---owner of LLD dependent item. What is interval for owner
+--update interval of owner in case LLD is dependent item
 SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)

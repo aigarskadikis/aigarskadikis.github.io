@@ -334,7 +334,7 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -436,7 +436,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -534,7 +534,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -544,7 +544,7 @@ AND items.status=0
 AND master_itemid.status=0
 AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
-For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata
+Clear error message for disabled items<pre><code>UPDATE item_rtdata
 SET error=''
 WHERE state=1
 AND itemid IN (
@@ -554,7 +554,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata
+Set state as supported for disabled items<pre><code>UPDATE item_rtdata
 SET state=0
 WHERE state=1
 AND itemid IN (
@@ -564,7 +564,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-Print error message for enabled hosts and enabled data collector items<pre><code>SELECT
+Print error active data collector items<pre><code>SELECT
 hosts.host,
 items.name,
 item_rtdata.error AS error
@@ -739,7 +739,7 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -760,7 +760,7 @@ WHERE hosts.hostid=items.hostid
 AND items.flags=1
 AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
-Which dashboard has been using host group id:2 for the input<pre><code>SELECT
+Which dashboard has been using host group<pre><code>SELECT
 DISTINCT dashboard.name,
 hstgrp.name
 FROM widget_field
@@ -768,7 +768,7 @@ JOIN widget ON (widget.widgetid=widget_field.widgetid)
 JOIN dashboard ON (dashboard.dashboardid=widget.dashboardid)
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
 WHERE widget_field.value_groupid IN (2);</code></pre>
-Zabbix agent hitting the central server<pre><code>SELECT
+Zabbix agent auto-registration probes<pre><code>SELECT
 hosts.host AS proxy,
 CASE autoreg_host.flags
 WHEN 0 THEN 'IP address, do not update host interface'
@@ -932,7 +932,7 @@ AND h.status<>3
 AND i.status=0
 AND ir.state=1
 LIMIT 5001;</code></pre>
-For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata
+Clear error message for disabled items<pre><code>UPDATE item_rtdata
 SET error=''
 WHERE state=1
 AND itemid IN (
@@ -942,7 +942,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata
+Set state as supported for disabled items<pre><code>UPDATE item_rtdata
 SET state=0
 WHERE state=1
 AND itemid IN (
@@ -952,7 +952,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-Print error message for enabled hosts and enabled data collector items<pre><code>SELECT
+Print error active data collector items<pre><code>SELECT
 hosts.host,
 items.name,
 item_rtdata.error AS error
@@ -962,16 +962,29 @@ AND hosts.status=0
 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;</code></pre>
-Identify item membership. Usefull if that is master item<pre><code>SELECT
+Show host object and proxy the item belongs to<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 items.name,
 items.key_,
-items.delay AS delay
+items.delay
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND items.status=0;</code></pre>
+Unique items keys behind proxy<pre><code>SELECT
+proxy.host AS proxy,
+items.key_,
+COUNT(*) AS count
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN items ON (items.hostid=hosts.hostid)
-WHERE items.itemid IN (12345,5678);</code></pre>
+WHERE hosts.status=0
+AND items.status=0
+AND items.flags<>2
+GROUP BY 1,2
+ORDER BY 3 ASC;</code></pre>
 <p>Download this section: <a href="src/50.sql">https://aigarskadikis.github.io/src/50.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/50.sql</a></p>
 </div>
@@ -1061,7 +1074,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -1082,7 +1095,7 @@ WHERE hosts.hostid=items.hostid
 AND items.flags=1
 AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;</code></pre>
-Zabbix agent hitting the central server<pre><code>SELECT
+Zabbix agent auto-registration probes<pre><code>SELECT
 hosts.host AS proxy,
 CASE autoreg_host.flags
 WHEN 0 THEN 'IP address, do not update host interface'
@@ -1119,7 +1132,7 @@ LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
 WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata
+Clear error message for disabled items<pre><code>UPDATE item_rtdata
 SET error=''
 WHERE state=1
 AND itemid IN (
@@ -1129,7 +1142,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata
+Set state as supported for disabled items<pre><code>UPDATE item_rtdata
 SET state=0
 WHERE state=1
 AND itemid IN (
@@ -1139,7 +1152,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-Print error message for enabled hosts and enabled data collector items<pre><code>SELECT
+Print error active data collector items<pre><code>SELECT
 hosts.host,
 items.name,
 item_rtdata.error AS error
@@ -1149,16 +1162,29 @@ AND hosts.status=0
 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;</code></pre>
-Identify item membership. Usefull if that is master item<pre><code>SELECT
+Show host object and proxy the item belongs to<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 items.name,
 items.key_,
-items.delay AS delay
+items.delay
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND items.status=0;</code></pre>
+Unique items keys behind proxy<pre><code>SELECT
+proxy.host AS proxy,
+items.key_,
+COUNT(*) AS count
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN items ON (items.hostid=hosts.hostid)
-WHERE items.itemid IN (12345,5678);</code></pre>
+WHERE hosts.status=0
+AND items.status=0
+AND items.flags<>2
+GROUP BY 1,2
+ORDER BY 3 ASC;</code></pre>
 <p>Download this section: <a href="src/52.sql">https://aigarskadikis.github.io/src/52.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql</a></p>
 </div>
@@ -1218,7 +1244,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -1248,7 +1274,7 @@ JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
 JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid)
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
 WHERE widget_field.value_groupid IN (2);</code></pre>
-Zabbix agent hitting the central server<pre><code>SELECT
+Zabbix agent auto-registration probes<pre><code>SELECT
 hosts.host AS proxy,
 CASE autoreg_host.flags
 WHEN 0 THEN 'IP address, do not update host interface'
@@ -1285,7 +1311,7 @@ LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
 WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;</code></pre>
-For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata
+Clear error message for disabled items<pre><code>UPDATE item_rtdata
 SET error=''
 WHERE state=1
 AND itemid IN (
@@ -1295,7 +1321,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata
+Set state as supported for disabled items<pre><code>UPDATE item_rtdata
 SET state=0
 WHERE state=1
 AND itemid IN (
@@ -1305,7 +1331,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-Print error message for enabled hosts and enabled data collector items<pre><code>SELECT
+Print error active data collector items<pre><code>SELECT
 hosts.host,
 items.name,
 item_rtdata.error AS error
@@ -1315,16 +1341,29 @@ AND hosts.status=0
 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;</code></pre>
-Identify item membership. Usefull if that is master item<pre><code>SELECT
+Show host object and proxy the item belongs to<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 items.name,
 items.key_,
-items.delay AS delay
+items.delay
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND items.status=0;</code></pre>
+Unique items keys behind proxy<pre><code>SELECT
+proxy.host AS proxy,
+items.key_,
+COUNT(*) AS count
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN items ON (items.hostid=hosts.hostid)
-WHERE items.itemid IN (12345,5678);</code></pre>
+WHERE hosts.status=0
+AND items.status=0
+AND items.flags<>2
+GROUP BY 1,2
+ORDER BY 3 ASC;</code></pre>
 <p>Download this section: <a href="src/54.sql">https://aigarskadikis.github.io/src/54.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/54.sql</a></p>
 </div>
@@ -1452,7 +1491,7 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -1482,7 +1521,7 @@ JOIN dashboard_page ON (dashboard_page.dashboard_pageid=widget.dashboard_pageid)
 JOIN dashboard ON (dashboard.dashboardid=dashboard_page.dashboardid)
 JOIN hstgrp ON (hstgrp.groupid=widget_field.value_groupid)
 WHERE widget_field.value_groupid IN (2);</code></pre>
-Zabbix agent hitting the central server<pre><code>SELECT
+Zabbix agent auto-registration probes<pre><code>SELECT
 hosts.host AS proxy,
 CASE autoreg_host.flags
 WHEN 0 THEN 'IP address, do not update host interface'
@@ -1636,7 +1675,7 @@ AND users_groups.usrgrpid=usrgrp.usrgrpid
 AND users_groups.userid=users.userid
 AND usrgrp.usrgrpid=rights.groupid
 AND rights.id=hstgrp.groupid;</code></pre>
-For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata
+Clear error message for disabled items<pre><code>UPDATE item_rtdata
 SET error=''
 WHERE state=1
 AND itemid IN (
@@ -1646,7 +1685,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata
+Set state as supported for disabled items<pre><code>UPDATE item_rtdata
 SET state=0
 WHERE state=1
 AND itemid IN (
@@ -1656,7 +1695,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-Print error message for enabled hosts and enabled data collector items<pre><code>SELECT
+Print error active data collector items<pre><code>SELECT
 hosts.host,
 items.name,
 item_rtdata.error AS error
@@ -1666,16 +1705,29 @@ AND hosts.status=0
 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;</code></pre>
-Identify item membership. Usefull if that is master item<pre><code>SELECT
+Show host object and proxy the item belongs to<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
 items.name,
 items.key_,
-items.delay AS delay
+items.delay
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND items.status=0;</code></pre>
+Unique items keys behind proxy<pre><code>SELECT
+proxy.host AS proxy,
+items.key_,
+COUNT(*) AS count
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN items ON (items.hostid=hosts.hostid)
-WHERE items.itemid IN (12345,5678);</code></pre>
+WHERE hosts.status=0
+AND items.status=0
+AND items.flags<>2
+GROUP BY 1,2
+ORDER BY 3 ASC;</code></pre>
 <p>Download this section: <a href="src/60.sql">https://aigarskadikis.github.io/src/60.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/60.sql</a></p>
 </div>
@@ -1737,7 +1789,7 @@ WHERE hosts.status=0
 AND items.status=0
 GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
-Owner of LLD dependent item. What is interval for owner<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
+Update interval of owner in case LLD is dependent item<pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
@@ -1770,7 +1822,7 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE interface.available=2
 AND proxy.host IS NOT NULL
 ORDER BY 1,2,3;</code></pre>
-For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why<pre><code>UPDATE item_rtdata
+Clear error message for disabled items<pre><code>UPDATE item_rtdata
 SET error=''
 WHERE state=1
 AND itemid IN (
@@ -1780,7 +1832,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled<pre><code>UPDATE item_rtdata
+Set state as supported for disabled items<pre><code>UPDATE item_rtdata
 SET state=0
 WHERE state=1
 AND itemid IN (
@@ -1790,7 +1842,7 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
-Print error message for enabled hosts and enabled data collector items<pre><code>SELECT
+Print error active data collector items<pre><code>SELECT
 hosts.host,
 items.name,
 item_rtdata.error AS error
@@ -1800,6 +1852,18 @@ AND hosts.status=0
 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;</code></pre>
+Unique items keys behind proxy<pre><code>SELECT
+proxy.host AS proxy,
+items.key_,
+COUNT(*) AS count
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+JOIN items ON (items.hostid=hosts.hostid)
+WHERE hosts.status=0
+AND items.status=0
+AND items.flags<>2
+GROUP BY 1,2
+ORDER BY 3 ASC;</code></pre>
 <p>Download this section: <a href="src/62.sql">https://aigarskadikis.github.io/src/62.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/62.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/62.sql</a></p>
 </div>

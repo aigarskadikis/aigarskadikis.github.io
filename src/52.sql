@@ -95,7 +95,7 @@ AND items.status=0
 GROUP BY items.type 
 ORDER BY COUNT(*) DESC;
 
---owner of LLD dependent item. What is interval for owner
+--update interval of owner in case LLD is dependent item
 SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
@@ -120,7 +120,7 @@ AND items.flags=1
 AND hosts.status=0
 GROUP BY 1,2,3,4 ORDER BY 1,2,3,4;
 
---Zabbix agent hitting the central server
+--Zabbix agent auto-registration probes
 SELECT
 hosts.host AS proxy,
 CASE autoreg_host.flags
@@ -163,7 +163,7 @@ WHERE hosts.status IN (0,1)
 AND hosts.flags=0
 GROUP BY 1,2 ORDER BY 1,3,2;
 
---For items which are currently disabled, clean the error message in database. This will help to locate what really is not working and why
+--clear error message for disabled items
 UPDATE item_rtdata
 SET error=''
 WHERE state=1
@@ -175,7 +175,7 @@ AND hosts.status=0
 AND items.status=1
 );
 
---For items which are currently disabled, reset the state as supported. This will help to locate what really is not working and why. Item will remain disabled
+--set state as supported for disabled items
 UPDATE item_rtdata
 SET state=0
 WHERE state=1
@@ -187,7 +187,7 @@ AND hosts.status=0
 AND items.status=1
 );
 
---print error message for enabled hosts and enabled data collector items
+--print error active data collector items
 SELECT
 hosts.host,
 items.name,
@@ -199,15 +199,30 @@ AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;
 
---identify item membership. usefull if that is master item
+--show host object and proxy the item belongs to
 SELECT
 proxy.host AS proxy,
 hosts.host,
 items.name,
 items.key_,
-items.delay AS delay
+items.delay
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND items.status=0;
+
+--unique items keys behind proxy
+SELECT
+proxy.host AS proxy,
+items.key_,
+COUNT(*) AS count
 FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 JOIN items ON (items.hostid=hosts.hostid)
-WHERE items.itemid IN (12345,5678);
+WHERE hosts.status=0
+AND items.status=0
+AND items.flags<>2
+GROUP BY 1,2
+ORDER BY 3 ASC;
 

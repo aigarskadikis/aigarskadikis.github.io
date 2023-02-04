@@ -132,7 +132,7 @@ WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;
 
---owner of LLD dependent item. What is interval for owner
+--update interval of owner in case LLD is dependent item
 SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
