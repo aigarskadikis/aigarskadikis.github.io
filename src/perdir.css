@@ -16,7 +16,7 @@
 }
 .tabs{
     flex-wrap:wrap;
-    width:77%
+    width:76%
 }
 .links{width:100%}
 .links a{margin:0 .3em}
@@ -33,13 +33,16 @@ float:right;
 position:fixed;
 top:40px;
 right:0px;
+bottom:0px;
 padding:1em 2em 1em 1em;
 background:#fff;
 width:20%;
+                overflow-x: hidden;
+                overflow-y: auto;
 }
 .tog{
-    float:right;
-    position:fixed;
+float:right;
+position:fixed;
 top:0px;
 right:0px;
 padding:1em 2em 0 1em;
