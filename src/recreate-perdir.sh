@@ -51,7 +51,6 @@ echo "<div class='links'>
 <a href='../z60/index.html'>6.0</a>
 <a href='../z62/index.html'>6.2</a>
 
-
 <div class='tog'>
 <label for='toggler'><input id='singleLineToggle' name='toggler' type='checkbox' />Use single line mode</label>
 <script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src="../singleLine.togglerIE.js"><\/script>')}else{document.write('<script src="../singleLine.toggler.js"><\/script>')}</script>
@@ -125,9 +124,15 @@ SECTION=$(echo "$TABDATA" | sed "s|...xml||")
 echo "<input type=\"radio\" name=\"tabs\" id=\"$SECTION\"><label for=\"$SECTION\">$SECTION</label><div class=\"tab\">" >> "$INDEX"
 
 # install index
+echo "<div class='index'>" >> "$INDEX"
+
+echo "
+
+" >> "$INDEX"
+
 echo "<ol>" >> "$INDEX"
 cat "$WORKDIR/$SECTION.1.xml" >> "$INDEX"
-echo "</ol>" >> "$INDEX"
+echo "</ol></div>" >> "$INDEX"
 
 # install content
 cat "$WORKDIR/$SECTION.2.xml" >> "$INDEX"

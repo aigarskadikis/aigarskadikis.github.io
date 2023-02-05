@@ -28,6 +28,25 @@
     margin:0;
     cursor:pointer
 }
+.index{
+float:right;
+position:fixed;
+top:40px;
+right:0px;
+padding:1em 2em 1em 1em;
+background:#fff;
+width:20%;
+}
+.tog{
+    float:right;
+    position:fixed;
+top:0px;
+right:0px;
+padding:1em 2em 0 1em;
+background:#fff;
+width:20%;
+
+}
 .tabs .tab{
     order:9;
     flex-grow:1;
@@ -98,10 +117,7 @@ pre{
     font-size:1.2em;
     font-weight:700
 }
-.tog{
-    #width:100%;
-    float:right;
-}
+
 a{
     text-decoration:none;
     color:blue

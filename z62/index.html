@@ -13,7 +13,6 @@
 <a href='../z60/index.html'>6.0</a>
 <a href='../z62/index.html'>6.2</a>
 
-
 <div class='tog'>
 <label for='toggler'><input id='singleLineToggle' name='toggler' type='checkbox' />Use single line mode</label>
 <script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=../singleLine.togglerIE.js><\/script>')}else{document.write('<script src=../singleLine.toggler.js><\/script>')}</script>
@@ -26,9 +25,13 @@
 <div class='tabs'>
 
 <input type="radio" name="tabs" id="hosts"><label for="hosts">hosts</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#712c8f937f85ca7df4c1fca3392ea3e5">Unique items keys behind proxy</a></li>
-</ol>
+</ol></div>
 <p id="712c8f937f85ca7df4c1fca3392ea3e5">Unique items keys behind proxy</p><pre><code>SELECT
 proxy.host AS proxy,
 items.key_,
@@ -44,10 +47,14 @@ ORDER BY 3 ASC;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="interface"><label for="interface">interface</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#5ea279232fa8c6cb29820f8b4c97635c">Host behind proxy 'z62prx' where interface is not healthy. Host is down</a></li>
 <li><a href="#7057ba8e9206fdcdc7a8c1272c72b335">Host/interface errors per all hosts behind proxy</a></li>
-</ol>
+</ol></div>
 <p id="5ea279232fa8c6cb29820f8b4c97635c">Host behind proxy 'z62prx' where interface is not healthy. Host is down</p><pre><code>SELECT
 hosts.host,
 interface.error
@@ -71,6 +78,10 @@ ORDER BY 1,2,3;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="items" checked="checked"><label for="items">items</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#27d4e096992b4449576e8e526ebfac0b">Non-working external scripts</a></li>
 <li><a href="#3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</a></li>
@@ -79,7 +90,7 @@ ORDER BY 1,2,3;</code></pre>
 <li><a href="#b0a20b742b4e46613860c83d9f1a8bbe">Clear error message for disabled items</a></li>
 <li><a href="#08de5d7c0ca80a17ccb5118e05edb63b">Set state as supported for disabled items</a></li>
 <li><a href="#7b87682be287de2ad0b728bab7470deb">Print error active data collector items</a></li>
-</ol>
+</ol></div>
 <p id="27d4e096992b4449576e8e526ebfac0b">Non-working external scripts</p><pre><code>SELECT
 hosts.host,
 items.key_,

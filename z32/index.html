@@ -13,7 +13,6 @@
 <a href='../z60/index.html'>6.0</a>
 <a href='../z62/index.html'>6.2</a>
 
-
 <div class='tog'>
 <label for='toggler'><input id='singleLineToggle' name='toggler' type='checkbox' />Use single line mode</label>
 <script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=../singleLine.togglerIE.js><\/script>')}else{document.write('<script src=../singleLine.toggler.js><\/script>')}</script>
@@ -26,9 +25,13 @@
 <div class='tabs'>
 
 <input type="radio" name="tabs" id="hosts"><label for="hosts">hosts</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#05d4d698d59aa2ddfa39de8bd280a661">Devices and it's status</a></li>
-</ol>
+</ol></div>
 <p id="05d4d698d59aa2ddfa39de8bd280a661">Devices and it's status</p><pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -54,10 +57,14 @@ AND interface.main=1;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="items" checked="checked"><label for="items">items</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</a></li>
 <li><a href="#5fdf0d3b15ae4ca17ba8cbd05ea30a52">Items in use</a></li>
-</ol>
+</ol></div>
 <p id="3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</p><pre><code>SELECT
 COUNT(*) AS count,
 proxy.host AS proxy,

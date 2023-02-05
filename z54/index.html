@@ -13,7 +13,6 @@
 <a href='../z60/index.html'>6.0</a>
 <a href='../z62/index.html'>6.2</a>
 
-
 <div class='tog'>
 <label for='toggler'><input id='singleLineToggle' name='toggler' type='checkbox' />Use single line mode</label>
 <script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=../singleLine.togglerIE.js><\/script>')}else{document.write('<script src=../singleLine.toggler.js><\/script>')}</script>
@@ -26,9 +25,13 @@
 <div class='tabs'>
 
 <input type="radio" name="tabs" id="autoreg_host"><label for="autoreg_host">autoreg_host</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#1354d376af172a0b97c0700445d63b9f">Zabbix agent auto-registration probes</a></li>
-</ol>
+</ol></div>
 <p id="1354d376af172a0b97c0700445d63b9f">Zabbix agent auto-registration probes</p><pre><code>SELECT
 hosts.host AS proxy,
 CASE autoreg_host.flags
@@ -47,11 +50,15 @@ GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="hosts"><label for="hosts">hosts</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#474967adc2cb831ad78557e6cea706c4">Linked template objects PostgreSQL</a></li>
 <li><a href="#d6c72432653f898e6cdd34cbfc80fbe7">Linked templates objects MySQL</a></li>
 <li><a href="#712c8f937f85ca7df4c1fca3392ea3e5">Unique items keys behind proxy</a></li>
-</ol>
+</ol></div>
 <p id="474967adc2cb831ad78557e6cea706c4">Linked template objects PostgreSQL</p><pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -91,6 +98,10 @@ ORDER BY 3 ASC;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="items" checked="checked"><label for="items">items</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#27d4e096992b4449576e8e526ebfac0b">Non-working external scripts</a></li>
 <li><a href="#3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</a></li>
@@ -101,7 +112,7 @@ ORDER BY 3 ASC;</code></pre>
 <li><a href="#08de5d7c0ca80a17ccb5118e05edb63b">Set state as supported for disabled items</a></li>
 <li><a href="#7b87682be287de2ad0b728bab7470deb">Print error active data collector items</a></li>
 <li><a href="#5d6211cb422c771d13023d3c7ef3f89e">Show host object and proxy the item belongs to</a></li>
-</ol>
+</ol></div>
 <p id="27d4e096992b4449576e8e526ebfac0b">Non-working external scripts</p><pre><code>SELECT
 hosts.host,
 items.key_,
@@ -230,9 +241,13 @@ AND items.status=0;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="widget_field"><label for="widget_field">widget_field</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#e656599a528fc46c59f8beaf20484ad6">Which dashboard has been using host group id:2 for the input</a></li>
-</ol>
+</ol></div>
 <p id="e656599a528fc46c59f8beaf20484ad6">Which dashboard has been using host group id:2 for the input</p><pre><code>SELECT
 DISTINCT dashboard.name,
 hstgrp.name

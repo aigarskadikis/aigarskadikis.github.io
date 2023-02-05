@@ -13,7 +13,6 @@
 <a href='../z60/index.html'>6.0</a>
 <a href='../z62/index.html'>6.2</a>
 
-
 <div class='tog'>
 <label for='toggler'><input id='singleLineToggle' name='toggler' type='checkbox' />Use single line mode</label>
 <script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=../singleLine.togglerIE.js><\/script>')}else{document.write('<script src=../singleLine.toggler.js><\/script>')}</script>
@@ -26,9 +25,13 @@
 <div class='tabs'>
 
 <input type="radio" name="tabs" id="autoreg_host"><label for="autoreg_host">autoreg_host</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#1354d376af172a0b97c0700445d63b9f">Zabbix agent auto-registration probes</a></li>
-</ol>
+</ol></div>
 <p id="1354d376af172a0b97c0700445d63b9f">Zabbix agent auto-registration probes</p><pre><code>SELECT
 hosts.host AS proxy,
 CASE autoreg_host.flags
@@ -47,9 +50,13 @@ GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="events"><label for="events">events</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#ff64207f3057eabbcff2e981d3c5b9e8">All events closed by global correlation rule</a></li>
-</ol>
+</ol></div>
 <p id="ff64207f3057eabbcff2e981d3c5b9e8">All events closed by global correlation rule</p><pre><code>SELECT
 repercussion.clock,
 repercussion.name,
@@ -63,6 +70,10 @@ ORDER BY repercussion.clock ASC;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="hosts"><label for="hosts">hosts</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#5c5f90bdbcf0f0d34c8447c0e9724656">ZBX hosts unreachable</a></li>
 <li><a href="#e4d6bcdcaf0844b8434471add0af36ad">SNMP hosts unreachable</a></li>
@@ -70,7 +81,7 @@ ORDER BY repercussion.clock ASC;</code></pre>
 <li><a href="#474967adc2cb831ad78557e6cea706c4">Linked template objects PostgreSQL</a></li>
 <li><a href="#d6c72432653f898e6cdd34cbfc80fbe7">Linked templates objects MySQL</a></li>
 <li><a href="#712c8f937f85ca7df4c1fca3392ea3e5">Unique items keys behind proxy</a></li>
-</ol>
+</ol></div>
 <p id="5c5f90bdbcf0f0d34c8447c0e9724656">ZBX hosts unreachable</p><pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -148,9 +159,13 @@ ORDER BY 3 ASC;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="hosts_templates"><label for="hosts_templates">hosts_templates</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#5741eca0b62389647471b2d679d22f1b">Difference between template macro and host macro</a></li>
-</ol>
+</ol></div>
 <p id="5741eca0b62389647471b2d679d22f1b">Difference between template macro and host macro</p><pre><code>SELECT
 b.host,
 hm2.macro,
@@ -169,9 +184,13 @@ AND hm1.value <> hm2.value;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="interface"><label for="interface">interface</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#3d561b19d4694bb3e8aeae4fc4c91976">Hosts with multiple interfaces</a></li>
-</ol>
+</ol></div>
 <p id="3d561b19d4694bb3e8aeae4fc4c91976">Hosts with multiple interfaces</p><pre><code>SELECT
 hosts.host
 FROM interface
@@ -182,6 +201,10 @@ HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="items" checked="checked"><label for="items">items</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#27d4e096992b4449576e8e526ebfac0b">Non-working external scripts</a></li>
 <li><a href="#3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</a></li>
@@ -195,7 +218,7 @@ HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 <li><a href="#08de5d7c0ca80a17ccb5118e05edb63b">Set state as supported for disabled items</a></li>
 <li><a href="#7b87682be287de2ad0b728bab7470deb">Print error active data collector items</a></li>
 <li><a href="#5d6211cb422c771d13023d3c7ef3f89e">Show host object and proxy the item belongs to</a></li>
-</ol>
+</ol></div>
 <p id="27d4e096992b4449576e8e526ebfac0b">Non-working external scripts</p><pre><code>SELECT
 hosts.host,
 items.key_,
@@ -363,12 +386,16 @@ AND items.status=0;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="problem"><label for="problem">problem</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#3f29f63dc2e637dbf508fbb38203a0d4">Non-working LLD rules</a></li>
 <li><a href="#2aca5e84bf2dbe3324ff8e49760d289d">Non-working data collector items</a></li>
 <li><a href="#624f5e432a84d397a9c44ee6ae7fe1f5">Trigger evaluation problems</a></li>
 <li><a href="#16ef91c3a784cf67b123aa2993e6da52">Open problems</a></li>
-</ol>
+</ol></div>
 <p id="3f29f63dc2e637dbf508fbb38203a0d4">Non-working LLD rules</p><pre><code>SELECT
 hosts.name AS hostName,
 items.key_ AS itemKey,
@@ -421,9 +448,13 @@ ORDER BY 2 DESC;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="sessions"><label for="sessions">sessions</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#05267d699ae612fe816cae236775c692">User sessions</a></li>
-</ol>
+</ol></div>
 <p id="05267d699ae612fe816cae236775c692">User sessions</p><pre><code>SELECT
 COUNT(*),
 users.username
@@ -433,9 +464,13 @@ GROUP BY 2 ORDER BY 1 ASC;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="users"><label for="users">users</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#c674ae604818596a4fa10e93e4243b84">Print all online users with rights group ID: 13</a></li>
-</ol>
+</ol></div>
 <p id="c674ae604818596a4fa10e93e4243b84">Print all online users with rights group ID: 13</p><pre><code>SELECT
 users.username,
 CASE
@@ -456,10 +491,14 @@ AND rights.id=hstgrp.groupid;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="widget_field"><label for="widget_field">widget_field</label><div class="tab">
+<div class='index'>
+
+
+
 <ol>
 <li><a href="#e656599a528fc46c59f8beaf20484ad6">Which dashboard has been using host group id:2 for the input</a></li>
 <li><a href="#2644d6b7e06195966430d1479a01aee9">Which dashboard widgets are using wildcards</a></li>
-</ol>
+</ol></div>
 <p id="e656599a528fc46c59f8beaf20484ad6">Which dashboard has been using host group id:2 for the input</p><pre><code>SELECT
 DISTINCT dashboard.name,
 hstgrp.name
