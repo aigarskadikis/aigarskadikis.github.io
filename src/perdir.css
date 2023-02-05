@@ -16,7 +16,7 @@
 }
 .tabs{
     flex-wrap:wrap;
-    width:100%
+    width:77%
 }
 .links{width:100%}
 .links a{margin:0 .3em}
@@ -51,8 +51,8 @@ width:20%;
     order:9;
     flex-grow:1;
     width:100%;
-    padding:.4rem;
-    min-height:60em;
+    padding:.4rem .4rem 40rem .4rem;
+    #min-height:60em;
 }
 body{
     min-height:100vh;

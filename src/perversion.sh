@@ -18,7 +18,7 @@ VERINT=$(echo $VER | sed 's|\.||')
 echo $VERINT
 touch "$VERINT.sql"
 > "$VERINT.sql"
-cat server.sql | while IFS= read -r LINE
+cat server.sql proxy.sql delete.sql | while IFS= read -r LINE
 do {
 
 # check empty line

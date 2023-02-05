@@ -104,3 +104,14 @@ AND master_itemid.status=0
 AND items.type=18
 GROUP BY 1,2 ORDER BY 3 DESC;
 
+--discard all users which is using frontend
+DELETE FROM session;
+
+--scan 'history_text' table and accidentally stored integers, decimal numbers, log entries and short strings
+DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=4);
+DELETE FROM history_text WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>4);
+
+--scan 'history_str' table and accidentally stored integers, decimal numbers, log entries and long text strings
+DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=1);
+DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>1);
+

@@ -69,6 +69,56 @@ WHERE event_recovery.c_eventid IS NOT NULL
 ORDER BY repercussion.clock ASC;</code></pre>
 
 </div>
+<input type="radio" name="tabs" id="history_str"><label for="history_str">history_str</label><div class="tab">
+<div class='index'>
+
+
+
+<ol>
+<li><a href="#2d67d61f1ac234451c2542f3ff1253a3">Remove repeated values per one itemid in 'history_str'. Discard unchanded</a></li>
+</ol></div>
+<p id="2d67d61f1ac234451c2542f3ff1253a3">Remove repeated values per one itemid in 'history_str'. Discard unchanded</p><pre><code>DELETE FROM history_str WHERE itemid=343812 AND clock IN (
+SELECT clock FROM (
+SELECT clock, value, r, v2 FROM (
+SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2,
+CASE
+WHEN value <> LEAD(value,1) OVER (order by clock)
+THEN value
+ELSE 'zero'
+END AS r
+FROM history_str WHERE itemid=343812
+) x2
+WHERE r='zero'
+) x3
+WHERE v2 IS NOT NULL
+);</code></pre>
+
+</div>
+<input type="radio" name="tabs" id="history_text"><label for="history_text">history_text</label><div class="tab">
+<div class='index'>
+
+
+
+<ol>
+<li><a href="#3770341b5e912ef300f79e405b3f14ce">Remove repeated values per one itemid in 'history_text'. Discard unchanded</a></li>
+</ol></div>
+<p id="3770341b5e912ef300f79e405b3f14ce">Remove repeated values per one itemid in 'history_text'. Discard unchanded</p><pre><code>DELETE FROM history_text WHERE itemid=42702 AND clock IN (
+SELECT clock from (
+SELECT clock, value, r, v2 FROM (
+SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2,
+CASE
+WHEN value <> LEAD(value,1) OVER (order by clock)
+THEN value
+ELSE 'zero'
+END AS r
+FROM history_text WHERE itemid=42702
+) x2
+WHERE r='zero'
+) x3
+WHERE v2 IS NOT NULL
+);</code></pre>
+
+</div>
 <input type="radio" name="tabs" id="hosts"><label for="hosts">hosts</label><div class="tab">
 <div class='index'>
 
@@ -445,6 +495,57 @@ WHEN source=3 AND object=5 THEN 'low level discovery not perfect'
 END AS problemCategory
 FROM problem GROUP BY 2,3
 ORDER BY 2 DESC;</code></pre>
+
+</div>
+<input type="radio" name="tabs" id="proxy_history"><label for="proxy_history">proxy_history</label><div class="tab">
+<div class='index'>
+
+
+
+<ol>
+<li><a href="#3e0582b82784693c546a7411ae554a54">How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT</a></li>
+<li><a href="#4723beaf045051a3ef7bddda1592cdf0">Optimal query to identify data overload</a></li>
+<li><a href="#4adeb9b56e5930824172340f4ea80b54">Proxy with MySQL. Print URLs for latest data page for the incomming big data</a></li>
+<li><a href="#7b0c18067543e0a185bbdce4ec4f554d">Check big LLD rules and its frequency based on clock</a></li>
+<li><a href="#5da1d39aa18e6e639b5fe5b9ba9c62b3">LLD rules</a></li>
+</ol></div>
+<p id="3e0582b82784693c546a7411ae554a54">How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT</p><pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1)
+FROM proxy_history;</code></pre>
+
+<p id="4723beaf045051a3ef7bddda1592cdf0">Optimal query to identify data overload</p><pre><code>SELECT itemid,
+COUNT(*),
+AVG(LENGTH(value))
+FROM proxy_history
+WHERE proxy_history.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
+GROUP BY 1 ORDER BY 2,3 DESC;</code></pre>
+
+<p id="4adeb9b56e5930824172340f4ea80b54">Proxy with MySQL. Print URLs for latest data page for the incomming big data</p><pre><code>SELECT
+LENGTH(value),
+CONCAT('history.php?itemids%5B0%5D=', proxy_history.itemid,'&action=showlatest') AS 'URL'
+FROM proxy_history
+JOIN items ON (items.itemid=proxy_history.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE LENGTH(value) > 60000;</code></pre>
+
+<p id="7b0c18067543e0a185bbdce4ec4f554d">Check big LLD rules and its frequency based on clock</p><pre><code>SELECT
+clock,
+hosts.host,
+items.key_,
+LENGTH(value)
+FROM proxy_history
+JOIN items ON (items.itemid=proxy_history.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE items.flags=1
+AND LENGTH(value) > 6000;</code></pre>
+
+<p id="5da1d39aa18e6e639b5fe5b9ba9c62b3">LLD rules</p><pre><code>SELECT
+items.key_,
+COUNT(*),
+AVG(LENGTH(value))
+FROM proxy_history, items
+WHERE proxy_history.itemid=items.itemid
+AND items.flags=1
+GROUP BY 1 ORDER BY 3,2;</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="sessions"><label for="sessions">sessions</label><div class="tab">
