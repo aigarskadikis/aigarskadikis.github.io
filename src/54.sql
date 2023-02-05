@@ -167,7 +167,7 @@ SELECT
 hosts.host,
 items.name,
 item_rtdata.error AS error
-FROM item_rtdata, items, hosts
+FROM items, item_rtdata, hosts
 WHERE item_rtdata.state=1
 AND hosts.status=0
 AND items.status=0
