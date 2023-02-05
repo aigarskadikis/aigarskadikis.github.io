@@ -32,17 +32,41 @@ INDEX="$DEST/index.html"
 > "$INDEX"
 
 # put header
-echo "<html><head><link rel='stylesheet' type='text/css' href='../src/css.css' />" >> "$INDEX"
+echo "<html><head><link rel='stylesheet' type='text/css' href='../src/perdir.css' />" >> "$INDEX"
 
 # start body and all tabs
-echo "</head><body><div class='tabs'>" >> "$INDEX"
+echo "</head><body>" >> "$INDEX"
 
-# install toggler button
-echo "<div class='tog'>
-<label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label>
+# links to similar pages
+echo "<div class='links'>
+<a href='../z30/index.html'>3.0</a>
+<a href='../z32/index.html'>3.2</a>
+<a href='../z34/index.html'>3.4</a>
+<a href='../z40/index.html'>4.0</a>
+<a href='../z42/index.html'>4.2</a>
+<a href='../z44/index.html'>4.4</a>
+<a href='../z50/index.html'>5.0</a>
+<a href='../z52/index.html'>5.2</a>
+<a href='../z54/index.html'>5.4</a>
+<a href='../z60/index.html'>6.0</a>
+<a href='../z62/index.html'>6.2</a>
+
+
+<div class='tog'>
+<label for='toggler'><input id='singleLineToggle' name='toggler' type='checkbox' />Use single line mode</label>
 <script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src="../singleLine.togglerIE.js"><\/script>')}else{document.write('<script src="../singleLine.toggler.js"><\/script>')}</script>
 <script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script>
-</div>" >> "$INDEX"
+</div>
+
+</div>
+
+" >> "$INDEX"
+
+
+echo "<div class='tabs'>" >> "$INDEX"
+
+# install toggler button
+echo "" >> "$INDEX"
 
 # empty the index file
 > goto.inc
@@ -115,6 +139,9 @@ echo "</div>" >> "$INDEX"
 
 # put footer
 echo "</div></body></html>" >> "$INDEX"
+
+# remove trailing spaces
+sed -i 's/^[ \t]*//;s/[ \t]*$//' "$INDEX"
 
 # install default tab
 sed -i "s%<input type=\"radio\" name=\"tabs\" id=\"items\">%<input type=\"radio\" name=\"tabs\" id=\"items\" checked=\"checked\">%" "$INDEX"

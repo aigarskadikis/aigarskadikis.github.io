@@ -1,10 +1,30 @@
-<html><head><link rel='stylesheet' type='text/css' href='../src/css.css' />
-</head><body><div class='tabs'>
+<html><head><link rel='stylesheet' type='text/css' href='../src/perdir.css' />
+</head><body>
+<div class='links'>
+<a href='../z30/index.html'>3.0</a>
+<a href='../z32/index.html'>3.2</a>
+<a href='../z34/index.html'>3.4</a>
+<a href='../z40/index.html'>4.0</a>
+<a href='../z42/index.html'>4.2</a>
+<a href='../z44/index.html'>4.4</a>
+<a href='../z50/index.html'>5.0</a>
+<a href='../z52/index.html'>5.2</a>
+<a href='../z54/index.html'>5.4</a>
+<a href='../z60/index.html'>6.0</a>
+<a href='../z62/index.html'>6.2</a>
+
+
 <div class='tog'>
-<label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label>
+<label for='toggler'><input id='singleLineToggle' name='toggler' type='checkbox' />Use single line mode</label>
 <script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=../singleLine.togglerIE.js><\/script>')}else{document.write('<script src=../singleLine.toggler.js><\/script>')}</script>
 <script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script>
 </div>
+
+</div>
+
+
+<div class='tabs'>
+
 <input type="radio" name="tabs" id="hosts"><label for="hosts">hosts</label><div class="tab">
 <ol>
 <li><a href="#7019848dd6ba478ba2a2289ff27291da">Unreachable ZBX host</a></li>
@@ -38,7 +58,7 @@ interface.ip,
 interface.dns,
 interface.useip,
 CASE hosts.available
-WHEN 0 THEN 'unknown' 
+WHEN 0 THEN 'unknown'
 WHEN 1 THEN 'available'
 WHEN 2 THEN 'down'
 END AS "status",
@@ -75,36 +95,36 @@ GROUP BY 2,3
 ORDER BY 2,3;</code></pre>
 
 <p id="5fdf0d3b15ae4ca17ba8cbd05ea30a52">Items in use</p><pre><code>SELECT
-CASE items.type 
-WHEN 0 THEN 'Zabbix agent' 
-WHEN 1 THEN 'SNMPv1 agent' 
-WHEN 2 THEN 'Zabbix trapper' 
-WHEN 3 THEN 'Simple check' 
-WHEN 4 THEN 'SNMPv2 agent' 
-WHEN 5 THEN 'Zabbix internal' 
-WHEN 6 THEN 'SNMPv3 agent' 
-WHEN 7 THEN 'Zabbix agent (active) check' 
-WHEN 8 THEN 'Aggregate' 
-WHEN 9 THEN 'HTTP test (web monitoring scenario step)' 
-WHEN 10 THEN 'External check' 
-WHEN 11 THEN 'Database monitor' 
-WHEN 12 THEN 'IPMI agent' 
-WHEN 13 THEN 'SSH agent' 
-WHEN 14 THEN 'TELNET agent' 
-WHEN 15 THEN 'Calculated' 
-WHEN 16 THEN 'JMX agent' 
-WHEN 17 THEN 'SNMP trap' 
-WHEN 18 THEN 'Dependent item' 
-WHEN 19 THEN 'HTTP agent' 
-WHEN 20 THEN 'SNMP agent' 
-WHEN 21 THEN 'Script item' 
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
 END AS type,
-COUNT(*) 
-FROM items 
-JOIN hosts ON (hosts.hostid=items.hostid) 
-WHERE hosts.status=0 
-AND items.status=0 
-GROUP BY items.type 
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status=0
+AND items.status=0
+GROUP BY items.type
 ORDER BY COUNT(*) DESC;</code></pre>
 
 <p id="b2f30b1fbe530bf8e309bb702e514124">Update interval of owner in case LLD rule is dependent item</p><pre><code>SELECT master_itemid.key_, master_itemid.delay, COUNT(*)
