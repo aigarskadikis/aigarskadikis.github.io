@@ -61,7 +61,7 @@ echo "data" && mysqldump \
 --ignore-table=$DBNAME.trends \
 --ignore-table=$DBNAME.trends_uint \
 $DBNAME > "$BACKUP_DIR/data.sql" && \
-gzip --fast "$BACKUP_DIR/data.sql" && \
+echo "compressing data" && gzip --fast "$BACKUP_DIR/data.sql" && \
 echo "quick restore" && mysqldump \
 --defaults-file=/etc/zabbix/zabbix_backup.cnf \
 --flush-logs \
@@ -74,7 +74,7 @@ echo "quick restore" && mysqldump \
 --ignore-table=$DBNAME.trends \
 --ignore-table=$DBNAME.trends_uint \
 $DBNAME > "$BACKUP_DIR/quick.restore.sql" && \
-gzip --fast "$BACKUP_DIR/quick.restore.sql"
+echo "compressing quick restore" && gzip --fast "$BACKUP_DIR/quick.restore.sql"
 mv "$BACKUP_DIR/schema.sql.gz" "$BACKUP_DIR/schema.$DATE.sql.gz"
 mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz"
 mv "$BACKUP_DIR/quick.restore.sql.gz" "$BACKUP_DIR/quick.restore.$DATE.sql.gz"
