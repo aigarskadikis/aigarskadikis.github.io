@@ -32,7 +32,13 @@ INDEX="$DEST/index.html"
 > "$INDEX"
 
 # put header
-echo "<html><head><link rel='stylesheet' type='text/css' href='../src/perdir.css' />" >> "$INDEX"
+echo "<html><head>
+<meta name='viewport' id='viewport' content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' />
+<meta http-equiv='X-UA-Compatible' content='IE=Edge,chrome=1' />
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../src/perdir.css' />
+" >> "$INDEX"
 
 # start body and all tabs
 echo "</head><body>" >> "$INDEX"
