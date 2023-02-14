@@ -47,7 +47,11 @@ pre{
     margin:0 0 1em;
     background-color:#FFF7F0;
     border-radius:3px;
-    #border:1px solid #CCCCCC
+    #border:1px solid #CCCCCC;
+	white-space: pre-wrap;
+    overflow-x: auto;
+  word-wrap: break-word;
+
 }
 #searchInputArea{
     display:flex;
