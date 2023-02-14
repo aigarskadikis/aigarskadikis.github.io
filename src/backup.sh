@@ -38,6 +38,7 @@ BACKUP_DIR=/backup
 DBNAME=zabbix
 DATE=$(date +%Y%m%d.%H%M)
 mkdir -p "$BACKUP_DIR"
+echo "schema"
 mysqldump \
 --defaults-file=/etc/zabbix/zabbix_backup.cnf \
 --set-gtid-purged=OFF \
@@ -46,7 +47,7 @@ mysqldump \
 --create-options \
 --no-data \
 $DBNAME | gzip --fast > "$BACKUP_DIR/schema.sql.gz" && \
-mysqldump \
+echo "data" && mysqldump \
 --defaults-file=/etc/zabbix/zabbix_backup.cnf \
 --flush-logs \
 --single-transaction \
@@ -59,9 +60,24 @@ mysqldump \
 --ignore-table=$DBNAME.history_uint \
 --ignore-table=$DBNAME.trends \
 --ignore-table=$DBNAME.trends_uint \
-$DBNAME | gzip --fast > "$BACKUP_DIR/data.sql.gz" && \
-mv "$BACKUP_DIR/schema.sql.gz" "$BACKUP_DIR/schema.$DATE.sql.gz" && \
-mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz" && \
+$DBNAME > "$BACKUP_DIR/data.sql" && \
+gzip --fast "$BACKUP_DIR/data.sql" && \
+echo "quick restore" && mysqldump \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/quick.restore.sql" && \
+gzip --fast "$BACKUP_DIR/quick.restore.sql"
+mv "$BACKUP_DIR/schema.sql.gz" "$BACKUP_DIR/schema.$DATE.sql.gz"
+mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz"
+mv "$BACKUP_DIR/quick.restore.sql.gz" "$BACKUP_DIR/quick.restore.$DATE.sql.gz"
 find /backup -type f -mtime +30
 find /backup -type f -mtime +30 -delete
 
