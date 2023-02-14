@@ -35,23 +35,33 @@ EOF
 
 # 30 days configuration backup if MySQL 8
 BACKUP_DIR=/backup
+DBNAME=zabbix
+DATE=$(date +%Y%m%d.%H%M)
 mkdir -p "$BACKUP_DIR"
+mysqldump \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+$DBNAME | gzip --fast > "$BACKUP_DIR/schema.sql.gz" && \
 mysqldump \
 --defaults-file=/etc/zabbix/zabbix_backup.cnf \
 --flush-logs \
 --single-transaction \
 --no-tablespaces \
 --set-gtid-purged=OFF \
---ignore-table=zabbix.history \
---ignore-table=zabbix.history_log \
---ignore-table=zabbix.history_str \
---ignore-table=zabbix.history_text \
---ignore-table=zabbix.history_uint \
---ignore-table=zabbix.trends \
---ignore-table=zabbix.trends_uint \
-zabbix > "$BACKUP_DIR/backup.sql" && \
-gzip --best "$BACKUP_DIR/backup.sql" && \
-mv "$BACKUP_DIR/backup.sql.gz" "$BACKUP_DIR/quick.restore.$(date +%Y%m%d.%H%M).sql.gz"
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME | gzip --fast > "$BACKUP_DIR/data.sql.gz" && \
+mv "$BACKUP_DIR/schema.sql.gz" "$BACKUP_DIR/schema.$DATE.sql.gz" && \
+mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz" && \
 find /backup -type f -mtime +30
 find /backup -type f -mtime +30 -delete
 
