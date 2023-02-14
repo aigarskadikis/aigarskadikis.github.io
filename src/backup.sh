@@ -17,8 +17,24 @@ cd /usr/local/bin && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/nginx/conf.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 
+# create a backup user
+mysql -e "
+CREATE USER 'zbx_backup'@'127.0.0.1' IDENTIFIED BY 'zabbix';
+GRANT LOCK TABLES, SELECT ON zabbix.* TO 'zbx_backup'@'127.0.0.1';
+GRANT RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';
+FLUSH PRIVILEGES;
+"
+
+# install credentials file for read-only backup
+cat << 'EOF' > /etc/zabbix/zabbix_backup.cnf
+[mysqldump]
+host=127.0.0.1
+user=zbx_backup
+password=zabbix
+EOF
+
 # 30 days configuration backup if MySQL 8
-BACKUP_DIR=/home/zabbix/backup
+BACKUP_DIR=/backup
 mkdir -p "$BACKUP_DIR"
 mysqldump \
 --defaults-file=/etc/zabbix/zabbix_backup.cnf \
@@ -36,12 +52,12 @@ mysqldump \
 zabbix > "$BACKUP_DIR/backup.sql" && \
 gzip --best "$BACKUP_DIR/backup.sql" && \
 mv "$BACKUP_DIR/backup.sql.gz" "$BACKUP_DIR/quick.restore.$(date +%Y%m%d.%H%M).sql.gz"
-find /home/zabbix/backup -type f -mtime +30
-find /home/zabbix/backup -type f -mtime +30 -delete
+find /backup -type f -mtime +30
+find /backup -type f -mtime +30 -delete
 
 # rotate backups for 30 days
-find /home/zabbix/backup -type f -mtime +30
-find /home/zabbix/backup -type f -mtime +30 -delete
+find /backup -type f -mtime +30
+find /backup -type f -mtime +30 -delete
 
 # Backup and compress zabbix server config with a purpose to restore it on other machine
 tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo
