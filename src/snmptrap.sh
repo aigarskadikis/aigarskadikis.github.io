@@ -37,3 +37,23 @@ cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/B1JdADqcyosJgONiHFxK21FYsOmcVP
 # bash parser
 cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/AiddADqcyosJgONiHFxK21FYsOmcVPjGP4X64Cl0bFy0Sxh6dQDRjk6f8dQ1bOCTQt37h4nPN7dqU5XiljBY1ISkB57iky9OaCllx2Pvw7ADF5H5hz2M/woIhS5kB6SZzGLqiZ/L4ObszSmHD/zqU/EptJXvrKiRxNPL3vREPA/bxK/iefk//ici0J76T5Pgu6B5JySWc9UrDRuOwLJH8gF+ac4z1dKxDWCbIjxuS28RZQlunU1OAlIr/CyCfBfC1Pp5b+H1lMr4yeBne7oOVqx5ytStJs+J/X+S3ck3O115oqn6NvsvaamKz6hnaSG91RKb+A8fUXoXwpXvTI8fmeOCsi9v9d1XDStnvix0EOqLqRFE9JrRiuKUHlSfkrtd1YAjr+Ab8+SpyXoxkYvt5qIsdJkT7uLhAiEcxHr2xtaZrVus3qsvA9pQ+uMtk9YIIG8auFD6ImlPI/52vUID9uBDVIv5x/1D5fhmBPRE8c9holuN9pWksYmlqewZ2deiPvfKNxpJNGp7ReBDjSh9/koaB8TWMcOKdARr52F498EGjzMeB6P7XNtUoi/gmHjgjpxDLLApKtZyENPXehKqMCUlTCKH03YuyiCezmurGbkkFAPQHKfDKSFJuahsOR/qAHOO7UwvzMluzaQFlIzUq9xpCvZjTLwpfpUnhIVxgY/GZw+9c6gweJWVUnfehDrKGqhvXFmAyjHtgTzjlpry2jgLBP72Dgt3PRLCAACEWwpFaPLuqgABwwSAUAAAjIZMILHEZ/sCAAAAAARZWg==" | base64 --decode | unxz | tar -xv
 
+# send incorrect SNMPv3 engineID
+snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe07 127.0.0.1 0 1.2.3
+ls /tmp
+
+# send incorrect SNMPv2 community
+snmptrap -v 1 -c moon 127.0.0.1 '.1.3.6.1.6.3.1.1.5.3' '0.0.0.0' 6 33 '55' .1.3.6.1.6.3.1.1.5.3 s "eth0"
+ls /tmp
+
+# correct SNMPv3 engineID
+snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe08 127.0.0.1 0 1.2.3
+ls /tmp
+cat /tmp/zabbix_traps.tmp
+rm -rf /tmp/zabbix_traps.tmp
+
+# correct SNMPv2 community
+snmptrap -v 1 -c earth 127.0.0.1 '.1.3.6.1.6.3.1.1.5.3' '0.0.0.0' 6 33 '55' .1.3.6.1.6.3.1.1.5.3 s "eth0"
+ls /tmp
+cat /tmp/zabbix_traps.tmp
+rm -rf /tmp/zabbix_traps.tmp
+
