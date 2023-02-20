@@ -1241,6 +1241,25 @@ AND items.status=0
 AND items.flags<>2
 GROUP BY 1,2
 ORDER BY 3 ASC;</code></pre>
+Size of MySQL DB<pre><code>SELECT
+ENGINE,
+TABLE_TYPE,
+TABLE_SCHEMA AS `DATABASE`,
+TABLE_NAME AS `TABLE`,
+ROUND(1.0*(DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024,2) AS `TOTAL SIZE (MB)`,
+ROUND(1.0*DATA_LENGTH/1024/1024, 2) AS `DATA SIZE (MB)`,
+ROUND(1.0*INDEX_LENGTH/1024/1024, 2) AS `INDEX SIZE (MB)`,
+ROUND(1.0*DATA_FREE/1024/1024, 2) AS `FREE SIZE (MB)`,
+CURDATE() AS `TODAY`,
+ROUND(DATA_FREE/(DATA_LENGTH+INDEX_LENGTH)*100,2) 'FRAGMENTED %',
+TABLE_ROWS,
+ROW_FORMAT,
+TABLE_COLLATION,
+VERSION
+FROM information_schema.TABLES
+WHERE table_schema NOT IN('information_schema', 'mysql','sys', 'performance_schema')
+ORDER BY (DATA_LENGTH + INDEX_LENGTH)
+DESC;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
