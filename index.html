@@ -16,28 +16,66 @@ cd /etc/cron.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /usr/local/bin && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/nginx/conf.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
-30 days configuration backup if MySQL 8<pre><code>BACKUP_DIR=/home/zabbix/backup
+Create a backup user<pre><code>mysql -e "
+CREATE USER 'zbx_backup'@'127.0.0.1' IDENTIFIED BY 'zabbix';
+GRANT LOCK TABLES, SELECT ON zabbix.* TO 'zbx_backup'@'127.0.0.1';
+GRANT RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';
+FLUSH PRIVILEGES;
+"</code></pre>
+Install credentials file for read-only backup<pre><code>cat << 'EOF' > /etc/zabbix/zabbix_backup.cnf
+[mysqldump]
+host=127.0.0.1
+user=zbx_backup
+password=zabbix
+EOF</code></pre>
+30 days configuration backup if MySQL 8<pre><code>BACKUP_DIR=/backup
+DBNAME=zabbix
+DATE=$(date +%Y%m%d.%H%M)
 mkdir -p "$BACKUP_DIR"
+echo "schema"
 mysqldump \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+$DBNAME | gzip --fast > "$BACKUP_DIR/schema.sql.gz" && \
+echo "data" && mysqldump \
 --defaults-file=/etc/zabbix/zabbix_backup.cnf \
 --flush-logs \
 --single-transaction \
 --no-tablespaces \
 --set-gtid-purged=OFF \
---ignore-table=zabbix.history \
---ignore-table=zabbix.history_log \
---ignore-table=zabbix.history_str \
---ignore-table=zabbix.history_text \
---ignore-table=zabbix.history_uint \
---ignore-table=zabbix.trends \
---ignore-table=zabbix.trends_uint \
-zabbix > "$BACKUP_DIR/backup.sql" && \
-gzip --best "$BACKUP_DIR/backup.sql" && \
-mv "$BACKUP_DIR/backup.sql.gz" "$BACKUP_DIR/quick.restore.$(date +%Y%m%d.%H%M).sql.gz"
-find /home/zabbix/backup -type f -mtime +30
-find /home/zabbix/backup -type f -mtime +30 -delete</code></pre>
-Rotate backups for 30 days<pre><code>find /home/zabbix/backup -type f -mtime +30
-find /home/zabbix/backup -type f -mtime +30 -delete</code></pre>
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/data.sql" && \
+echo "compressing data" && gzip --fast "$BACKUP_DIR/data.sql" && \
+echo "quick restore" && mysqldump \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/quick.restore.sql" && \
+echo "compressing quick restore" && gzip --fast "$BACKUP_DIR/quick.restore.sql"
+mv "$BACKUP_DIR/schema.sql.gz" "$BACKUP_DIR/schema.$DATE.sql.gz"
+mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz"
+mv "$BACKUP_DIR/quick.restore.sql.gz" "$BACKUP_DIR/quick.restore.$DATE.sql.gz"
+find /backup -type f -mtime +30
+find /backup -type f -mtime +30 -delete</code></pre>
+Rotate backups for 30 days<pre><code>find /backup -type f -mtime +30
+find /backup -type f -mtime +30 -delete</code></pre>
 Backup and compress zabbix server config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress partitioning script and configuration files<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
@@ -224,6 +262,7 @@ List of MySQL tables/partitions by size<pre><code>du -ab /var/lib/mysql > /tmp/s
 du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt</code></pre>
 Backup data directory. Fastest way time-wise<pre><code>systemctl stop mysqld
 tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
+Check "Max open files" for MySQL daemon. This is important if a lot of DB table partition are used<pre><code>cat /proc/$(ps auxww | grep "[m]ysqld" | awk '{print $2}')/limits | grep "Max open files"</code></pre>
 Authorize in MySQL<pre><code>mysql --host=127.0.0.1 --database=zabbixDB --user=zbx_srv --password='zabbix' --port=3306</code></pre>
 Track how DB table partitions grow<pre><code>cd /var/lib/mysql/zabbix && watch -n1 'ls -Rltr | tail -10'</code></pre>
 List of open files per MySQL server. If tables has a lot of partitions it will be a lot of files<pre><code>lsof -p $(pidof mysqld) > /tmp/mysqld.list.open.files.txt</code></pre>
@@ -310,6 +349,58 @@ Schema backup for MySQL 8. Credentials embeded in command<pre><code>mysqldump \
 zabbix | gzip --fast > schema.sql.gz</code></pre>
 <p>Download this section: <a href="src/my.sh">https://aigarskadikis.github.io/src/my.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh</a></p>
+</div>
+<input type="radio" name="tabs" id="mysqlsh"><label for="mysqlsh">mysqlsh</label><div class="tab">
+Switch to SQL mode<pre><code>\sql</code></pre>
+Change global variable in order to allow MySQL work with external directories:<pre><code>set global local_infile = 'on';</code></pre>
+Switch to JavaScript mode<pre><code>\js</code></pre>
+Set DB name<pre><code>DBname="zabbix"</code></pre>
+Set destination directory<pre><code>DBdumpath="/tmp"</code></pre>
+Download schema<pre><code>util.dumpSchemas([DBname],DBdumpath+"/zabbix_schema.dump", {ddlOnly: true, threads: 8, showProgress: true});</code></pre>
+Dump all<pre><code>DBname="zabbix"
+DBdumpath="/tmp"
+util.dumpTables(DBname, [], DBdumpath + DBname, {"all": true,"threads": 4,"bytesPerChunk": "256M"});</code></pre>
+Download configuration<pre><code>util.dumpSchemas(
+[DBname],
+DBdumpath+"/zabbix_configuration.dump", {
+excludeTables:[
+DBname+".history",
+DBname+".history_uint",
+DBname+".history_log",
+DBname+".history_text",
+DBname+".history_str",
+DBname+".trends",
+DBname+".trends_uint"
+], threads: 8, showProgress: true}
+);</code></pre>
+Download configuration with zstd compression<pre><code>util.dumpSchemas(
+[DBname],
+DBdumpath+"/zabbix_configuration.dump.zstd", {
+excludeTables:[
+DBname+".history",
+DBname+".history_uint",
+DBname+".history_log",
+DBname+".history_text",
+DBname+".history_str",
+DBname+".trends",
+DBname+".trends_uint"
+], threads: 8, compression: "zstd", showProgress: true}
+);</code></pre>
+Download configuration with gzip compression<pre><code>util.dumpSchemas(
+[DBname],
+DBdumpath+"/zabbix_configuration.dump.gzip", {
+excludeTables:[
+DBname+".history",
+DBname+".history_uint",
+DBname+".history_log",
+DBname+".history_text",
+DBname+".history_str",
+DBname+".trends",
+DBname+".trends_uint"
+], threads: 8, compression: "gzip", showProgress: true}
+);</code></pre>
+<p>Download this section: <a href="src/mysqlsh.sh">https://aigarskadikis.github.io/src/mysqlsh.sh</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysqlsh.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysqlsh.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="sed"><label for="sed">sed</label><div class="tab">
 Reinstall values which have been already customized<pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
@@ -1150,6 +1241,52 @@ AND items.status=0
 AND items.flags<>2
 GROUP BY 1,2
 ORDER BY 3 ASC;</code></pre>
+Size of MySQL DB<pre><code>SELECT
+ENGINE,
+TABLE_TYPE,
+TABLE_SCHEMA AS `DATABASE`,
+TABLE_NAME AS `TABLE`,
+ROUND(1.0*(DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024,2) AS `TOTAL SIZE (MB)`,
+ROUND(1.0*DATA_LENGTH/1024/1024, 2) AS `DATA SIZE (MB)`,
+ROUND(1.0*INDEX_LENGTH/1024/1024, 2) AS `INDEX SIZE (MB)`,
+ROUND(1.0*DATA_FREE/1024/1024, 2) AS `FREE SIZE (MB)`,
+CURDATE() AS `TODAY`,
+ROUND(DATA_FREE/(DATA_LENGTH+INDEX_LENGTH)*100,2) 'FRAGMENTED %',
+TABLE_ROWS,
+ROW_FORMAT,
+TABLE_COLLATION,
+VERSION
+FROM information_schema.TABLES
+WHERE table_schema NOT IN('information_schema', 'mysql','sys', 'performance_schema')
+ORDER BY (DATA_LENGTH + INDEX_LENGTH)
+DESC;</code></pre>
+Detect parallelity<pre><code>SELECT
+hosts.host,
+items.delay,
+MOD(items.itemid,table1.inSeconds) AS offset,
+GROUP_CONCAT(items.itemid),
+COUNT(*)
+FROM items
+JOIN (
+SELECT DISTINCT delay, CASE delay
+WHEN '10s' THEN '10'
+WHEN '12s' THEN '12'
+WHEN '15s' THEN '15'
+WHEN '1m' THEN '60'
+WHEN '2m' THEN '120'
+WHEN '3m' THEN '180'
+WHEN '5m' THEN '300'
+WHEN '15m' THEN '900'
+WHEN '1h' THEN '3600'
+WHEN '1d' THEN '86400'
+ELSE '0'
+END AS inSeconds
+FROM items
+) table1 ON table1.delay=items.delay
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status=0 AND items.status=0
+GROUP BY 1,2,3
+HAVING COUNT(*) > 1;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>

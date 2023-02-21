@@ -6,6 +6,9 @@ du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt
 systemctl stop mysqld
 tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql
 
+# check "Max open files" for MySQL daemon. this is important if a lot of DB table partition are used
+cat /proc/$(ps auxww | grep "[m]ysqld" | awk '{print $2}')/limits | grep "Max open files"
+
 # Authorize in MySQL
 mysql --host=127.0.0.1 --database=zabbixDB --user=zbx_srv --password='zabbix' --port=3306
 

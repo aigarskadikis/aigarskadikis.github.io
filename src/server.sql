@@ -738,3 +738,53 @@ AND items.flags<>2
 GROUP BY 1,2
 ORDER BY 3 ASC;
 
+--size of MySQL DB
+SELECT
+ENGINE,
+TABLE_TYPE,
+TABLE_SCHEMA AS `DATABASE`,
+TABLE_NAME AS `TABLE`,
+ROUND(1.0*(DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024,2) AS `TOTAL SIZE (MB)`,
+ROUND(1.0*DATA_LENGTH/1024/1024, 2) AS `DATA SIZE (MB)`,
+ROUND(1.0*INDEX_LENGTH/1024/1024, 2) AS `INDEX SIZE (MB)`,
+ROUND(1.0*DATA_FREE/1024/1024, 2) AS `FREE SIZE (MB)`,
+CURDATE() AS `TODAY`,
+ROUND(DATA_FREE/(DATA_LENGTH+INDEX_LENGTH)*100,2) 'FRAGMENTED %',
+TABLE_ROWS,
+ROW_FORMAT,
+TABLE_COLLATION,
+VERSION
+FROM information_schema.TABLES
+WHERE table_schema NOT IN('information_schema', 'mysql','sys', 'performance_schema')
+ORDER BY (DATA_LENGTH + INDEX_LENGTH)
+DESC;
+
+--detect parallelity
+SELECT
+hosts.host,
+items.delay,
+MOD(items.itemid,table1.inSeconds) AS offset,
+GROUP_CONCAT(items.itemid),
+COUNT(*)
+FROM items
+JOIN (
+SELECT DISTINCT delay, CASE delay
+WHEN '10s' THEN '10'
+WHEN '12s' THEN '12'
+WHEN '15s' THEN '15'
+WHEN '1m' THEN '60'
+WHEN '2m' THEN '120'
+WHEN '3m' THEN '180'
+WHEN '5m' THEN '300'
+WHEN '15m' THEN '900'
+WHEN '1h' THEN '3600'
+WHEN '1d' THEN '86400'
+ELSE '0'
+END AS inSeconds
+FROM items
+) table1 ON table1.delay=items.delay
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status=0 AND items.status=0
+GROUP BY 1,2,3
+HAVING COUNT(*) > 1;
+
