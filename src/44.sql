@@ -133,10 +133,21 @@ SELECT
 hosts.host,
 items.name,
 item_rtdata.error AS error
-FROM item_rtdata, items, hosts
+FROM items, item_rtdata, hosts
 WHERE item_rtdata.state=1
 AND hosts.status=0
 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;
+
+--discard all users which is using frontend
+DELETE FROM session;
+
+--scan 'history_text' table and accidentally stored integers, decimal numbers, log entries and short strings
+DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=4);
+DELETE FROM history_text WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>4);
+
+--scan 'history_str' table and accidentally stored integers, decimal numbers, log entries and long text strings
+DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=1);
+DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>1);
 

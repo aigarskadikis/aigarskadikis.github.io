@@ -1,7 +1,8 @@
---How many values is in the backlog. does not work on oracle proxy becuase of LIMIT
-SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1) FROM proxy_history;
+--How many values is in the backlog. does not work on oracle proxy becuase of LIMIT. Zabbix 4.0, 5.0, 6.0
+SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1)
+FROM proxy_history;
 
---Optimal query to identify data overload
+--Optimal query to identify data overload. Zabbix 4.0, 5.0, 6.0
 SELECT itemid,
 COUNT(*),
 AVG(LENGTH(value))
@@ -9,7 +10,7 @@ FROM proxy_history
 WHERE proxy_history.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1 ORDER BY 2,3 DESC;
 
---proxy with MySQL. print URLs for latest data page for the incomming big data
+--proxy with MySQL. print URLs for latest data page for the incomming big data. Zabbix 4.0, 5.0, 6.0
 SELECT
 LENGTH(value),
 CONCAT('history.php?itemids%5B0%5D=', proxy_history.itemid,'&action=showlatest') AS 'URL'
@@ -18,7 +19,7 @@ JOIN items ON (items.itemid=proxy_history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE LENGTH(value) > 60000;
 
---check big LLD rules and its frequency based on clock
+--check big LLD rules and its frequency based on clock. Zabbix 4.0, 5.0, 6.0
 SELECT
 clock,
 hosts.host,
@@ -30,7 +31,7 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE items.flags=1
 AND LENGTH(value) > 6000;
 
---LLD rules
+--LLD rules. Zabbix 4.0, 5.0, 6.0
 SELECT
 items.key_,
 COUNT(*),

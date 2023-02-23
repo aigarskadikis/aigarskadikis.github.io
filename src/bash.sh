@@ -50,6 +50,16 @@ AND t1.itemid=$ITEMID
 " | mysql zabbix
 } done
 
+# print metrics on screen
+while true; do
+echo -n 'total: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[];
+echo -n 'user: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,user];
+echo -n 'system: '&& zabbix_get -s 127.0.0.1 -k system.cpu.util[,system];
+echo -n 'guest: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest];
+echo -n 'guest_nice: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest_nice];
+echo '------------'
+sleep 1; done;
+
 # erase dublicate data in table 'history_str'. this does NOT work like discard unchanged
 mysql \
 --database='zabbix' \

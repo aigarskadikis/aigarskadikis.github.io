@@ -17,31 +17,73 @@ cd /usr/local/bin && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/nginx/conf.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 
+# create a backup user
+mysql -e "
+CREATE USER 'zbx_backup'@'127.0.0.1' IDENTIFIED BY 'zabbix';
+GRANT LOCK TABLES, SELECT ON zabbix.* TO 'zbx_backup'@'127.0.0.1';
+GRANT RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';
+FLUSH PRIVILEGES;
+"
+
+# install credentials file for read-only backup
+cat << 'EOF' > /etc/zabbix/zabbix_backup.cnf
+[mysqldump]
+host=127.0.0.1
+user=zbx_backup
+password=zabbix
+EOF
+
 # 30 days configuration backup if MySQL 8
-BACKUP_DIR=/home/zabbix/backup
+BACKUP_DIR=/backup
+DBNAME=zabbix
+DATE=$(date +%Y%m%d.%H%M)
 mkdir -p "$BACKUP_DIR"
+echo "schema"
 mysqldump \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+$DBNAME | gzip --fast > "$BACKUP_DIR/schema.sql.gz" && \
+echo "data" && mysqldump \
 --defaults-file=/etc/zabbix/zabbix_backup.cnf \
 --flush-logs \
 --single-transaction \
 --no-tablespaces \
 --set-gtid-purged=OFF \
---ignore-table=zabbix.history \
---ignore-table=zabbix.history_log \
---ignore-table=zabbix.history_str \
---ignore-table=zabbix.history_text \
---ignore-table=zabbix.history_uint \
---ignore-table=zabbix.trends \
---ignore-table=zabbix.trends_uint \
-zabbix > "$BACKUP_DIR/backup.sql" && \
-gzip --best "$BACKUP_DIR/backup.sql" && \
-mv "$BACKUP_DIR/backup.sql.gz" "$BACKUP_DIR/quick.restore.$(date +%Y%m%d.%H%M).sql.gz"
-find /home/zabbix/backup -type f -mtime +30
-find /home/zabbix/backup -type f -mtime +30 -delete
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/data.sql" && \
+echo "compressing data" && gzip --fast "$BACKUP_DIR/data.sql" && \
+echo "quick restore" && mysqldump \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/quick.restore.sql" && \
+echo "compressing quick restore" && gzip --fast "$BACKUP_DIR/quick.restore.sql"
+mv "$BACKUP_DIR/schema.sql.gz" "$BACKUP_DIR/schema.$DATE.sql.gz"
+mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz"
+mv "$BACKUP_DIR/quick.restore.sql.gz" "$BACKUP_DIR/quick.restore.$DATE.sql.gz"
+find /backup -type f -mtime +30
+find /backup -type f -mtime +30 -delete
 
 # rotate backups for 30 days
-find /home/zabbix/backup -type f -mtime +30
-find /home/zabbix/backup -type f -mtime +30 -delete
+find /backup -type f -mtime +30
+find /backup -type f -mtime +30 -delete
 
 # Backup and compress zabbix server config with a purpose to restore it on other machine
 tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo

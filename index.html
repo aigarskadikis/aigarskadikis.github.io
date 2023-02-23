@@ -1,6 +1,5 @@
-<html><head><style type='text/css'>
-.tabs .tab,.tabs input[type=radio]:checked+label{background:#fff}.tabs,.tabs label,body{display:flex}.tabs .tab,.tabs input[type=radio]{display:none}#searchResultDlg,#searchResultDlgContent{overflow:auto;overscroll-behavior:contain}#closeIcon,.tabs input[type=radio]:checked+label+.tab{display:block}.tabs{flex-wrap:wrap;width:100%}.tabs label{order:1;justify-content:center;align-items:center;padding:.1rem .5rem;margin:0;cursor:pointer}.tabs .tab{order:9;flex-grow:1;width:100%;height:1000rem;padding:.4rem}body{background:#dcdcdc;min-height:100vh;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-weight:300;line-height:1.5;font-size:100%}pre{padding:.3em 2em .3em .5em;margin:0 0 1em;background-color:#FFF7F0;border-radius:3px;border:1px solid #CCCCCC}#searchInputArea{display:flex;position:absolute;right:50px;top:5px}#searchInput{margin-left:20px;border:0}#searchInput:focus{outline:0}#searchResultDlg{display:none;flex-direction:column;position:fixed;top:50px;left:100px;right:100px;bottom:50px;padding:10px;background-color:#dcdcdc}#searchResultDlgContent{display:grid;flex-direction:column;height:100%}#closeIcon{color:#778899;font-size:55px;position:fixed;top:20px;right:50px;cursor:pointer}.resultBlock{width:100%;border-bottom:1px solid #000}.resultBlock .tabName{font-size:1.2em;font-weight:700}.tog{width:100%}a{text-decoration:none;color:blue}a:hover{text-decoration:underline}ol li{list-style-type:none}p,li,ol{width:100%;padding:0 0 0 0;margin:0 0 0 0}ol{padding:0 0 1em}
-</style></head><body onLoad='initDataArray()'><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=singleLine.togglerIE.js><\/script>')}else{document.write('<script src=singleLine.toggler.js><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>
+<html><head><link rel='stylesheet' type='text/css' href='./src/css.css' />
+</head><body onLoad='initDataArray()'><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=singleLine.togglerIE.js><\/script>')}else{document.write('<script src=singleLine.toggler.js><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>
 <input type="radio" name="tabs" id="backup"><label for="backup">backup</label><div class="tab">
 Process list<pre><code>mysql \
 --host=dns.of.ip \
@@ -17,28 +16,66 @@ cd /etc/cron.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /usr/local/bin && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/nginx/conf.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
-30 days configuration backup if MySQL 8<pre><code>BACKUP_DIR=/home/zabbix/backup
+Create a backup user<pre><code>mysql -e "
+CREATE USER 'zbx_backup'@'127.0.0.1' IDENTIFIED BY 'zabbix';
+GRANT LOCK TABLES, SELECT ON zabbix.* TO 'zbx_backup'@'127.0.0.1';
+GRANT RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';
+FLUSH PRIVILEGES;
+"</code></pre>
+Install credentials file for read-only backup<pre><code>cat << 'EOF' > /etc/zabbix/zabbix_backup.cnf
+[mysqldump]
+host=127.0.0.1
+user=zbx_backup
+password=zabbix
+EOF</code></pre>
+30 days configuration backup if MySQL 8<pre><code>BACKUP_DIR=/backup
+DBNAME=zabbix
+DATE=$(date +%Y%m%d.%H%M)
 mkdir -p "$BACKUP_DIR"
+echo "schema"
 mysqldump \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+$DBNAME | gzip --fast > "$BACKUP_DIR/schema.sql.gz" && \
+echo "data" && mysqldump \
 --defaults-file=/etc/zabbix/zabbix_backup.cnf \
 --flush-logs \
 --single-transaction \
 --no-tablespaces \
 --set-gtid-purged=OFF \
---ignore-table=zabbix.history \
---ignore-table=zabbix.history_log \
---ignore-table=zabbix.history_str \
---ignore-table=zabbix.history_text \
---ignore-table=zabbix.history_uint \
---ignore-table=zabbix.trends \
---ignore-table=zabbix.trends_uint \
-zabbix > "$BACKUP_DIR/backup.sql" && \
-gzip --best "$BACKUP_DIR/backup.sql" && \
-mv "$BACKUP_DIR/backup.sql.gz" "$BACKUP_DIR/quick.restore.$(date +%Y%m%d.%H%M).sql.gz"
-find /home/zabbix/backup -type f -mtime +30
-find /home/zabbix/backup -type f -mtime +30 -delete</code></pre>
-Rotate backups for 30 days<pre><code>find /home/zabbix/backup -type f -mtime +30
-find /home/zabbix/backup -type f -mtime +30 -delete</code></pre>
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/data.sql" && \
+echo "compressing data" && gzip --fast "$BACKUP_DIR/data.sql" && \
+echo "quick restore" && mysqldump \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/quick.restore.sql" && \
+echo "compressing quick restore" && gzip --fast "$BACKUP_DIR/quick.restore.sql"
+mv "$BACKUP_DIR/schema.sql.gz" "$BACKUP_DIR/schema.$DATE.sql.gz"
+mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz"
+mv "$BACKUP_DIR/quick.restore.sql.gz" "$BACKUP_DIR/quick.restore.$DATE.sql.gz"
+find /backup -type f -mtime +30
+find /backup -type f -mtime +30 -delete</code></pre>
+Rotate backups for 30 days<pre><code>find /backup -type f -mtime +30
+find /backup -type f -mtime +30 -delete</code></pre>
 Backup and compress zabbix server config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress partitioning script and configuration files<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
@@ -225,6 +262,7 @@ List of MySQL tables/partitions by size<pre><code>du -ab /var/lib/mysql > /tmp/s
 du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt</code></pre>
 Backup data directory. Fastest way time-wise<pre><code>systemctl stop mysqld
 tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
+Check "Max open files" for MySQL daemon. This is important if a lot of DB table partition are used<pre><code>cat /proc/$(ps auxww | grep "[m]ysqld" | awk '{print $2}')/limits | grep "Max open files"</code></pre>
 Authorize in MySQL<pre><code>mysql --host=127.0.0.1 --database=zabbixDB --user=zbx_srv --password='zabbix' --port=3306</code></pre>
 Track how DB table partitions grow<pre><code>cd /var/lib/mysql/zabbix && watch -n1 'ls -Rltr | tail -10'</code></pre>
 List of open files per MySQL server. If tables has a lot of partitions it will be a lot of files<pre><code>lsof -p $(pidof mysqld) > /tmp/mysqld.list.open.files.txt</code></pre>
@@ -312,6 +350,58 @@ zabbix | gzip --fast > schema.sql.gz</code></pre>
 <p>Download this section: <a href="src/my.sh">https://aigarskadikis.github.io/src/my.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh</a></p>
 </div>
+<input type="radio" name="tabs" id="mysqlsh"><label for="mysqlsh">mysqlsh</label><div class="tab">
+Switch to SQL mode<pre><code>\sql</code></pre>
+Change global variable in order to allow MySQL work with external directories:<pre><code>set global local_infile = 'on';</code></pre>
+Switch to JavaScript mode<pre><code>\js</code></pre>
+Set DB name<pre><code>DBname="zabbix"</code></pre>
+Set destination directory<pre><code>DBdumpath="/tmp"</code></pre>
+Download schema<pre><code>util.dumpSchemas([DBname],DBdumpath+"/zabbix_schema.dump", {ddlOnly: true, threads: 8, showProgress: true});</code></pre>
+Dump all<pre><code>DBname="zabbix"
+DBdumpath="/tmp"
+util.dumpTables(DBname, [], DBdumpath + DBname, {"all": true,"threads": 4,"bytesPerChunk": "256M"});</code></pre>
+Download configuration<pre><code>util.dumpSchemas(
+[DBname],
+DBdumpath+"/zabbix_configuration.dump", {
+excludeTables:[
+DBname+".history",
+DBname+".history_uint",
+DBname+".history_log",
+DBname+".history_text",
+DBname+".history_str",
+DBname+".trends",
+DBname+".trends_uint"
+], threads: 8, showProgress: true}
+);</code></pre>
+Download configuration with zstd compression<pre><code>util.dumpSchemas(
+[DBname],
+DBdumpath+"/zabbix_configuration.dump.zstd", {
+excludeTables:[
+DBname+".history",
+DBname+".history_uint",
+DBname+".history_log",
+DBname+".history_text",
+DBname+".history_str",
+DBname+".trends",
+DBname+".trends_uint"
+], threads: 8, compression: "zstd", showProgress: true}
+);</code></pre>
+Download configuration with gzip compression<pre><code>util.dumpSchemas(
+[DBname],
+DBdumpath+"/zabbix_configuration.dump.gzip", {
+excludeTables:[
+DBname+".history",
+DBname+".history_uint",
+DBname+".history_log",
+DBname+".history_text",
+DBname+".history_str",
+DBname+".trends",
+DBname+".trends_uint"
+], threads: 8, compression: "gzip", showProgress: true}
+);</code></pre>
+<p>Download this section: <a href="src/mysqlsh.sh">https://aigarskadikis.github.io/src/mysqlsh.sh</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysqlsh.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysqlsh.sh</a></p>
+</div>
 <input type="radio" name="tabs" id="sed"><label for="sed">sed</label><div class="tab">
 Reinstall values which have been already customized<pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
 sed -i 's|^ValueCacheSize=.*|ValueCacheSize=768M|' /etc/zabbix/zabbix_server.conf && grep ^ValueCacheSize /etc/zabbix/zabbix_server.conf
@@ -321,6 +411,36 @@ Summarize configuration file<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server
 Restart and follow log<pre><code>systemctl restart zabbix-server && tail -f /var/log/zabbix/zabbix_server.log</code></pre>
 <p>Download this section: <a href="src/sed.sh">https://aigarskadikis.github.io/src/sed.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sed.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sed.sh</a></p>
+</div>
+<input type="radio" name="tabs" id="snmptrap"><label for="snmptrap">snmptrap</label><div class="tab">
+Install dependencies on ubuntu 22<pre><code>apt install snmp snmptrapd libsnmp-perl snmptt snmp-mibs-downloader -y</code></pre>
+Turn down 'snmpd'. This was installed to solve dependencies<pre><code>systemctl stop snmpd && systemctl disable snmpd</code></pre>
+Turn down 'snmptrapd' to reconfigure service<pre><code>systemctl stop snmptrapd</code></pre>
+Make a backup of old config, install new<pre><code>mv /etc/snmp/snmptrapd.conf /etc/snmp/original.snmptrapd.conf</code></pre>
+Install example config to catpur SNMPv2 traps and SNMPv3 traps<pre><code>cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/AhVdADKdCIYUyy9sMvNjsbbzalh2a+CieFE1VBk12M+iJ9k2na4QOO9Ofnui3QKfd3E/1VgKRwkM3Epl5SMnZfJ+Cco4JO/AyUapb6yMjEt3XsUk7BjRRaUGM0uAlufs91DZkXRkomCIZcsUZrGk8QVyxc1g+OrLpcr1Gg25NNexih87iDdzxxXIVJgzVqeurca2iV8PwHaIeBXGVdbKgnDrACTAfUmxOg07Y1YRNqNGilYXa4zP6mlr2G8L/KlkUmJf6ubOEorh1eMX1zWVeyRK1XBCx+6WKTsxTijP20A7rttOg7s/+Z7PVXRdghD91fIRWVby9K35SKcjkn1B7BUNwC4X586M6S04Pqgb+PamryiP9Ct2w7IgMiIUcCrzC4LZuRRpzbOKzLL5NbYeeM5QOxK6/PvsM1MlZwNf+5F3ubEr4eObU517xhW+bSvntYwetQTJm+5bcOTnu+HkJaVinw58QEIsCjOOtAJmqcKkrlvo2nYuobkRW64ME3nA2TdcqJ2BZQ2o5/rKwn7ZKmCKNgxffdMELcji4pRjALX1lC8g/hyEi+ysu34iA/ciq1HJVEO9ulGVAmrr9OdmqbZXWiPs7pg7Epcjr9CKQjsORS3R/3Gsf7umyWtWnCKpex48gClLRQPv2bI2WtGG6V6uXyPyBLUPiHKj6u74SAQJ/235xmovoLNuGl5bQ9DSrp0bzRi7qhc+AAAAALkbuP45VSNNAAGxBIBQAABGKqZmscRn+wIAAAAABFla" | base64 --decode | unxz | tar -xv</code></pre>
+Install example config to catpur SNMPv2 traps and SNMPv3 traps fro Ubuntu 22<pre><code>cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/AYNdADKdCIYUyy9sMvNjsbbzalh2a+CieFE1VBk116qSpEChzLfeNm/VMSFs0glXd1kGmtWdaahiXsCj/lmFbJdNPBKh2MwwBi9c7ONuSaWL+cEZOEGH3966HOgmoL6XtkTd0ilQ4in/LDfhRuwL4659LqCUDqASYem/P0OmvYVnLyAIIrIgRl+QwqRYQyGtU8YrjfRJMuGU4djjwWSC2Elx8WEIr1Q12VTLcNoeXeMkOaonxhmtWgZ5mzTedKf+Bydc+lnUQjCe/aDIw2CL3Z89BKaYLh7LlqqdQEEZhzQQhLkfZBx/zsjiZ4hGZFqG+/HOuJ0uKiCSeySmAoTZT/ASHBpWW391kPZsefEjx3ScD6qwVoO7aDC+1i9FnuBNeD/EvLMYhYHlBP2nn4QNd/4RiYE2CYohgf3wATTuzMkQC0PeHq5rojWkOQam7pZIPy395Rahm0fhoyrTGasibCWPNIT0MyBPE9pFOXraL1F9PYoSM+T2a/ZEb0k74EjQwEHZKlYNQAAAtCgAjNz6fkQAAZ8DgFAAABCSIOmxxGf7AgAAAAAEWVo=" | base64 --decode | unxz | tar -xv</code></pre>
+Backup /etc/snmp/snmptrpad.conf<pre><code>tar --create --verbose --use-compress-program='xz -9' /etc/snmp/snmptrapd.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | unxz | tar -xv%' && echo</code></pre>
+Start SNMP trap listening service and enable at startup<pre><code>systemctl start snmptrapd && systemctl enable snmptrapd</code></pre>
+Check if it listens on UDP 162<pre><code>ss --udp --listen --numeric --process | grep 162</code></pre>
+Install official parser from git.zabbix.com<pre><code>curl https://git.zabbix.com/projects/ZBX/repos/zabbix/raw/misc/snmptrap/zabbix_trap_receiver.pl?at=refs%2Fheads%2Fmaster -o /usr/local/bin/zabbix_trap_receiver.pl</code></pre>
+Install official parser from gitgub.com<pre><code>curl https://raw.githubusercontent.com/zabbix/zabbix/master/misc/snmptrap/zabbix_trap_receiver.pl -o /usr/local/bin/zabbix_trap_receiver.pl</code></pre>
+Install without internet access<pre><code>cd / && echo "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" | base64 --decode | unxz | tar -xv</code></pre>
+Non-official with variable binding<pre><code>cd / && echo "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" | base64 --decode | unxz | tar -xv</code></pre>
+Bash parser<pre><code>cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/AiddADqcyosJgONiHFxK21FYsOmcVPjGP4X64Cl0bFy0Sxh6dQDRjk6f8dQ1bOCTQt37h4nPN7dqU5XiljBY1ISkB57iky9OaCllx2Pvw7ADF5H5hz2M/woIhS5kB6SZzGLqiZ/L4ObszSmHD/zqU/EptJXvrKiRxNPL3vREPA/bxK/iefk//ici0J76T5Pgu6B5JySWc9UrDRuOwLJH8gF+ac4z1dKxDWCbIjxuS28RZQlunU1OAlIr/CyCfBfC1Pp5b+H1lMr4yeBne7oOVqx5ytStJs+J/X+S3ck3O115oqn6NvsvaamKz6hnaSG91RKb+A8fUXoXwpXvTI8fmeOCsi9v9d1XDStnvix0EOqLqRFE9JrRiuKUHlSfkrtd1YAjr+Ab8+SpyXoxkYvt5qIsdJkT7uLhAiEcxHr2xtaZrVus3qsvA9pQ+uMtk9YIIG8auFD6ImlPI/52vUID9uBDVIv5x/1D5fhmBPRE8c9holuN9pWksYmlqewZ2deiPvfKNxpJNGp7ReBDjSh9/koaB8TWMcOKdARr52F498EGjzMeB6P7XNtUoi/gmHjgjpxDLLApKtZyENPXehKqMCUlTCKH03YuyiCezmurGbkkFAPQHKfDKSFJuahsOR/qAHOO7UwvzMluzaQFlIzUq9xpCvZjTLwpfpUnhIVxgY/GZw+9c6gweJWVUnfehDrKGqhvXFmAyjHtgTzjlpry2jgLBP72Dgt3PRLCAACEWwpFaPLuqgABwwSAUAAAjIZMILHEZ/sCAAAAAARZWg==" | base64 --decode | unxz | tar -xv</code></pre>
+Send incorrect SNMPv3 engineID<pre><code>snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe07 127.0.0.1 0 1.2.3
+ls /tmp</code></pre>
+Send incorrect SNMPv2 community<pre><code>snmptrap -v 1 -c moon 127.0.0.1 '.1.3.6.1.6.3.1.1.5.3' '0.0.0.0' 6 33 '55' .1.3.6.1.6.3.1.1.5.3 s "eth0"
+ls /tmp</code></pre>
+Correct SNMPv3 engineID<pre><code>snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe08 127.0.0.1 0 1.2.3
+ls /tmp
+cat /tmp/zabbix_traps.tmp
+rm -rf /tmp/zabbix_traps.tmp</code></pre>
+Correct SNMPv2 community<pre><code>snmptrap -v 1 -c earth 127.0.0.1 '.1.3.6.1.6.3.1.1.5.3' '0.0.0.0' 6 33 '55' .1.3.6.1.6.3.1.1.5.3 s "eth0"
+ls /tmp
+cat /tmp/zabbix_traps.tmp
+rm -rf /tmp/zabbix_traps.tmp</code></pre>
+<p>Download this section: <a href="src/snmptrap.sh">https://aigarskadikis.github.io/src/snmptrap.sh</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/snmptrap.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/snmptrap.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="sudoers"><label for="sudoers">sudoers</label><div class="tab">
 Allow to reload cache from Zabbix frontend<pre><code>cd /etc/sudoers.d
@@ -374,32 +494,41 @@ systemctl reload nginx</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="delete"><label for="delete">delete.sql</label><div class="tab">
-Discard all users which is using frontend<pre><code>DELETE FROM session;</code></pre>
-Delete all events comming from specific trigger id. Only execute if trigger is not in problem state<pre><code>DELETE FROM events WHERE events.source=0 AND events.object=0 AND events.objectid=987654321;</code></pre>
+Discard all users which is using frontend. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>DELETE FROM session;</code></pre>
+Delete all events comming from specific trigger id. Zabbix 4.0, 5.0<pre><code>DELETE
+FROM events
+WHERE events.source=0
+AND events.object=0
+AND events.objectid=987654321;</code></pre>
 Delete discovery, autoregistration and internal events<pre><code>DELETE FROM events WHERE source IN (1,2,3) LIMIT 1;
 DELETE FROM events WHERE source IN (1,2,3) LIMIT 10;
 DELETE FROM events WHERE source IN (1,2,3) LIMIT 100;</code></pre>
-Delete child events which was closed by global correlation<pre><code>DELETE e FROM events e
+Delete child events which was closed by global correlation. Zabbix 5.0<pre><code>DELETE e
+FROM events e
 LEFT JOIN event_recovery ON (event_recovery.eventid=e.eventid)
 WHERE event_recovery.c_eventid IS NOT NULL
 AND e.clock < 1234;</code></pre>
-Delete dublicate values per itemid. Keep the newest one. this is NOT discard and unchanged!<pre><code>DELETE t1 FROM history_text t1
+Delete dublicate values per itemid. Zabbix 5.0<pre><code>DELETE t1
+FROM history_text t1
 INNER JOIN history_text t2
 WHERE t1.itemid=382198
 AND t1.clock < t2.clock
 AND t1.value=t2.value
 AND t1.itemid=t2.itemid;</code></pre>
-Delete all dublicate metrics in history. Useful if table used for backups<pre><code>DELETE t1 FROM history_text t1
+Delete all dublicate metrics in history_text. Zabbix 5.0<pre><code>DELETE t1
+FROM history_text t1
 INNER JOIN history_text t2
 WHERE t1.clock < t2.clock
 AND t1.value=t2.value
 AND t1.itemid=t2.itemid;</code></pre>
-Delete all dublicate metrics in history. Useful if table used for backups<pre><code>DELETE t1 FROM history_str t1
+Delete all dublicate metrics in history. Zabbix 5.0<pre><code>DELETE t1
+FROM history_str t1
 INNER JOIN history_str t2
 WHERE t1.clock < t2.clock
 AND t1.value=t2.value
 AND t1.itemid=t2.itemid;</code></pre>
-Remove data for 'history_text' for items where 'Do not keep history' is configred later than initially<pre><code>DELETE FROM history_text WHERE itemid IN (
+Remove data for 'history_text' where 'Do not keep history'. Zabbix 5.0<pre><code>DELETE
+FROM history_text WHERE itemid IN (
 SELECT items.itemid FROM items, hosts
 WHERE hosts.hostid=items.hostid
 AND hosts.status IN (0,1)
@@ -407,7 +536,7 @@ AND items.value_type=4
 AND items.flags IN (0,4)
 AND items.history IN ('0')
 );</code></pre>
-Remove data for 'history_str' for items where 'Do not keep history' is configred later than initially<pre><code>DELETE FROM history_str WHERE itemid IN (
+Remove data for 'history_str' where 'Do not keep history'. Zabbix 5.0<pre><code>DELETE FROM history_str WHERE itemid IN (
 SELECT items.itemid FROM items, hosts
 WHERE hosts.hostid=items.hostid
 AND hosts.status IN (0,1)
@@ -415,11 +544,11 @@ AND items.value_type=1
 AND items.flags IN (0,4)
 AND items.history IN ('0')
 );</code></pre>
-Scan 'history_text' table and accidentally stored integers, decimal numbers, log entries and short strings<pre><code>DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=4);
+Scan 'history_text' table and accidentally stored integers, decimal numbers, log entries and short strings. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=4);
 DELETE FROM history_text WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>4);</code></pre>
-Scan 'history_str' table and accidentally stored integers, decimal numbers, log entries and long text strings<pre><code>DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=1);
+Scan 'history_str' table and accidentally stored integers, decimal numbers, log entries and long text strings. Zabbix 3.0, 3.2, 3.4, 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=1);
 DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>1);</code></pre>
-Remove repeated values per one itemid in 'history_str'. Simulate discard unchanded<pre><code>DELETE FROM history_str WHERE itemid=343812 AND clock IN (
+Remove repeated values per one itemid in 'history_str'. Discard unchanded. Zabbix 5.0, 6.0<pre><code>DELETE FROM history_str WHERE itemid=343812 AND clock IN (
 SELECT clock FROM (
 SELECT clock, value, r, v2 FROM (
 SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2,
@@ -434,7 +563,7 @@ WHERE r='zero'
 ) x3
 WHERE v2 IS NOT NULL
 );</code></pre>
-Remove repeated values per one itemid in 'history_text'. Simulate discard unchanded<pre><code>DELETE FROM history_text WHERE itemid=42702 AND clock IN (
+Remove repeated values per one itemid in 'history_text'. Discard unchanded. Zabbix 5.0, 6.0<pre><code>DELETE FROM history_text WHERE itemid=42702 AND clock IN (
 SELECT clock from (
 SELECT clock, value, r, v2 FROM (
 SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2,
@@ -445,7 +574,7 @@ ELSE 'zero'
 END AS r
 FROM history_text WHERE itemid=42702
 ) x2
-where r='zero'
+WHERE r='zero'
 ) x3
 WHERE v2 IS NOT NULL
 );</code></pre>
@@ -453,21 +582,22 @@ WHERE v2 IS NOT NULL
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="proxy"><label for="proxy">proxy.sql</label><div class="tab">
-How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1) FROM proxy_history;</code></pre>
-Optimal query to identify data overload<pre><code>SELECT itemid,
+How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1)
+FROM proxy_history;</code></pre>
+Optimal query to identify data overload. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT itemid,
 COUNT(*),
 AVG(LENGTH(value))
 FROM proxy_history
 WHERE proxy_history.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1 ORDER BY 2,3 DESC;</code></pre>
-Proxy with MySQL. Print URLs for latest data page for the incomming big data<pre><code>SELECT
+Proxy with MySQL. Print URLs for latest data page for the incomming big data. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT
 LENGTH(value),
 CONCAT('history.php?itemids%5B0%5D=', proxy_history.itemid,'&action=showlatest') AS 'URL'
 FROM proxy_history
 JOIN items ON (items.itemid=proxy_history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE LENGTH(value) > 60000;</code></pre>
-Check big LLD rules and its frequency based on clock<pre><code>SELECT
+Check big LLD rules and its frequency based on clock. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT
 clock,
 hosts.host,
 items.key_,
@@ -477,7 +607,7 @@ JOIN items ON (items.itemid=proxy_history.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE items.flags=1
 AND LENGTH(value) > 6000;</code></pre>
-LLD rules<pre><code>SELECT
+LLD rules. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT
 items.key_,
 COUNT(*),
 AVG(LENGTH(value))
@@ -488,7 +618,7 @@ GROUP BY 1 ORDER BY 3,2;</code></pre>
 <p>Download this section: <a href="src/proxy.sql">https://aigarskadikis.github.io/src/proxy.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/proxy.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/proxy.sql</a></p>
 </div>
-<input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>
+<input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab">
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 Unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT
@@ -1082,7 +1212,7 @@ Print error active data collector items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre
 hosts.host,
 items.name,
 item_rtdata.error AS error
-FROM item_rtdata, items, hosts
+FROM items, item_rtdata, hosts
 WHERE item_rtdata.state=1
 AND hosts.status=0
 AND items.status=0
@@ -1111,6 +1241,52 @@ AND items.status=0
 AND items.flags<>2
 GROUP BY 1,2
 ORDER BY 3 ASC;</code></pre>
+Size of MySQL DB<pre><code>SELECT
+ENGINE,
+TABLE_TYPE,
+TABLE_SCHEMA AS `DATABASE`,
+TABLE_NAME AS `TABLE`,
+ROUND(1.0*(DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024,2) AS `TOTAL SIZE (MB)`,
+ROUND(1.0*DATA_LENGTH/1024/1024, 2) AS `DATA SIZE (MB)`,
+ROUND(1.0*INDEX_LENGTH/1024/1024, 2) AS `INDEX SIZE (MB)`,
+ROUND(1.0*DATA_FREE/1024/1024, 2) AS `FREE SIZE (MB)`,
+CURDATE() AS `TODAY`,
+ROUND(DATA_FREE/(DATA_LENGTH+INDEX_LENGTH)*100,2) 'FRAGMENTED %',
+TABLE_ROWS,
+ROW_FORMAT,
+TABLE_COLLATION,
+VERSION
+FROM information_schema.TABLES
+WHERE table_schema NOT IN('information_schema', 'mysql','sys', 'performance_schema')
+ORDER BY (DATA_LENGTH + INDEX_LENGTH)
+DESC;</code></pre>
+Detect parallelity<pre><code>SELECT
+hosts.host,
+items.delay,
+MOD(items.itemid,table1.inSeconds) AS offset,
+GROUP_CONCAT(items.itemid),
+COUNT(*)
+FROM items
+JOIN (
+SELECT DISTINCT delay, CASE delay
+WHEN '10s' THEN '10'
+WHEN '12s' THEN '12'
+WHEN '15s' THEN '15'
+WHEN '1m' THEN '60'
+WHEN '2m' THEN '120'
+WHEN '3m' THEN '180'
+WHEN '5m' THEN '300'
+WHEN '15m' THEN '900'
+WHEN '1h' THEN '3600'
+WHEN '1d' THEN '86400'
+ELSE '0'
+END AS inSeconds
+FROM items
+) table1 ON table1.delay=items.delay
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status=0 AND items.status=0
+GROUP BY 1,2,3
+HAVING COUNT(*) > 1;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>

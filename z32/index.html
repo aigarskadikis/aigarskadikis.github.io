@@ -1,0 +1,121 @@
+<html><head>
+<meta name='viewport' id='viewport' content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' />
+<meta http-equiv='X-UA-Compatible' content='IE=Edge,chrome=1' />
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../src/perdir.css' />
+
+</head><body>
+<div class='links'>
+<a href='../z30/index.html'>3.0</a>
+<a href='../z32/index.html'>3.2</a>
+<a href='../z34/index.html'>3.4</a>
+<a href='../z40/index.html'>4.0</a>
+<a href='../z42/index.html'>4.2</a>
+<a href='../z44/index.html'>4.4</a>
+<a href='../z50/index.html'>5.0</a>
+<a href='../z52/index.html'>5.2</a>
+<a href='../z54/index.html'>5.4</a>
+<a href='../z60/index.html'>6.0</a>
+<a href='../z62/index.html'>6.2</a>
+
+<div class='tog'>
+<label for='toggler'><input id='singleLineToggle' name='toggler' type='checkbox' />Use single line mode</label>
+<script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=../singleLine.togglerIE.js><\/script>')}else{document.write('<script src=../singleLine.toggler.js><\/script>')}</script>
+<script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script>
+</div>
+
+</div>
+
+
+<div class='tabs'>
+
+<input type="radio" name="tabs" id="hosts"><label for="hosts">hosts</label><div class="tab">
+<div class='index'>
+
+
+
+<ol>
+<li><a href="#05d4d698d59aa2ddfa39de8bd280a661">Devices and it's status</a></li>
+</ol></div>
+<p id="05d4d698d59aa2ddfa39de8bd280a661">Devices and it's status</p><pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.ip,
+interface.dns,
+interface.useip,
+CASE hosts.available
+WHEN 0 THEN 'unknown'
+WHEN 1 THEN 'available'
+WHEN 2 THEN 'down'
+END AS "status",
+CASE interface.type
+WHEN 1 THEN 'ZBX'
+WHEN 2 THEN 'SNMP'
+WHEN 3 THEN 'IPMI'
+WHEN 4 THEN 'JMX'
+END AS "type", hosts.error
+FROM hosts
+JOIN interface ON interface.hostid=hosts.hostid
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
+WHERE hosts.status=0
+AND interface.main=1;</code></pre>
+
+</div>
+<input type="radio" name="tabs" id="items" checked="checked"><label for="items">items</label><div class="tab">
+<div class='index'>
+
+
+
+<ol>
+<li><a href="#3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</a></li>
+<li><a href="#5fdf0d3b15ae4ca17ba8cbd05ea30a52">Items in use</a></li>
+</ol></div>
+<p id="3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</p><pre><code>SELECT
+COUNT(*) AS count,
+proxy.host AS proxy,
+items.type
+FROM items
+JOIN hosts ON (items.hostid=hosts.hostid)
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND items.status=0
+AND proxy.status IN (5,6)
+GROUP BY 2,3
+ORDER BY 2,3;</code></pre>
+
+<p id="5fdf0d3b15ae4ca17ba8cbd05ea30a52">Items in use</p><pre><code>SELECT
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status=0
+AND items.status=0
+GROUP BY items.type
+ORDER BY COUNT(*) DESC;</code></pre>
+
+</div>
+</div></body></html>

@@ -439,7 +439,7 @@ SELECT
 hosts.host,
 items.name,
 item_rtdata.error AS error
-FROM item_rtdata, items, hosts
+FROM items, item_rtdata, hosts
 WHERE item_rtdata.state=1
 AND hosts.status=0
 AND items.status=0
@@ -472,4 +472,152 @@ AND items.status=0
 AND items.flags<>2
 GROUP BY 1,2
 ORDER BY 3 ASC;
+
+--How many values is in the backlog. does not work on oracle proxy becuase of LIMIT
+SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1)
+FROM proxy_history;
+
+--Optimal query to identify data overload
+SELECT itemid,
+COUNT(*),
+AVG(LENGTH(value))
+FROM proxy_history 
+WHERE proxy_history.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
+GROUP BY 1 ORDER BY 2,3 DESC;
+
+--proxy with MySQL. print URLs for latest data page for the incomming big data
+SELECT
+LENGTH(value),
+CONCAT('history.php?itemids%5B0%5D=', proxy_history.itemid,'&action=showlatest') AS 'URL'
+FROM proxy_history
+JOIN items ON (items.itemid=proxy_history.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE LENGTH(value) > 60000;
+
+--check big LLD rules and its frequency based on clock
+SELECT
+clock,
+hosts.host,
+items.key_,
+LENGTH(value)
+FROM proxy_history
+JOIN items ON (items.itemid=proxy_history.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE items.flags=1
+AND LENGTH(value) > 6000;
+
+--LLD rules
+SELECT
+items.key_,
+COUNT(*),
+AVG(LENGTH(value))
+FROM proxy_history, items
+WHERE proxy_history.itemid=items.itemid
+AND items.flags=1
+GROUP BY 1 ORDER BY 3,2;
+
+--discard all users which is using frontend
+DELETE FROM session;
+
+--delete all events comming from specific trigger id
+DELETE
+FROM events
+WHERE events.source=0
+AND events.object=0
+AND events.objectid=987654321;
+
+--delete child events which was closed by global correlation
+DELETE e
+FROM events e
+LEFT JOIN event_recovery ON (event_recovery.eventid=e.eventid)
+WHERE event_recovery.c_eventid IS NOT NULL
+AND e.clock < 1234;
+
+--delete dublicate values per itemid
+DELETE t1
+FROM history_text t1
+INNER JOIN history_text t2
+WHERE t1.itemid=382198
+AND t1.clock < t2.clock
+AND t1.value=t2.value
+AND t1.itemid=t2.itemid;
+
+--delete all dublicate metrics in history_text
+DELETE t1
+FROM history_text t1
+INNER JOIN history_text t2
+WHERE t1.clock < t2.clock
+AND t1.value=t2.value
+AND t1.itemid=t2.itemid;
+
+--delete all dublicate metrics in history
+DELETE t1
+FROM history_str t1
+INNER JOIN history_str t2
+WHERE t1.clock < t2.clock
+AND t1.value=t2.value
+AND t1.itemid=t2.itemid;
+
+--remove data for 'history_text' where 'Do not keep history'
+DELETE
+FROM history_text WHERE itemid IN (
+SELECT items.itemid FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status IN (0,1)
+AND items.value_type=4
+AND items.flags IN (0,4)
+AND items.history IN ('0')
+);
+
+--remove data for 'history_str' where 'Do not keep history'
+DELETE FROM history_str WHERE itemid IN (
+SELECT items.itemid FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status IN (0,1)
+AND items.value_type=1
+AND items.flags IN (0,4)
+AND items.history IN ('0')
+);
+
+--scan 'history_text' table and accidentally stored integers, decimal numbers, log entries and short strings
+DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=4);
+DELETE FROM history_text WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>4);
+
+--scan 'history_str' table and accidentally stored integers, decimal numbers, log entries and long text strings
+DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items WHERE value_type=1);
+DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_type<>1);
+
+--remove repeated values per one itemid in 'history_str'. discard unchanded
+DELETE FROM history_str WHERE itemid=343812 AND clock IN (
+SELECT clock FROM (
+SELECT clock, value, r, v2 FROM (
+SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2,
+CASE
+WHEN value <> LEAD(value,1) OVER (order by clock)
+THEN value
+ELSE 'zero'
+END AS r
+FROM history_str WHERE itemid=343812
+) x2
+WHERE r='zero'
+) x3
+WHERE v2 IS NOT NULL
+);
+
+--remove repeated values per one itemid in 'history_text'. discard unchanded
+DELETE FROM history_text WHERE itemid=42702 AND clock IN (
+SELECT clock from (
+SELECT clock, value, r, v2 FROM (
+SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2,
+CASE
+WHEN value <> LEAD(value,1) OVER (order by clock)
+THEN value
+ELSE 'zero'
+END AS r
+FROM history_text WHERE itemid=42702
+) x2
+WHERE r='zero'
+) x3
+WHERE v2 IS NOT NULL
+);
 

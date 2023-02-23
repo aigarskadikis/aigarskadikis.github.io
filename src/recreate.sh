@@ -5,13 +5,13 @@ clear
 > ../index.html
 
 # put header
-echo "<html><head><style type='text/css'>" >> ../index.html
+echo "<html><head><link rel='stylesheet' type='text/css' href='./src/css.css' />" >> ../index.html
 
 # install css
-cat css.css >> ../index.html
+# cat css.css >> ../index.html
 
 # start body and all tabs
-echo "</style></head><body onLoad='initDataArray()'><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src="singleLine.togglerIE.js"><\/script>')}else{document.write('<script src="singleLine.toggler.js"><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>" >> ../index.html
+echo "</head><body onLoad='initDataArray()'><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src="singleLine.togglerIE.js"><\/script>')}else{document.write('<script src="singleLine.toggler.js"><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>" >> ../index.html
 
 ########
 # bash #
@@ -155,7 +155,7 @@ sed -i 's/^[ \t]*//;s/[ \t]*$//' ../index.html
 sed -i 's|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab">|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab"><p>Create MySQL users using wizard: <a href="./u/index.html">https://aigarskadikis.github.io/u</a></p>|' ../index.html
 
 # install extra link under 'server.sql' to have quries per version
-sed -i 's|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab">|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>|' ../index.html
+# sed -i 's|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab">|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>|' ../index.html
 
 # install default block
 sed -i 's|input type="radio" name="tabs" id="server"|input type="radio" name="tabs" id="server" checked="checked"|' ../index.html
