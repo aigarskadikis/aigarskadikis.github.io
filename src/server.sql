@@ -69,6 +69,25 @@ WHERE hosts.status IN (0,1) AND items.status IN (0,1)
 GROUP BY proxy.host, items.type
 ORDER BY 1,2,3,4,5 DESC;
 
+--most recent data collector items. Zabbix 4.2, 4.4, 5.0
+SELECT proxy.host AS proxy, hosts.host, items.itemid, items.key_
+FROM items, hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.hostid=items.hostid
+ORDER BY items.itemid DESC
+LIMIT 10;
+
+--most recent triggers
+SELECT DISTINCT triggers.triggerid, triggers.description, hosts.host, proxy.host AS proxy
+FROM triggers
+JOIN functions ON (functions.triggerid=triggers.triggerid)
+JOIN items ON (items.itemid=functions.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE triggers.flags IN (0,4)
+ORDER BY triggers.triggerid DESC
+LIMIT 10;
+
 --ZBX hosts unreachable. Zabbix 6.0
 SELECT
 proxy.host AS proxy,
