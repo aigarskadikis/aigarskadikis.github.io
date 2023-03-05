@@ -234,6 +234,8 @@ WHERE v2 IS NOT NULL
 <li><a href="#474967adc2cb831ad78557e6cea706c4">Linked template objects PostgreSQL</a></li>
 <li><a href="#d6c72432653f898e6cdd34cbfc80fbe7">Linked templates objects MySQL</a></li>
 <li><a href="#4ebcd98543ebba5fd3dda9b0bf72a30c">Unsupported items and LLD rules</a></li>
+<li><a href="#6954f6e8a7232e2472453fc73607f100">Show internal events for items which is working right now</a></li>
+<li><a href="#69ecb4460468ebdf3e7a99da7ead2ed3">Detete internal events for items which is working right now</a></li>
 <li><a href="#712c8f937f85ca7df4c1fca3392ea3e5">Unique items keys behind proxy</a></li>
 </ol></div>
 <p id="7019848dd6ba478ba2a2289ff27291da">Unreachable ZBX host</p><pre><code>SELECT
@@ -330,6 +332,32 @@ AND h.status<>3
 AND i.status=0
 AND ir.state=1
 LIMIT 5001;</code></pre>
+
+<p id="6954f6e8a7232e2472453fc73607f100">Show internal events for items which is working right now</p><pre><code>SELECT events.name FROM events
+WHERE source=3 AND object=4
+AND objectid NOT IN (
+SELECT items.itemid
+FROM hosts, items, item_rtdata
+WHERE items.hostid=hosts.hostid
+AND items.itemid=item_rtdata.itemid
+AND hosts.status=0
+AND items.status=0
+AND hosts.flags IN (0,4)
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
+
+<p id="69ecb4460468ebdf3e7a99da7ead2ed3">Detete internal events for items which is working right now</p><pre><code>DELETE FROM events
+WHERE source=3 AND object=4
+AND objectid NOT IN (
+SELECT items.itemid
+FROM hosts, items, item_rtdata
+WHERE items.hostid=hosts.hostid
+AND items.itemid=item_rtdata.itemid
+AND hosts.status=0
+AND items.status=0
+AND hosts.flags IN (0,4)
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
 
 <p id="712c8f937f85ca7df4c1fca3392ea3e5">Unique items keys behind proxy</p><pre><code>SELECT
 proxy.host AS proxy,

@@ -1201,6 +1201,30 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
+Show internal events for items which is working right now<pre><code>SELECT events.name FROM events
+WHERE source=3 AND object=4
+AND objectid NOT IN (
+SELECT items.itemid
+FROM hosts, items, item_rtdata
+WHERE items.hostid=hosts.hostid
+AND items.itemid=item_rtdata.itemid
+AND hosts.status=0
+AND items.status=0
+AND hosts.flags IN (0,4)
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
+Detete internal events for items which is working right now<pre><code>DELETE FROM events
+WHERE source=3 AND object=4
+AND objectid NOT IN (
+SELECT items.itemid
+FROM hosts, items, item_rtdata
+WHERE items.hostid=hosts.hostid
+AND items.itemid=item_rtdata.itemid
+AND hosts.status=0
+AND items.status=0
+AND hosts.flags IN (0,4)
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
 Print error active data collector items<pre><code>SELECT
 hosts.host,
 items.name,
