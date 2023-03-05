@@ -525,6 +525,55 @@ AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;
 
+--healthy/active/enabled trigger objects, together with healthy items and healthy/enabled hosts
+SELECT DISTINCT triggers.triggerid, hosts.host
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0;
+
+--select internal trigger events for triggers which where not working some time ago, but triggers is healthy now
+SELECT name FROM events
+WHERE source=3 AND object=0
+AND objectid NOT IN (
+SELECT DISTINCT triggers.triggerid
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND hosts.flags IN (0,4)
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0
+);
+
+--delete INTERNAL trigger events for triggers which is healthy at this very second. since it's healthy now, we can remove old evidence why it was not working. this will allow to concentrate more preciselly on what other things is not working right now
+DELETE FROM events
+WHERE source=3 AND object=0
+AND objectid NOT IN (
+SELECT DISTINCT triggers.triggerid
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND hosts.flags IN (0,4)
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0
+);
+
 --show host object and proxy the item belongs to
 SELECT
 proxy.host AS proxy,
