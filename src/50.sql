@@ -26,6 +26,57 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;
 
+--active and disabled hosts and items
+SELECT
+proxy.host AS proxy,
+CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS host,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS item,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1)
+GROUP BY proxy.host, items.type
+ORDER BY 1,2,3,4,5 DESC;
+
+--most recent data collector items
+SELECT proxy.host AS proxy, hosts.host, items.itemid, items.key_
+FROM items, hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.hostid=items.hostid
+ORDER BY items.itemid DESC
+LIMIT 10;
+
 --show items by proxy
 SELECT
 COUNT(*) AS count,
