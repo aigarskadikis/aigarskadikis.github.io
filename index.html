@@ -74,6 +74,55 @@ mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz"
 mv "$BACKUP_DIR/quick.restore.sql.gz" "$BACKUP_DIR/quick.restore.$DATE.sql.gz"
 find /backup -type f -mtime +30
 find /backup -type f -mtime +30 -delete</code></pre>
+Mariadb backup<pre><code>BACKUP_DIR=/backup
+KEEP_DAYS=90
+DBNAME=zabbix
+DATE=$(date +%Y%m%d.%H%M)
+mkdir -p "$BACKUP_DIR"
+echo "schema"
+mysqldump \
+--defaults-file=~/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+$DBNAME | gzip --fast > "$BACKUP_DIR/schema.sql.gz" && \
+echo "data" && \
+mysqldump \
+--defaults-file=~/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--no-tablespaces \
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/data.sql" && \
+echo "compressing data" && gzip --fast "$BACKUP_DIR/data.sql" && \
+echo "snapshot" && mysqldump \
+--defaults-file=~/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/snapshot.sql" && \
+echo "compressing snapshot" && gzip --fast "$BACKUP_DIR/snapshot.sql" && \
+mv "$BACKUP_DIR/schema.sql.gz" "$BACKUP_DIR/schema.$DATE.sql.gz" && \
+mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz" && \
+mv "$BACKUP_DIR/snapshot.sql.gz" "$BACKUP_DIR/snapshot.$DATE.sql.gz"
+if [ -d "$BACKUP_DIR" ]; then
+echo "deleting files older than $KEEP_DAYS days:"
+find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.gz' -mtime +$KEEP_DAYS
+find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.gz' -mtime +$KEEP_DAYS -delete
+fi</code></pre>
 Rotate backups for 30 days<pre><code>find /backup -type f -mtime +30
 find /backup -type f -mtime +30 -delete</code></pre>
 Backup and compress zabbix server config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
@@ -124,6 +173,14 @@ AND t1.itemid=t2.itemid
 AND t1.itemid=$ITEMID
 " | mysql zabbix
 } done</code></pre>
+Print metrics on screen<pre><code>while true; do
+echo -n 'total: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[];
+echo -n 'user: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,user];
+echo -n 'system: '&& zabbix_get -s 127.0.0.1 -k system.cpu.util[,system];
+echo -n 'guest: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest];
+echo -n 'guest_nice: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest_nice];
+echo '------------'
+sleep 1; done;</code></pre>
 Erase dublicate data in table 'history_str'. This does NOT work like discard unchanged<pre><code>mysql \
 --database='zabbix' \
 --silent \
@@ -639,6 +696,62 @@ FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
+Active and disabled hosts and items. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
+proxy.host AS proxy,
+CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS host,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS item,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1)
+GROUP BY proxy.host, items.type
+ORDER BY 1,2,3,4,5 DESC;</code></pre>
+Most recent data collector items. Zabbix 4.2, 4.4, 5.0<pre><code>SELECT proxy.host AS proxy, hosts.host, items.itemid, items.key_
+FROM items, hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.hostid=items.hostid
+ORDER BY items.itemid DESC
+LIMIT 10;</code></pre>
+Most recent triggers<pre><code>SELECT DISTINCT triggers.triggerid, triggers.description, hosts.host, proxy.host AS proxy
+FROM triggers
+JOIN functions ON (functions.triggerid=triggers.triggerid)
+JOIN items ON (items.itemid=functions.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE triggers.flags IN (0,4)
+ORDER BY triggers.triggerid DESC
+LIMIT 10;</code></pre>
 ZBX hosts unreachable. Zabbix 6.0<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -1208,6 +1321,30 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
+Show internal events for items which is working right now. Zabbix 5.0<pre><code>SELECT events.name FROM events
+WHERE source=3 AND object=4
+AND objectid NOT IN (
+SELECT items.itemid
+FROM hosts, items, item_rtdata
+WHERE items.hostid=hosts.hostid
+AND items.itemid=item_rtdata.itemid
+AND hosts.status=0
+AND items.status=0
+AND hosts.flags IN (0,4)
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
+Detete internal events for items which is working right now. Zabbix 5.0<pre><code>DELETE FROM events
+WHERE source=3 AND object=4
+AND objectid NOT IN (
+SELECT items.itemid
+FROM hosts, items, item_rtdata
+WHERE items.hostid=hosts.hostid
+AND items.itemid=item_rtdata.itemid
+AND hosts.status=0
+AND items.status=0
+AND hosts.flags IN (0,4)
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
 Print error active data collector items. Zabbix 4.4, 5.0, 5.2, 5.4, 6.0, 6.2<pre><code>SELECT
 hosts.host,
 items.name,
@@ -1218,6 +1355,49 @@ AND hosts.status=0
 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;</code></pre>
+Healthy/active/enabled trigger objects, together with healthy items and healthy/enabled hosts. Zabbix 5.0<pre><code>SELECT DISTINCT triggers.triggerid, hosts.host
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0;</code></pre>
+Select internal trigger events for triggers which where not working some time ago, but triggers is healthy now. Zabbix 5.0<pre><code>SELECT name FROM events
+WHERE source=3 AND object=0
+AND objectid NOT IN (
+SELECT DISTINCT triggers.triggerid
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND hosts.flags IN (0,4)
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
+Delete INTERNAL trigger events for triggers which is healthy at this very second. Since it's healthy now, we can remove old evidence why it was not working. this will allow to concentrate more preciselly on what other things is not working right now. Zabbix 5.0<pre><code>DELETE FROM events
+WHERE source=3 AND object=0
+AND objectid NOT IN (
+SELECT DISTINCT triggers.triggerid
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND hosts.flags IN (0,4)
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
 Show host object and proxy the item belongs to. Zabbix 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,

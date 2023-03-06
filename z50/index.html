@@ -234,6 +234,8 @@ WHERE v2 IS NOT NULL
 <li><a href="#474967adc2cb831ad78557e6cea706c4">Linked template objects PostgreSQL</a></li>
 <li><a href="#d6c72432653f898e6cdd34cbfc80fbe7">Linked templates objects MySQL</a></li>
 <li><a href="#4ebcd98543ebba5fd3dda9b0bf72a30c">Unsupported items and LLD rules</a></li>
+<li><a href="#6954f6e8a7232e2472453fc73607f100">Show internal events for items which is working right now</a></li>
+<li><a href="#69ecb4460468ebdf3e7a99da7ead2ed3">Detete internal events for items which is working right now</a></li>
 <li><a href="#712c8f937f85ca7df4c1fca3392ea3e5">Unique items keys behind proxy</a></li>
 </ol></div>
 <p id="7019848dd6ba478ba2a2289ff27291da">Unreachable ZBX host</p><pre><code>SELECT
@@ -331,6 +333,32 @@ AND i.status=0
 AND ir.state=1
 LIMIT 5001;</code></pre>
 
+<p id="6954f6e8a7232e2472453fc73607f100">Show internal events for items which is working right now</p><pre><code>SELECT events.name FROM events
+WHERE source=3 AND object=4
+AND objectid NOT IN (
+SELECT items.itemid
+FROM hosts, items, item_rtdata
+WHERE items.hostid=hosts.hostid
+AND items.itemid=item_rtdata.itemid
+AND hosts.status=0
+AND items.status=0
+AND hosts.flags IN (0,4)
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
+
+<p id="69ecb4460468ebdf3e7a99da7ead2ed3">Detete internal events for items which is working right now</p><pre><code>DELETE FROM events
+WHERE source=3 AND object=4
+AND objectid NOT IN (
+SELECT items.itemid
+FROM hosts, items, item_rtdata
+WHERE items.hostid=hosts.hostid
+AND items.itemid=item_rtdata.itemid
+AND hosts.status=0
+AND items.status=0
+AND hosts.flags IN (0,4)
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
+
 <p id="712c8f937f85ca7df4c1fca3392ea3e5">Unique items keys behind proxy</p><pre><code>SELECT
 proxy.host AS proxy,
 items.key_,
@@ -393,6 +421,8 @@ HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 
 
 <ol>
+<li><a href="#39c02d0d0aabaa84d3ddb006b6748b24">Active and disabled hosts and items</a></li>
+<li><a href="#feb6d4b70afaaadfb2d254af4616c4fc">Most recent data collector items</a></li>
 <li><a href="#3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</a></li>
 <li><a href="#5fdf0d3b15ae4ca17ba8cbd05ea30a52">Items in use</a></li>
 <li><a href="#9908a2c1dcc80a1d72d4fd706d529674">Exceptions in update interval</a></li>
@@ -406,6 +436,55 @@ HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 <li><a href="#7b87682be287de2ad0b728bab7470deb">Print error active data collector items</a></li>
 <li><a href="#5d6211cb422c771d13023d3c7ef3f89e">Show host object and proxy the item belongs to</a></li>
 </ol></div>
+<p id="39c02d0d0aabaa84d3ddb006b6748b24">Active and disabled hosts and items</p><pre><code>SELECT
+proxy.host AS proxy,
+CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS host,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS item,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1)
+GROUP BY proxy.host, items.type
+ORDER BY 1,2,3,4,5 DESC;</code></pre>
+
+<p id="feb6d4b70afaaadfb2d254af4616c4fc">Most recent data collector items</p><pre><code>SELECT proxy.host AS proxy, hosts.host, items.itemid, items.key_
+FROM items, hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.hostid=items.hostid
+ORDER BY items.itemid DESC
+LIMIT 10;</code></pre>
+
 <p id="3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</p><pre><code>SELECT
 COUNT(*) AS count,
 proxy.host AS proxy,
@@ -702,6 +781,63 @@ users.alias
 FROM sessions
 JOIN users ON (users.userid=sessions.userid)
 GROUP BY 2 ORDER BY 1 ASC;</code></pre>
+
+</div>
+<input type="radio" name="tabs" id="triggers"><label for="triggers">triggers</label><div class="tab">
+<div class='index'>
+
+
+
+<ol>
+<li><a href="#81a9674116b61a96a11ec705ce22ae93">Healthy/active/enabled trigger objects, together with healthy items and healthy/enabled hosts</a></li>
+<li><a href="#f8e60314cc0575ab111f8d3440f85dd0">Select internal trigger events for triggers which where not working some time ago, but triggers is healthy now</a></li>
+<li><a href="#9d4f45e4774cd09878cd90a6928f00d2">Delete INTERNAL trigger events for triggers which is healthy at this very second. Since it's healthy now, we can remove old evidence why it was not working. this will allow to concentrate more preciselly on what other things is not working right now</a></li>
+</ol></div>
+<p id="81a9674116b61a96a11ec705ce22ae93">Healthy/active/enabled trigger objects, together with healthy items and healthy/enabled hosts</p><pre><code>SELECT DISTINCT triggers.triggerid, hosts.host
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0;</code></pre>
+
+<p id="f8e60314cc0575ab111f8d3440f85dd0">Select internal trigger events for triggers which where not working some time ago, but triggers is healthy now</p><pre><code>SELECT name FROM events
+WHERE source=3 AND object=0
+AND objectid NOT IN (
+SELECT DISTINCT triggers.triggerid
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND hosts.flags IN (0,4)
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
+
+<p id="9d4f45e4774cd09878cd90a6928f00d2">Delete INTERNAL trigger events for triggers which is healthy at this very second. Since it's healthy now, we can remove old evidence why it was not working. this will allow to concentrate more preciselly on what other things is not working right now</p><pre><code>DELETE FROM events
+WHERE source=3 AND object=0
+AND objectid NOT IN (
+SELECT DISTINCT triggers.triggerid
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND hosts.flags IN (0,4)
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
 
 </div>
 <input type="radio" name="tabs" id="widget_field"><label for="widget_field">widget_field</label><div class="tab">

@@ -251,6 +251,47 @@ FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
+Active and disabled hosts and items<pre><code>SELECT
+proxy.host AS proxy,
+CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS host,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS item,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1)
+GROUP BY proxy.host, items.type
+ORDER BY 1,2,3,4,5 DESC;</code></pre>
 Show items by proxy<pre><code>SELECT
 COUNT(*) AS count,
 proxy.host AS proxy,
@@ -427,6 +468,53 @@ FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
+Active and disabled hosts and items<pre><code>SELECT
+proxy.host AS proxy,
+CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS host,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS item,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1)
+GROUP BY proxy.host, items.type
+ORDER BY 1,2,3,4,5 DESC;</code></pre>
+Most recent data collector items<pre><code>SELECT proxy.host AS proxy, hosts.host, items.itemid, items.key_
+FROM items, hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.hostid=items.hostid
+ORDER BY items.itemid DESC
+LIMIT 10;</code></pre>
 Show items by proxy<pre><code>SELECT
 COUNT(*) AS count,
 proxy.host AS proxy,
@@ -530,6 +618,53 @@ FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
+Active and disabled hosts and items<pre><code>SELECT
+proxy.host AS proxy,
+CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS host,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS item,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1)
+GROUP BY proxy.host, items.type
+ORDER BY 1,2,3,4,5 DESC;</code></pre>
+Most recent data collector items<pre><code>SELECT proxy.host AS proxy, hosts.host, items.itemid, items.key_
+FROM items, hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.hostid=items.hostid
+ORDER BY items.itemid DESC
+LIMIT 10;</code></pre>
 Show items by proxy<pre><code>SELECT
 COUNT(*) AS count,
 proxy.host AS proxy,
@@ -665,6 +800,53 @@ FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
+Active and disabled hosts and items<pre><code>SELECT
+proxy.host AS proxy,
+CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS host,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS item,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1)
+GROUP BY proxy.host, items.type
+ORDER BY 1,2,3,4,5 DESC;</code></pre>
+Most recent data collector items<pre><code>SELECT proxy.host AS proxy, hosts.host, items.itemid, items.key_
+FROM items, hosts
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.hostid=items.hostid
+ORDER BY items.itemid DESC
+LIMIT 10;</code></pre>
 Show items by proxy<pre><code>SELECT
 COUNT(*) AS count,
 proxy.host AS proxy,
@@ -1019,6 +1201,30 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
+Show internal events for items which is working right now<pre><code>SELECT events.name FROM events
+WHERE source=3 AND object=4
+AND objectid NOT IN (
+SELECT items.itemid
+FROM hosts, items, item_rtdata
+WHERE items.hostid=hosts.hostid
+AND items.itemid=item_rtdata.itemid
+AND hosts.status=0
+AND items.status=0
+AND hosts.flags IN (0,4)
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
+Detete internal events for items which is working right now<pre><code>DELETE FROM events
+WHERE source=3 AND object=4
+AND objectid NOT IN (
+SELECT items.itemid
+FROM hosts, items, item_rtdata
+WHERE items.hostid=hosts.hostid
+AND items.itemid=item_rtdata.itemid
+AND hosts.status=0
+AND items.status=0
+AND hosts.flags IN (0,4)
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
 Print error active data collector items<pre><code>SELECT
 hosts.host,
 items.name,
@@ -1029,6 +1235,49 @@ AND hosts.status=0
 AND items.status=0
 AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid;</code></pre>
+Healthy/active/enabled trigger objects, together with healthy items and healthy/enabled hosts<pre><code>SELECT DISTINCT triggers.triggerid, hosts.host
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0;</code></pre>
+Select internal trigger events for triggers which where not working some time ago, but triggers is healthy now<pre><code>SELECT name FROM events
+WHERE source=3 AND object=0
+AND objectid NOT IN (
+SELECT DISTINCT triggers.triggerid
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND hosts.flags IN (0,4)
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
+Delete INTERNAL trigger events for triggers which is healthy at this very second. Since it's healthy now, we can remove old evidence why it was not working. this will allow to concentrate more preciselly on what other things is not working right now<pre><code>DELETE FROM events
+WHERE source=3 AND object=0
+AND objectid NOT IN (
+SELECT DISTINCT triggers.triggerid
+FROM triggers, functions, items, hosts, item_rtdata
+WHERE triggers.triggerid=functions.triggerid
+AND functions.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_rtdata.itemid=items.itemid
+AND hosts.status=0
+AND hosts.flags IN (0,4)
+AND items.status=0
+AND triggers.status=0
+AND LENGTH(triggers.error)=0
+AND LENGTH(item_rtdata.error)=0
+);</code></pre>
 Show host object and proxy the item belongs to<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
@@ -1189,6 +1438,47 @@ FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
+Active and disabled hosts and items<pre><code>SELECT
+proxy.host AS proxy,
+CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS host,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS item,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1)
+GROUP BY proxy.host, items.type
+ORDER BY 1,2,3,4,5 DESC;</code></pre>
 Show items by proxy<pre><code>SELECT
 COUNT(*) AS count,
 proxy.host AS proxy,
@@ -1375,6 +1665,47 @@ DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_ty
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/52.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="54"><label for="54">54.sql</label><div class="tab">
+Active and disabled hosts and items<pre><code>SELECT
+proxy.host AS proxy,
+CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS host,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS item,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1)
+GROUP BY proxy.host, items.type
+ORDER BY 1,2,3,4,5 DESC;</code></pre>
 Non-working external scripts<pre><code>SELECT
 hosts.host,
 items.key_,
@@ -1560,6 +1891,47 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="60"><label for="60">60.sql</label><div class="tab">
 Active problems including internal<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Active and disabled hosts and items<pre><code>SELECT
+proxy.host AS proxy,
+CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS host,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS item,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1)
+GROUP BY proxy.host, items.type
+ORDER BY 1,2,3,4,5 DESC;</code></pre>
 ZBX hosts unreachable<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
