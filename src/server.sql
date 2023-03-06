@@ -451,6 +451,17 @@ JOIN item_discovery ON (item_discovery.itemid=items.itemid)
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE item_discovery.ts_delete > 0;
 
+--delete items which are not discovered anymore
+DELETE FROM items WHERE itemid IN (
+SELECT x2.field FROM (
+SELECT items.itemid AS field
+FROM items, item_discovery, hosts
+WHERE item_discovery.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND item_discovery.ts_delete > 0
+) x2
+);
+
 --count of item is not discovered anymore and will be deleted
 SELECT
 hosts.host,
