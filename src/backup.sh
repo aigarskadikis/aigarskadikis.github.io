@@ -148,3 +148,18 @@ tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_parti
 # Backup all frontend modules with 'xz' compression
 tar --create --verbose --use-compress-program='xz -9' /usr/share/zabbix/modules | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | unxz | tar -xv%' && echo
 
+# unpack base64 content from database. create a meaningful filesystem
+cd && rm backup -rf && mysql \
+--database='zabbix' \
+--silent \
+--skip-column-names \
+--batch \
+--execute="
+SELECT CONCAT('cd && mkdir -p backup/',hosts.host,' && cd backup/',hosts.host, history_text.value)
+FROM hosts, items, history_text
+WHERE hosts.hostid=items.hostid
+AND items.itemid=history_text.itemid
+AND items.key_ like 'restore.files.in.home.dir%'
+AND history_text.clock > UNIX_TIMESTAMP(NOW()- INTERVAL 1 DAY)
+" | sed 's|cd .. mkdir backup .. cd backup | |' > restore.sh && chmod +x restore.sh && ./restore.sh
+

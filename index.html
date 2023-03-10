@@ -129,6 +129,19 @@ Backup and compress zabbix server config with a purpose to restore it on other m
 Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress partitioning script and configuration files<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup all frontend modules with 'xz' compression<pre><code>tar --create --verbose --use-compress-program='xz -9' /usr/share/zabbix/modules | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | unxz | tar -xv%' && echo</code></pre>
+Unpack base64 content from database. Create a meaningful filesystem<pre><code>cd && rm backup -rf && mysql \
+--database='zabbix' \
+--silent \
+--skip-column-names \
+--batch \
+--execute="
+SELECT CONCAT('cd && mkdir -p backup/',hosts.host,' && cd backup/',hosts.host, history_text.value)
+FROM hosts, items, history_text
+WHERE hosts.hostid=items.hostid
+AND items.itemid=history_text.itemid
+AND items.key_ like 'restore.files.in.home.dir%'
+AND history_text.clock > UNIX_TIMESTAMP(NOW()- INTERVAL 1 DAY)
+" | sed 's|cd .. mkdir backup .. cd backup | |' > restore.sh && chmod +x restore.sh && ./restore.sh</code></pre>
 <p>Download this section: <a href="src/backup.sh">https://aigarskadikis.github.io/src/backup.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh</a></p>
 </div>
