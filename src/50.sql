@@ -26,6 +26,17 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;
 
+--all items which belongs to application 'DR'
+SELECT hosts.host, items.key_
+FROM items, hosts, items_applications, applications
+WHERE items_applications.itemid=items.itemid
+AND applications.applicationid=items_applications.applicationid
+AND hosts.hostid=items.hostid
+AND hosts.status=0
+AND items.status=0
+AND items.flags IN (0,4)
+AND applications.name='DR';
+
 --clean up trends for items which now does not want to store trends or item is disabled
 SET SESSION SQL_LOG_BIN=0;
 DELETE FROM trends WHERE itemid IN (SELECT itemid FROM items WHERE value_type=0 AND trends='0' AND flags IN (0,4));

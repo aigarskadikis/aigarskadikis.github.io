@@ -421,6 +421,7 @@ HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 
 
 <ol>
+<li><a href="#aef337247b29970fd1185fe081b3c387">All items which belongs to application 'DR'</a></li>
 <li><a href="#39c02d0d0aabaa84d3ddb006b6748b24">Active and disabled hosts and items</a></li>
 <li><a href="#feb6d4b70afaaadfb2d254af4616c4fc">Most recent data collector items</a></li>
 <li><a href="#3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</a></li>
@@ -436,6 +437,16 @@ HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 <li><a href="#7b87682be287de2ad0b728bab7470deb">Print error active data collector items</a></li>
 <li><a href="#5d6211cb422c771d13023d3c7ef3f89e">Show host object and proxy the item belongs to</a></li>
 </ol></div>
+<p id="aef337247b29970fd1185fe081b3c387">All items which belongs to application 'DR'</p><pre><code>SELECT hosts.host, items.key_
+FROM items, hosts, items_applications, applications
+WHERE items_applications.itemid=items.itemid
+AND applications.applicationid=items_applications.applicationid
+AND hosts.hostid=items.hostid
+AND hosts.status=0
+AND items.status=0
+AND items.flags IN (0,4)
+AND applications.name='DR';</code></pre>
+
 <p id="39c02d0d0aabaa84d3ddb006b6748b24">Active and disabled hosts and items</p><pre><code>SELECT
 proxy.host AS proxy,
 CASE hosts.status
