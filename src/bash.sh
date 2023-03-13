@@ -22,6 +22,9 @@ dd if=/dev/urandom of=/db/mount/point/5GB bs=1M count=5120 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/50GB bs=1M count=51200 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/65GB bs=1M count=65536 oflag=direct
 
+# simulate javascript code without placing file in filesystem
+zabbix_js --script <(echo 'return 1;') --param '' --loglevel 4 --timeout 60
+
 # erase dublicate data in table 'history_text'. this does NOT work like discard unchanged
 mysql \
 --database='zabbix' \
