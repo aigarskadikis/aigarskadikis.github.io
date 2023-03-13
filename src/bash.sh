@@ -25,6 +25,9 @@ dd if=/dev/urandom of=/db/mount/point/65GB bs=1M count=65536 oflag=direct
 # simulate javascript code without placing file in filesystem
 zabbix_js --script <(echo 'return 1;') --param '' --loglevel 4 --timeout 60
 
+# feed the output of file into javascript program
+zabbix_js --script <(echo 'return value;') --loglevel 3 --timeout 60 --input <(grep -v "^$\|#" /etc/zabbix/zabbix_agentd.conf | sort)
+
 # erase dublicate data in table 'history_text'. this does NOT work like discard unchanged
 mysql \
 --database='zabbix' \
