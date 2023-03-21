@@ -26,8 +26,21 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;
 
---find duplicate interfaces based on device serial number stored in the "Serial A" field
-SELECT host_inventory.serialno_a AS serial, GROUP_CONCAT(interface.ip) AS IP
+--dublicate devices phase1. find duplicate interfaces based on device serial number stored in the "Serial A" field
+SELECT host_inventory.serialno_a AS serial, GROUP_CONCAT(interface.interfaceid) AS iID
+FROM interface, host_inventory, hosts
+WHERE host_inventory.hostid=interface.hostid
+AND hosts.hostid=host_inventory.hostid
+AND hosts.status=0
+AND interface.main=0
+AND host_inventory.serialno_a='123456'
+GROUP BY host_inventory.serialno_a;
+
+--dublicate devices phase2. add the interface to the other device
+UPDATE interface SET hostid=10561 WHERE interfaceid IN (28,32,437);
+
+--dublicate devices phase3. summary
+SELECT host_inventory.serialno_a AS serial, GROUP_CONCAT(interface.ip) AS IP, GROUP_CONCAT(hosts.hostid) AS hID
 FROM interface, host_inventory, hosts
 WHERE host_inventory.hostid=interface.hostid
 AND hosts.hostid=host_inventory.hostid
