@@ -26,6 +26,16 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;
 
+--find duplicate interfaces based on device serial number stored in the "Serial A" field
+SELECT host_inventory.serialno_a AS serial, GROUP_CONCAT(interface.ip) AS IP
+FROM interface, host_inventory, hosts
+WHERE host_inventory.hostid=interface.hostid
+AND hosts.hostid=host_inventory.hostid
+AND hosts.status=0
+AND LENGTH(host_inventory.serialno_a) > 0
+GROUP BY host_inventory.serialno_a
+HAVING COUNT(*) > 1;
+
 --all items which belongs to application 'DR'. Zabbix 5.0
 SELECT hosts.host, items.key_
 FROM items, hosts, items_applications, applications
