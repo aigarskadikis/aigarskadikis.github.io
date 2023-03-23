@@ -36,6 +36,16 @@ AND interface.main=0
 AND host_inventory.serialno_a='123456'
 GROUP BY host_inventory.serialno_a;
 
+--same host name
+SELECT host_inventory.name AS name, GROUP_CONCAT(interface.interfaceid) AS IP, GROUP_CONCAT(hosts.hostid) AS hID
+FROM interface, host_inventory, hosts
+WHERE host_inventory.hostid=interface.hostid
+AND hosts.hostid=host_inventory.hostid
+AND hosts.status=0
+AND interface.main=0
+AND host_inventory.name='idrac'
+GROUP BY 1;
+
 --dublicate devices phase2. add the interface to the other device
 UPDATE interface SET hostid=10561 WHERE interfaceid IN (28,32,437);
 
