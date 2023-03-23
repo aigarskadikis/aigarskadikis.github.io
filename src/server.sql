@@ -59,6 +59,18 @@ AND LENGTH(host_inventory.serialno_a) > 0
 GROUP BY host_inventory.serialno_a
 HAVING COUNT(*) > 1;
 
+--go directly per unsupported items per host object. Zabbix 6.0
+SELECT COUNT(*),proxy.host, hosts.host, CONCAT('items.php?context=host&filter_hostids%5B%5D=',hosts.hostid,'&filter_name=&filter_key=&filter_type=-1&filter_value_type=-1&filter_snmp_oid=&filter_history=&filter_trends=&filter_delay=&filter_evaltype=0&filter_tags%5B0%5D%5Btag%5D=&filter_tags%5B0%5D%5Boperator%5D=0&filter_tags%5B0%5D%5Bvalue%5D=&filter_state=1&filter_with_triggers=-1&filter_inherited=-1&filter_discovered=-1&filter_set=1') AS hostid 
+FROM items
+JOIN item_rtdata ON (item_rtdata.itemid=items.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND item_rtdata.state=1
+GROUP BY 2,3,4
+ORDER BY 1 DESC
+LIMIT 10;
+
 --all items which belongs to application 'DR'. Zabbix 5.0
 SELECT hosts.host, items.key_
 FROM items, hosts, items_applications, applications
