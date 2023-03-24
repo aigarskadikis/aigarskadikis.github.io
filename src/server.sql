@@ -59,6 +59,19 @@ AND LENGTH(host_inventory.serialno_a) > 0
 GROUP BY host_inventory.serialno_a
 HAVING COUNT(*) > 1;
 
+--order how hosts got discovered. must have global setting on to keep older records. Zabbix 6.0
+SELECT FROM_UNIXTIME(clock), name,
+CASE value
+WHEN 0 THEN 'UP'
+WHEN 1 THEN 'DOWN'
+WHEN 2 THEN 'discovered'
+WHEN 3 THEN 'lost'
+END AS "status"
+FROM events
+WHERE source=1
+AND value=2
+ORDER BY 1 ASC;
+
 --go directly per unsupported items per host object. Zabbix 6.0
 SELECT COUNT(*),proxy.host, hosts.host, CONCAT('items.php?context=host&filter_hostids%5B%5D=',hosts.hostid,'&filter_name=&filter_key=&filter_type=-1&filter_value_type=-1&filter_snmp_oid=&filter_history=&filter_trends=&filter_delay=&filter_evaltype=0&filter_tags%5B0%5D%5Btag%5D=&filter_tags%5B0%5D%5Boperator%5D=0&filter_tags%5B0%5D%5Bvalue%5D=&filter_state=1&filter_with_triggers=-1&filter_inherited=-1&filter_discovered=-1&filter_set=1') AS hostid 
 FROM items
