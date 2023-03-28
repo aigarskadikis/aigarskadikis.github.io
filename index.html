@@ -160,6 +160,8 @@ Test disk throughput<pre><code>dd if=/dev/urandom of=/db/mount/point/512M bs=1M 
 dd if=/dev/urandom of=/db/mount/point/5GB bs=1M count=5120 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/50GB bs=1M count=51200 oflag=direct
 dd if=/dev/urandom of=/db/mount/point/65GB bs=1M count=65536 oflag=direct</code></pre>
+Simulate javascript code without placing file in filesystem<pre><code>zabbix_js --script <(echo 'return 1;') --param '' --loglevel 4 --timeout 60</code></pre>
+Feed the output of file into javascript program<pre><code>zabbix_js --script <(echo 'return value;') --loglevel 3 --timeout 60 --input <(grep -v "^$\|#" /etc/zabbix/zabbix_agentd.conf | sort)</code></pre>
 Erase dublicate data in table 'history_text'. This does NOT work like discard unchanged<pre><code>mysql \
 --database='zabbix' \
 --silent \
@@ -709,6 +711,52 @@ FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.snmp_error) > 0;</code></pre>
+Dublicate devices phase1. Find duplicate interfaces based on device serial number stored in the "Serial A" field<pre><code>SELECT host_inventory.serialno_a AS serial, GROUP_CONCAT(interface.interfaceid) AS iID
+FROM interface, host_inventory, hosts
+WHERE host_inventory.hostid=interface.hostid
+AND hosts.hostid=host_inventory.hostid
+AND hosts.status=0
+AND interface.main=0
+AND host_inventory.serialno_a='123456'
+GROUP BY host_inventory.serialno_a;</code></pre>
+Same host name<pre><code>SELECT host_inventory.name AS name, GROUP_CONCAT(interface.interfaceid) AS IP, GROUP_CONCAT(hosts.hostid) AS hID
+FROM interface, host_inventory, hosts
+WHERE host_inventory.hostid=interface.hostid
+AND hosts.hostid=host_inventory.hostid
+AND hosts.status=0
+AND interface.main=0
+AND host_inventory.name='idrac'
+GROUP BY 1;</code></pre>
+Dublicate devices phase2. Add the interface to the other device<pre><code>UPDATE interface SET hostid=10561 WHERE interfaceid IN (28,32,437);</code></pre>
+Dublicate devices phase3. Summary<pre><code>SELECT host_inventory.serialno_a AS serial, GROUP_CONCAT(interface.ip) AS IP, GROUP_CONCAT(hosts.hostid) AS hID
+FROM interface, host_inventory, hosts
+WHERE host_inventory.hostid=interface.hostid
+AND hosts.hostid=host_inventory.hostid
+AND hosts.status=0
+AND LENGTH(host_inventory.serialno_a) > 0
+GROUP BY host_inventory.serialno_a
+HAVING COUNT(*) > 1;</code></pre>
+Order how hosts got discovered. Must have global setting on to keep older records. Zabbix 6.0<pre><code>SELECT FROM_UNIXTIME(clock), name,
+CASE value
+WHEN 0 THEN 'UP'
+WHEN 1 THEN 'DOWN'
+WHEN 2 THEN 'discovered'
+WHEN 3 THEN 'lost'
+END AS "status"
+FROM events
+WHERE source=1
+AND value=2
+ORDER BY 1 ASC;</code></pre>
+Go directly per unsupported items per host object. Zabbix 6.0<pre><code>SELECT COUNT(*),proxy.host, hosts.host, CONCAT('items.php?context=host&filter_hostids%5B%5D=',hosts.hostid,'&filter_name=&filter_key=&filter_type=-1&filter_value_type=-1&filter_snmp_oid=&filter_history=&filter_trends=&filter_delay=&filter_evaltype=0&filter_tags%5B0%5D%5Btag%5D=&filter_tags%5B0%5D%5Boperator%5D=0&filter_tags%5B0%5D%5Bvalue%5D=&filter_state=1&filter_with_triggers=-1&filter_inherited=-1&filter_discovered=-1&filter_set=1') AS hostid
+FROM items
+JOIN item_rtdata ON (item_rtdata.itemid=items.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND item_rtdata.state=1
+GROUP BY 2,3,4
+ORDER BY 1 DESC
+LIMIT 10;</code></pre>
 All items which belongs to application 'DR'. Zabbix 5.0<pre><code>SELECT hosts.host, items.key_
 FROM items, hosts, items_applications, applications
 WHERE items_applications.itemid=items.itemid

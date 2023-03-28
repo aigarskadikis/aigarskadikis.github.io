@@ -61,8 +61,21 @@ GROUP BY 1,2,3 ORDER BY 1,2,3;</code></pre>
 
 
 <ol>
+<li><a href="#a38bff54b4f3ce983fdb74471851fb22">Order how hosts got discovered. Must have global setting on to keep older records</a></li>
 <li><a href="#ff64207f3057eabbcff2e981d3c5b9e8">All events closed by global correlation rule</a></li>
 </ol></div>
+<p id="a38bff54b4f3ce983fdb74471851fb22">Order how hosts got discovered. Must have global setting on to keep older records</p><pre><code>SELECT FROM_UNIXTIME(clock), name,
+CASE value
+WHEN 0 THEN 'UP'
+WHEN 1 THEN 'DOWN'
+WHEN 2 THEN 'discovered'
+WHEN 3 THEN 'lost'
+END AS "status"
+FROM events
+WHERE source=1
+AND value=2
+ORDER BY 1 ASC;</code></pre>
+
 <p id="ff64207f3057eabbcff2e981d3c5b9e8">All events closed by global correlation rule</p><pre><code>SELECT
 repercussion.clock,
 repercussion.name,
@@ -262,6 +275,7 @@ HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 
 
 <ol>
+<li><a href="#c02e2681ff8a61a53848a9cdd877b67c">Go directly per unsupported items per host object</a></li>
 <li><a href="#39c02d0d0aabaa84d3ddb006b6748b24">Active and disabled hosts and items</a></li>
 <li><a href="#27d4e096992b4449576e8e526ebfac0b">Non-working external scripts</a></li>
 <li><a href="#3f8c12fb0e6f189a488d2d05c78f485e">Show items by proxy</a></li>
@@ -276,6 +290,17 @@ HAVING COUNT(interface.interfaceid) > 1;</code></pre>
 <li><a href="#7b87682be287de2ad0b728bab7470deb">Print error active data collector items</a></li>
 <li><a href="#5d6211cb422c771d13023d3c7ef3f89e">Show host object and proxy the item belongs to</a></li>
 </ol></div>
+<p id="c02e2681ff8a61a53848a9cdd877b67c">Go directly per unsupported items per host object</p><pre><code>SELECT COUNT(*),proxy.host, hosts.host, CONCAT('items.php?context=host&filter_hostids%5B%5D=',hosts.hostid,'&filter_name=&filter_key=&filter_type=-1&filter_value_type=-1&filter_snmp_oid=&filter_history=&filter_trends=&filter_delay=&filter_evaltype=0&filter_tags%5B0%5D%5Btag%5D=&filter_tags%5B0%5D%5Boperator%5D=0&filter_tags%5B0%5D%5Bvalue%5D=&filter_state=1&filter_with_triggers=-1&filter_inherited=-1&filter_discovered=-1&filter_set=1') AS hostid
+FROM items
+JOIN item_rtdata ON (item_rtdata.itemid=items.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0
+AND item_rtdata.state=1
+GROUP BY 2,3,4
+ORDER BY 1 DESC
+LIMIT 10;</code></pre>
+
 <p id="39c02d0d0aabaa84d3ddb006b6748b24">Active and disabled hosts and items</p><pre><code>SELECT
 proxy.host AS proxy,
 CASE hosts.status
