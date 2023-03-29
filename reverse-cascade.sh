@@ -7,7 +7,7 @@ DBNAME=$1
 
 VERSION=$(mysql --database=$DBNAME -sss --skip-column-names -e "
 SELECT mandatory FROM dbversion;
-")
+" | head -1)
 
 for TABLE in $(
 mysql --database=$DBNAME -sss --skip-column-names -e "
@@ -37,3 +37,4 @@ SELECT mandatory FROM dbversion;
 "
 
 fi
+
