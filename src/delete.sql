@@ -29,6 +29,9 @@ AND t1.clock < t2.clock
 AND t1.value=t2.value
 AND t1.itemid=t2.itemid;
 
+--remove evidence about all failed actions. Zabbix 5.0
+DELETE FROM alerts WHERE status=2;
+
 --delete all dublicate metrics in history_text. Zabbix 5.0
 DELETE t1
 FROM history_text t1
