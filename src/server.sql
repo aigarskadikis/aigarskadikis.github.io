@@ -108,6 +108,24 @@ DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_ty
 DELETE FROM history_log WHERE itemid IN (SELECT itemid FROM items WHERE value_type=2 AND history='0' AND flags IN (0,4));
 DELETE FROM history_log WHERE itemid IN (SELECT itemid FROM items WHERE value_type=2 AND status=1 AND flags IN (0,4));
 
+--list LLD rules which has an "input" from "Zabbix trapper" item. This is list on what will be about to be disabled.
+SELECT hosts.host AS host, master_itemid.key_ AS master, items.key_ AS LLD
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
+WHERE items.flags=1
+AND hosts.status=0
+AND master_itemid.type=2;
+
+--note down exact itemIDs for LLD items which is attached to "Zabbix trapper" item:
+SET SESSION group_concat_max_len = 1000000; SELECT GROUP_CONCAT(items.itemid)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
+WHERE items.flags=1
+AND hosts.status=0
+AND master_itemid.type=2;
+
 --active and disabled hosts and items. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0
 SELECT
 proxy.host AS proxy,
