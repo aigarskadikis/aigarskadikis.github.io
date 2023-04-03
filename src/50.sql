@@ -625,6 +625,17 @@ AND items.flags<>2
 GROUP BY 1,2
 ORDER BY 3 ASC;
 
+--show failed actions
+SELECT CONCAT('tr_events.php?triggerid=',events.objectid,'&eventid=',events.eventid) AS OpenEventDetails,
+FROM_UNIXTIME(alerts.clock) AS clock, alerts.error AS WhyItFailed,
+actions.name AS ActionName,
+CONCAT('actionconf.php?form=update&actionid=',actions.actionid) AS OpenAction
+FROM alerts, events, actions
+WHERE alerts.eventid=events.eventid
+AND actions.actionid=alerts.actionid
+AND alerts.status=2
+ORDER BY alerts.clock DESC LIMIT 10;
+
 --How many values is in the backlog. does not work on oracle proxy becuase of LIMIT
 SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1)
 FROM proxy_history;

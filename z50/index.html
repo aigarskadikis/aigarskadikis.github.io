@@ -30,6 +30,25 @@
 
 <div class='tabs'>
 
+<input type="radio" name="tabs" id="alerts"><label for="alerts">alerts</label><div class="tab">
+<div class='index'>
+
+
+
+<ol>
+<li><a href="#85fdf088a071c03a70b0369f2ce62300">Show failed actions</a></li>
+</ol></div>
+<p id="85fdf088a071c03a70b0369f2ce62300">Show failed actions</p><pre><code>SELECT CONCAT('tr_events.php?triggerid=',events.objectid,'&eventid=',events.eventid) AS OpenEventDetails,
+FROM_UNIXTIME(alerts.clock) AS clock, alerts.error AS WhyItFailed,
+actions.name AS ActionName,
+CONCAT('actionconf.php?form=update&actionid=',actions.actionid) AS OpenAction
+FROM alerts, events, actions
+WHERE alerts.eventid=events.eventid
+AND actions.actionid=alerts.actionid
+AND alerts.status=2
+ORDER BY alerts.clock DESC LIMIT 10;</code></pre>
+
+</div>
 <input type="radio" name="tabs" id="autoreg_host"><label for="autoreg_host">autoreg_host</label><div class="tab">
 <div class='index'>
 

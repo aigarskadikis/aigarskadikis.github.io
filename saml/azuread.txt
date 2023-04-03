@@ -1,0 +1,1 @@
+https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
