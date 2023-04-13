@@ -126,6 +126,18 @@ WHERE items.flags=1
 AND hosts.status=0
 AND master_itemid.type=2;
 
+--usernames, roles and user type. Zabbix 6.0
+SELECT
+users.username,
+role.name AS Role,
+CASE role.type
+WHEN 1 THEN 'user'
+WHEN 2 THEN 'admin'
+WHEN 3 THEN 'super admin'
+END AS UserType
+FROM users
+JOIN role ON (users.roleid=role.roleid);
+
 --active and disabled hosts and items. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0
 SELECT
 proxy.host AS proxy,
