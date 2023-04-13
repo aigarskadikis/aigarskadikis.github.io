@@ -126,6 +126,12 @@ WHERE items.flags=1
 AND hosts.status=0
 AND master_itemid.type=2;
 
+--dependency tree for active problems. Zabbix 6.0
+SELECT triggerid_down, COUNT(*) FROM trigger_depends WHERE triggerid_up IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+SELECT triggerid_down, COUNT(*) FROM trigger_depends WHERE triggerid_down IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+SELECT triggerid_up, COUNT(*) FROM trigger_depends WHERE triggerid_down IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+SELECT triggerid_up, COUNT(*) FROM trigger_depends WHERE triggerid_up IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+
 --usernames, roles and user type. Zabbix 6.0
 SELECT
 users.username,
