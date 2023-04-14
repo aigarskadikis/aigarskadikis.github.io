@@ -1,18 +1,21 @@
 # these are the tips running zabbix monitoring software.
 # list is ordered from the most importand (on top) to less important (bottom)
 
-- finetune the database engine to utilize the available memory
+
+- finetune the database engine to utilize the available memory. 'free -h'
 - timeout at agent side must be lower than on proxy/server. lower at least by 1s
 - use same DB flavor for central server and proxies. do not mix mysql with postgreSQL
-- use zabbix proxies to do data collection
+- use zabbix proxies to do data collection. central server will calculate triggers and send emails, open tickets
 - turn off binlog on Zabbix proxies
 - use table partitioning on central server
-- table partitioning on zabbix proxy
+- table partitioning for higly loaded zabbix proxy
 - use sqlite3 database if all zabbix proxies are small (less than 500 NVPS). using sqlite3 will lower down the maintenance cost of proxy servers. lower down patching and maintain software versions
-
+- dedicated DB users for frontend, backend, partitioning, backup
+- using an IP address to connect to endpoint is more reliable than connection to DNS
+- for write intensive workload the best thing is to use postgresql with timescaledb as the data is first inserted in memory. later flushed down to the disks
 
 
 - if item update frequency is 2m then trigger funtion max(10m) VS max(#5) does the same task. however the '10m' thing will cost "20 CPU cycles" but '#5' will cost 5 CPU cycles
 - for all data collectors use less proccesses. let them be 60% busy in AVG
-
+- do not erase the default value from config file
 
