@@ -2,12 +2,13 @@
 # list is ordered from the most importand (on top) to less important (bottom)
 
 - finetune the database engine to utilize the available memory
+- timeout at agent side must be lower than on proxy/server. lower at least by 1s
 - use same DB flavor for central server and proxies. do not mix mysql with postgreSQL
 - use zabbix proxies to do data collection
 - turn off binlog on Zabbix proxies
 - use table partitioning on central server
 - table partitioning on zabbix proxy
-
+- use sqlite3 database if all zabbix proxies are small (less than 500 NVPS). using sqlite3 will lower down the maintenance cost of proxy servers. lower down patching and maintain software versions
 
 
 
