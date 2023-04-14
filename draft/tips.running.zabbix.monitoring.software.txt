@@ -1,0 +1,17 @@
+# these are the tips running zabbix monitoring software.
+# list is ordered from the most importand (on top) to less important (bottom)
+
+- finetune the database engine to utilize the available memory
+- use same DB flavor for central server and proxies. do not mix mysql with postgreSQL
+- use zabbix proxies to do data collection
+- turn off binlog on Zabbix proxies
+- use table partitioning on central server
+- table partitioning on zabbix proxy
+
+
+
+
+- if item update frequency is 2m then trigger funtion max(10m) VS max(#5) does the same task. however the '10m' thing will cost "20 CPU cycles" but '#5' will cost 5 CPU cycles
+- for all data collectors use less proccesses. let them be 60% busy in AVG
+
+
