@@ -1,21 +1,53 @@
-# these are the tips running zabbix monitoring software.
-# list is ordered from the most importand (on top) to less important (bottom)
+
+# start with official document:
+https://www.zabbix.com/documentation/current/en/manual/installation/requirements/best_practices
 
 
-- finetune the database engine to utilize the available memory. 'free -h'
-- timeout at agent side must be lower than on proxy/server. lower at least by 1s
+=== arhitecture ===
 - use same DB flavor for central server and proxies. do not mix mysql with postgreSQL
+- use sqlite3 database if all zabbix proxies are small (less than 500 NVPS). sqlite3 requires no maintenance. less software on proxy server.
 - use zabbix proxies to do data collection. central server will calculate triggers and send emails, open tickets
-- turn off binlog on Zabbix proxies
 - use table partitioning on central server
 - table partitioning for higly loaded zabbix proxy
-- use sqlite3 database if all zabbix proxies are small (less than 500 NVPS). using sqlite3 will lower down the maintenance cost of proxy servers. lower down patching and maintain software versions
-- dedicated DB users for frontend, backend, partitioning, backup
-- using an IP address to connect to endpoint is more reliable than connection to DNS
-- for write intensive workload the best thing is to use postgresql with timescaledb as the data is first inserted in memory. later flushed down to the disks
 
 
+=== performance ===
+- finetune the database engine to utilize the available memory. 'free -h'
+- turn off binlog on Zabbix proxies
+
+
+=== misconfiguration ===
+- timeout at agent side must be lower than on proxy/server. lower at least by 1s. Timeout=29 for agent is last acceptable
+- In MYSQL houskeeper settings must match the settings for partitioning script
+- every new major version is having new helth templates. this must be manually updated
+
+
+=== maintenance, transparency, troubleshooting ===
+- dedicated DB users for frontend, backend, partitioning, backup script
+- do not allow connnections to database from any host
+- do not erase the default value from config file
+
+
+=== max ===
 - if item update frequency is 2m then trigger funtion max(10m) VS max(#5) does the same task. however the '10m' thing will cost "20 CPU cycles" but '#5' will cost 5 CPU cycles
 - for all data collectors use less proccesses. let them be 60% busy in AVG
-- do not erase the default value from config file
+- using an IP address to connect to endpoint is more reliable than connection to DNS
+- table "housekeeper" can use black hole table engine
+
+
+=== knowledge ===
+- for write intensive workload the best thing is to use postgresql with timescaledb as the data is firstly is inserted in memory. later flushed down to the disks
+- enable inventory
+- have at least one autoregistration action per windows, one autoregistration action per linux
+- discovery actions are working in stack. One can assign template, other(s) can assign host group(s)
+- there is an option to keep only raw history, do not calculate trends. A way to save storage.
+- it's possible to keep/calculate only trends without storing history. A way to save write throuput.
+- recovery message required.
+- repeated notifications
+- trigger for write cache graph has not build correctly. leason learned the hard way. It will create many side effects when write cache is NOT 100% free (or is NOT 0% used) for 5+ minutes. The line must stay straight all the time. No trianges, no parabolic pictures. Actually it is quite impossible to build a meaningfull trigger, because the trigger will not fire up in time, because the write cache is corrupted.
+- NVPS does not count dependent items
+- housekeeper run DELETE command towards all 5 tables, even if the data type belong to 1 table. a waste of DELETE commands
+- open(active) problems will degrate performance of user interface. for example 500 000 open problems will kill excitement to use frontend. Imagine the paperwork required to fill 500 000 problems.
+- a repeted/failed notification will degrate performance of problems page.
+- a non-super administrator requires more validations for DB server. The best frontend speed will be always for "Zabbix Super Admin"
 
