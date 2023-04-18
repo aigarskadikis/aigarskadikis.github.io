@@ -196,6 +196,10 @@ echo -n 'guest: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest];
 echo -n 'guest_nice: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest_nice];
 echo '------------'
 sleep 1; done;</code></pre>
+Compress /var/lib/mysql by using gzip<pre><code>tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
+Compress /var/lib/mysql by using lz4<pre><code>dnf install lz4
+tar --create --verbose --use-compress-program='lz4' --file=/tmp/var.lib.mysql.tar.lz4 /var/lib/mysql</code></pre>
+Track when trends are completed<pre><code>watch -n.2 'mysql -e "show full processlist;" | grep insert'</code></pre>
 Erase dublicate data in table 'history_str'. This does NOT work like discard unchanged<pre><code>mysql \
 --database='zabbix' \
 --silent \
@@ -587,6 +591,7 @@ WHERE t1.itemid=382198
 AND t1.clock < t2.clock
 AND t1.value=t2.value
 AND t1.itemid=t2.itemid;</code></pre>
+Remove evidence about all failed actions. Zabbix 5.0<pre><code>DELETE FROM alerts WHERE status=2;</code></pre>
 Delete all dublicate metrics in history_text. Zabbix 5.0<pre><code>DELETE t1
 FROM history_text t1
 INNER JOIN history_text t2
@@ -652,6 +657,16 @@ WHERE v2 IS NOT NULL
 );</code></pre>
 <p>Download this section: <a href="src/delete.sql">https://aigarskadikis.github.io/src/delete.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql</a></p>
+</div>
+<input type="radio" name="tabs" id="mysql"><label for="mysql">mysql.sql</label><div class="tab">
+Ssl connection information for MySQL<pre><code>SELECT sbt.variable_value AS tls_version, t2.variable_value AS cipher,
+processlist_user AS user, processlist_host AS host
+FROM performance_schema.status_by_thread AS sbt
+JOIN performance_schema.threads AS t ON t.thread_id = sbt.thread_id
+JOIN performance_schema.status_by_thread AS t2 ON t2.thread_id = t.thread_id
+WHERE sbt.variable_name = 'Ssl_version' and t2.variable_name = 'Ssl_cipher' ORDER BY tls_version;</code></pre>
+<p>Download this section: <a href="src/mysql.sql">https://aigarskadikis.github.io/src/mysql.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysql.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysql.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="proxy"><label for="proxy">proxy.sql</label><div class="tab">
 How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1)
@@ -777,6 +792,34 @@ DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_ty
 DELETE FROM history_str WHERE itemid IN (SELECT itemid FROM items WHERE value_type=1 AND status=1 AND flags IN (0,4));
 DELETE FROM history_log WHERE itemid IN (SELECT itemid FROM items WHERE value_type=2 AND history='0' AND flags IN (0,4));
 DELETE FROM history_log WHERE itemid IN (SELECT itemid FROM items WHERE value_type=2 AND status=1 AND flags IN (0,4));</code></pre>
+List LLD rules which has an "input" from "Zabbix trapper" item. This is list on what will be about to be disabled.<pre><code>SELECT hosts.host AS host, master_itemid.key_ AS master, items.key_ AS LLD
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
+WHERE items.flags=1
+AND hosts.status=0
+AND master_itemid.type=2;</code></pre>
+Note down exact itemIDs for LLD items which is attached to "Zabbix trapper" item:<pre><code>SET SESSION group_concat_max_len = 1000000; SELECT GROUP_CONCAT(items.itemid)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN items master_itemid ON (master_itemid.itemid=items.master_itemid)
+WHERE items.flags=1
+AND hosts.status=0
+AND master_itemid.type=2;</code></pre>
+Dependency tree for active problems. Zabbix 6.0<pre><code>SELECT triggerid_down, COUNT(*) FROM trigger_depends WHERE triggerid_up IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+SELECT triggerid_down, COUNT(*) FROM trigger_depends WHERE triggerid_down IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+SELECT triggerid_up, COUNT(*) FROM trigger_depends WHERE triggerid_down IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+SELECT triggerid_up, COUNT(*) FROM trigger_depends WHERE triggerid_up IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;</code></pre>
+Usernames, roles and user type. Zabbix 6.0<pre><code>SELECT
+users.username,
+role.name AS Role,
+CASE role.type
+WHEN 1 THEN 'user'
+WHEN 2 THEN 'admin'
+WHEN 3 THEN 'super admin'
+END AS UserType
+FROM users
+JOIN role ON (users.roleid=role.roleid);</code></pre>
 Active and disabled hosts and items. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0<pre><code>SELECT
 proxy.host AS proxy,
 CASE hosts.status
@@ -1566,6 +1609,16 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0 AND items.status=0
 GROUP BY 1,2,3
 HAVING COUNT(*) > 1;</code></pre>
+Summary of data collection and storage used<pre><code>SELECT items.delay,
+items.history,
+items.history, COUNT(*)
+FROM items
+JOIN hosts
+WHERE hosts.hostid=items.hostid
+AND items.status=0
+AND hosts.status=0
+GROUP BY 1,2,3
+ORDER BY 4 ASC;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>

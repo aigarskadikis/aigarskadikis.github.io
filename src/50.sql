@@ -705,6 +705,9 @@ AND t1.clock < t2.clock
 AND t1.value=t2.value
 AND t1.itemid=t2.itemid;
 
+--remove evidence about all failed actions
+DELETE FROM alerts WHERE status=2;
+
 --delete all dublicate metrics in history_text
 DELETE t1
 FROM history_text t1
