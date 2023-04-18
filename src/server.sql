@@ -1067,3 +1067,15 @@ WHERE hosts.status=0 AND items.status=0
 GROUP BY 1,2,3
 HAVING COUNT(*) > 1;
 
+--summary of data collection and storage used
+SELECT items.delay,
+items.history,
+items.history, COUNT(*)
+FROM items
+JOIN hosts
+WHERE hosts.hostid=items.hostid
+AND items.status=0
+AND hosts.status=0
+GROUP BY 1,2,3
+ORDER BY 4 ASC;
+

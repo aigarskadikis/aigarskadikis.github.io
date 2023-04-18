@@ -66,6 +66,16 @@ echo -n 'guest_nice: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest_nice
 echo '------------'
 sleep 1; done;
 
+# compress /var/lib/mysql by using gzip
+tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql
+
+# compress /var/lib/mysql by using lz4
+dnf install lz4
+tar --create --verbose --use-compress-program='lz4' --file=/tmp/var.lib.mysql.tar.lz4 /var/lib/mysql
+
+# track when trends are completed
+watch -n.2 'mysql -e "show full processlist;" | grep insert'
+
 # erase dublicate data in table 'history_str'. this does NOT work like discard unchanged
 mysql \
 --database='zabbix' \
