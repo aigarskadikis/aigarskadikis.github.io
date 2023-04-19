@@ -26,6 +26,24 @@ GROUP BY 2,3,4
 ORDER BY 1 DESC
 LIMIT 10;
 
+--dependency tree for active problems
+SELECT triggerid_down, COUNT(*) FROM trigger_depends WHERE triggerid_up IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+SELECT triggerid_down, COUNT(*) FROM trigger_depends WHERE triggerid_down IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+SELECT triggerid_up, COUNT(*) FROM trigger_depends WHERE triggerid_down IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+SELECT triggerid_up, COUNT(*) FROM trigger_depends WHERE triggerid_up IN (SELECT objectid FROM problem WHERE source=0) GROUP BY 1 HAVING COUNT(*)>1 ORDER BY 2 DESC LIMIT 10;
+
+--usernames, roles and user type
+SELECT
+users.username,
+role.name AS Role,
+CASE role.type
+WHEN 1 THEN 'user'
+WHEN 2 THEN 'admin'
+WHEN 3 THEN 'super admin'
+END AS UserType
+FROM users
+JOIN role ON (users.roleid=role.roleid);
+
 --active and disabled hosts and items
 SELECT
 proxy.host AS proxy,

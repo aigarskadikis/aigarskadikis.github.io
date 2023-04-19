@@ -644,8 +644,20 @@ GROUP BY 2 ORDER BY 1 ASC;</code></pre>
 
 
 <ol>
+<li><a href="#e530d077010b3b74880cb124748b634b">Usernames, roles and user type</a></li>
 <li><a href="#c674ae604818596a4fa10e93e4243b84">Print all online users with rights group ID: 13</a></li>
 </ol></div>
+<p id="e530d077010b3b74880cb124748b634b">Usernames, roles and user type</p><pre><code>SELECT
+users.username,
+role.name AS Role,
+CASE role.type
+WHEN 1 THEN 'user'
+WHEN 2 THEN 'admin'
+WHEN 3 THEN 'super admin'
+END AS UserType
+FROM users
+JOIN role ON (users.roleid=role.roleid);</code></pre>
+
 <p id="c674ae604818596a4fa10e93e4243b84">Print all online users with rights group ID: 13</p><pre><code>SELECT
 users.username,
 CASE
