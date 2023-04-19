@@ -1070,7 +1070,7 @@ HAVING COUNT(*) > 1;
 --summary of data collection and storage used
 SELECT items.delay,
 items.history,
-items.history, COUNT(*)
+items.trends, COUNT(*)
 FROM items
 JOIN hosts
 WHERE hosts.hostid=items.hostid
