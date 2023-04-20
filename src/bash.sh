@@ -76,6 +76,16 @@ tar --create --verbose --use-compress-program='lz4' --file=/tmp/var.lib.mysql.ta
 # track when trends are completed
 watch -n.2 'mysql -e "show full processlist;" | grep insert'
 
+# take poller #11, increase log level to 5 and stream live situation of what kind of items are fetched and how fast. Zabbix 6.0, 6.2, 6.4
+zabbix_proxy -R log_level_increase="poller",11
+zabbix_proxy -R log_level_increase="poller",11
+tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #11 " | awk '{ print $2 }')" | grep -E 'interfaceid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'
+
+# take poller #11, increase log level to 5 and stream live situation of what kind of items are fetched and how fast. Zabbix 5.0
+zabbix_proxy -R log_level_increase="poller",11
+zabbix_proxy -R log_level_increase="poller",11
+tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #11 " | awk '{ print $2 }')" | grep -E 'hostid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'
+
 # erase dublicate data in table 'history_str'. this does NOT work like discard unchanged
 mysql \
 --database='zabbix' \
