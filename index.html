@@ -200,6 +200,13 @@ Compress /var/lib/mysql by using gzip<pre><code>tar --create --verbose --use-com
 Compress /var/lib/mysql by using lz4<pre><code>dnf install lz4
 tar --create --verbose --use-compress-program='lz4' --file=/tmp/var.lib.mysql.tar.lz4 /var/lib/mysql</code></pre>
 Track when trends are completed<pre><code>watch -n.2 'mysql -e "show full processlist;" | grep insert'</code></pre>
+Take poller #11, increase log level to 5 and stream live situation of what kind of items are fetched and how fast. Zabbix 6.0, 6.2, 6.4<pre><code>zabbix_proxy -R log_level_increase="poller",11
+zabbix_proxy -R log_level_increase="poller",11
+tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #11 " | awk '{ print $2 }')" | grep -E 'interfaceid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'</code></pre>
+Take poller #11, increase log level to 5 and stream live situation of what kind of items are fetched and how fast. Zabbix 5.0<pre><code>zabbix_proxy -R log_level_increase="poller",1
+zabbix_proxy -R log_level_increase="poller",1
+tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -E 'hostid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'
+tail -99f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -Eo 'hostid:\S+ itemid:\S+ type:\S+|got.*sec.*idle'</code></pre>
 Erase dublicate data in table 'history_str'. This does NOT work like discard unchanged<pre><code>mysql \
 --database='zabbix' \
 --silent \
@@ -1454,6 +1461,16 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0
 AND items.status=1
 );</code></pre>
+For hosts which are disable, set all items as supported<pre><code>UPDATE item_rtdata
+SET state=0
+WHERE state=1
+AND itemid IN (
+SELECT items.itemid
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status=1
+AND items.status=0
+);</code></pre>
 Show internal events for items which is working right now. Zabbix 5.0<pre><code>SELECT events.name FROM events
 WHERE source=3 AND object=4
 AND objectid NOT IN (
@@ -1611,7 +1628,7 @@ GROUP BY 1,2,3
 HAVING COUNT(*) > 1;</code></pre>
 Summary of data collection and storage used<pre><code>SELECT items.delay,
 items.history,
-items.history, COUNT(*)
+items.trends, COUNT(*)
 FROM items
 JOIN hosts
 WHERE hosts.hostid=items.hostid

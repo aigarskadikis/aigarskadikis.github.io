@@ -890,6 +890,18 @@ AND hosts.status=0
 AND items.status=1
 );
 
+--for hosts which are disable, set all items as supported
+UPDATE item_rtdata
+SET state=0
+WHERE state=1
+AND itemid IN (
+SELECT items.itemid
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status=1
+AND items.status=0
+);
+
 --show internal events for items which is working right now. Zabbix 5.0
 SELECT events.name FROM events
 WHERE source=3 AND object=4
