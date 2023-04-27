@@ -436,6 +436,17 @@ JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
 WHERE event_recovery.c_eventid IS NOT NULL
 ORDER BY repercussion.clock ASC;
 
+--delete events closed by global correlation:
+DELETE FROM events WHERE eventid IN (
+SELECT
+repercussion.eventid
+FROM events repercussion
+JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid)
+JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
+WHERE event_recovery.c_eventid IS NOT NULL
+ORDER BY repercussion.clock ASC
+) AND clock < 1682475866;
+
 --all active data collector items on enabled hosts. Zabbix 3.0, 4.0, 5.0, 6.0
 SELECT hosts.host, items.name, items.type, items.key_, items.delay
 FROM items
