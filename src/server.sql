@@ -458,6 +458,21 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
 WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 HAVING COUNT(*)=1 ORDER BY 1,3,2;
 
+--print host objects which own a lonely template object
+SELECT proxy.host AS proxy,
+hosts.host,
+template.host AS template,
+COUNT(*)
+FROM hosts
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
+WHERE hosts.status IN (0,1) AND hosts.flags=0
+AND template.host='write name of template here'
+GROUP BY 1,2,3
+HAVING COUNT(*)=1
+ORDER BY 1,2;
+
 --all active data collector items on enabled hosts. Zabbix 3.0, 4.0, 5.0, 6.0
 SELECT hosts.host, items.name, items.type, items.key_, items.delay
 FROM items
