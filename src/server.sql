@@ -473,6 +473,10 @@ GROUP BY 1,2,3
 HAVING COUNT(*)=1
 ORDER BY 1,2;
 
+--auditlog spaming database
+SELECT action, resourcetype, COUNT(*) FROM auditlog WHERE clock >= UNIX_TIMESTAMP(NOW() - INTERVAL 2 HOUR) GROUP BY 1,2 ORDER BY COUNT(*) ASC;
+SELECT action, resourcetype, COUNT(*) FROM auditlog WHERE clock >= UNIX_TIMESTAMP(NOW() - INTERVAL 2 HOUR) GROUP BY 1,2 ORDER BY COUNT(*) ASC;
+
 --all active data collector items on enabled hosts. Zabbix 3.0, 4.0, 5.0, 6.0
 SELECT hosts.host, items.name, items.type, items.key_, items.delay
 FROM items
