@@ -129,19 +129,6 @@ Backup and compress zabbix server config with a purpose to restore it on other m
 Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress partitioning script and configuration files<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup all frontend modules with 'xz' compression<pre><code>tar --create --verbose --use-compress-program='xz -9' /usr/share/zabbix/modules | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | unxz | tar -xv%' && echo</code></pre>
-Unpack base64 content from database. Create a meaningful filesystem<pre><code>cd && rm backup -rf && mysql \
---database='zabbix' \
---silent \
---skip-column-names \
---batch \
---execute="
-SELECT CONCAT('cd && mkdir -p backup/',hosts.host,' && cd backup/',hosts.host, history_text.value)
-FROM hosts, items, history_text
-WHERE hosts.hostid=items.hostid
-AND items.itemid=history_text.itemid
-AND items.key_ like 'restore.files.in.home.dir%'
-AND history_text.clock > UNIX_TIMESTAMP(NOW()- INTERVAL 1 DAY)
-" | sed 's|cd .. mkdir backup .. cd backup | |' > restore.sh && chmod +x restore.sh && ./restore.sh</code></pre>
 <p>Download this section: <a href="src/backup.sh">https://aigarskadikis.github.io/src/backup.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh</a></p>
 </div>
@@ -207,6 +194,10 @@ Take poller #11, increase log level to 5 and stream live situation of what kind 
 zabbix_proxy -R log_level_increase="poller",1
 tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -E 'hostid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'
 tail -99f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -Eo 'hostid:\S+ itemid:\S+ type:\S+|got.*sec.*idle'</code></pre>
+Backup<pre><code>psql z50 -c "COPY (SELECT * FROM trends) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/z50.trends.csv.lz4
+psql z50 -c "COPY (SELECT * FROM trends_uint) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/z50.trends_uint.csv.lz4</code></pre>
+Restore<pre><code>psql z50 -c "\COPY trends FROM PROGRAM 'lz4cat /tmp/z50.trends.csv.lz4' DELIMITER ',' CSV"
+psql z50 -c "\COPY trends_uint FROM PROGRAM 'lz4cat /tmp/z50.trends_uint.csv.lz4' DELIMITER ',' CSV"</code></pre>
 Erase dublicate data in table 'history_str'. This does NOT work like discard unchanged<pre><code>mysql \
 --database='zabbix' \
 --silent \
@@ -1085,6 +1076,39 @@ JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid)
 JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
 WHERE event_recovery.c_eventid IS NOT NULL
 ORDER BY repercussion.clock ASC;</code></pre>
+Delete events closed by global correlation:<pre><code>DELETE FROM events WHERE eventid IN (
+SELECT
+repercussion.eventid
+FROM events repercussion
+JOIN event_recovery ON (event_recovery.eventid=repercussion.eventid)
+JOIN events rootCause ON (rootCause.eventid=event_recovery.c_eventid)
+WHERE event_recovery.c_eventid IS NOT NULL
+ORDER BY repercussion.clock ASC
+) AND clock < 1682475866;</code></pre>
+Hosts with a single template<pre><code>SELECT proxy.host AS proxy,
+hosts.host,
+GROUP_CONCAT(template.host SEPARATOR ', ') AS templates,
+COUNT(*)
+FROM hosts
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
+WHERE hosts.status IN (0,1) AND hosts.flags=0 GROUP BY 1,2 HAVING COUNT(*)=1 ORDER BY 1,3,2;</code></pre>
+Print host objects which own a lonely template object<pre><code>SELECT proxy.host AS proxy,
+hosts.host,
+template.host AS template,
+COUNT(*)
+FROM hosts
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
+WHERE hosts.status IN (0,1) AND hosts.flags=0
+AND template.host='write name of template here'
+GROUP BY 1,2,3
+HAVING COUNT(*)=1
+ORDER BY 1,2;</code></pre>
+Auditlog spaming database<pre><code>SELECT action, resourcetype, COUNT(*) FROM auditlog WHERE clock >= UNIX_TIMESTAMP(NOW() - INTERVAL 2 HOUR) GROUP BY 1,2 ORDER BY COUNT(*) ASC;
+SELECT action, resourcetype, COUNT(*) FROM auditlog WHERE clock >= UNIX_TIMESTAMP(NOW() - INTERVAL 2 HOUR) GROUP BY 1,2 ORDER BY COUNT(*) ASC;</code></pre>
 All active data collector items on enabled hosts. Zabbix 3.0, 4.0, 5.0, 6.0<pre><code>SELECT hosts.host, items.name, items.type, items.key_, items.delay
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
