@@ -12,3 +12,7 @@ SELECT * FROM information_schema.processlist WHERE command = 'Sleep';
 --busy connections
 SELECT * FROM information_schema.processlist WHERE command != 'Sleep' and time > 1 and user != 'event_scheduler' ORDER BY time DESC, id;
 
+--mimic SHOW SLAVE STATUS
+SELECT t.PROCESSLIST_TIME, t.* FROM performance_schema.threads t WHERE NAME IN('thread/sql/slave_io', 'thread/sql/slave_sql');
+SELECT t.PROCESSLIST_TIME, t.* FROM performance_schema.threads t;
+
