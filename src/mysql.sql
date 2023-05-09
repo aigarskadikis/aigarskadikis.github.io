@@ -9,6 +9,9 @@ WHERE sbt.variable_name = 'Ssl_version' and t2.variable_name = 'Ssl_cipher' ORDE
 --persistent connections
 SELECT * FROM information_schema.processlist WHERE command = 'Sleep';
 
+--create random password for users
+UPDATE users SET passwd=substring(MD5(RAND()),1,20) WHERE userid NOT IN (1);
+
 --busy connections
 SELECT * FROM information_schema.processlist WHERE command != 'Sleep' and time > 1 and user != 'event_scheduler' ORDER BY time DESC, id;
 
