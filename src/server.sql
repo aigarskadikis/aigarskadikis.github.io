@@ -486,6 +486,23 @@ AND hosts.flags=0
 GROUP BY 1,2,3
 ORDER BY 4 DESC LIMIT 30;
 
+--statistics about media types and delivery. Zabbix 4.0
+SELECT actions.name AS actionName, users.alias AS sendTo, media_type.description AS mediaName,
+CASE alerts.status
+WHEN 0 THEN 'NOT_SEN'
+WHEN 1 THEN 'SENT'
+WHEN 2 THEN 'FAILED'
+WHEN 3 THEN 'NEW'
+END AS "alertStatus",
+COUNT(*) AS count
+FROM alerts
+JOIN actions ON (actions.actionid=alerts.actionid)
+JOIN media_type ON (media_type.mediatypeid=alerts.mediatypeid)
+LEFT JOIN users ON (users.userid=alerts.userid)
+WHERE alerts.alerttype=0
+GROUP BY 1,2,3,4
+ORDER BY 5 ASC;
+
 --all active data collector items on enabled hosts. Zabbix 3.0, 4.0, 5.0, 6.0
 SELECT hosts.host, items.name, items.type, items.key_, items.delay
 FROM items
