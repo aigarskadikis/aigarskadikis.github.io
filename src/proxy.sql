@@ -2,6 +2,15 @@
 SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1)
 FROM proxy_history;
 
+--skip all cached LLD rules
+delete from proxy_history where itemid in (select itemid from items where flags=1);
+
+--delete data which has been sent already
+DELETE FROM proxy_history WHERE id < (select nextid from ids where table_name = "proxy_history" limit 1);
+
+--show LLD JSON data
+SELECT items.hostid, items.hostid, items.key_, proxy_history.value FROM proxy_history, items WHERE proxy_history.itemid=items.itemid AND items.flags=1 ORDER BY clock ASC;
+
 --Optimal query to identify data overload. Zabbix 4.0, 5.0, 6.0
 SELECT itemid,
 COUNT(*),
