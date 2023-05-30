@@ -5,34 +5,37 @@ https://www.zabbix.com/documentation/current/en/manual/installation/requirements
 
 === arhitecture ===
 - use same DB flavor for central server and proxies. do not mix mysql with postgreSQL
-- use sqlite3 database if all zabbix proxies are small (less than 500 NVPS). sqlite3 requires no maintenance. less software on proxy server.
-- use zabbix proxies to do data collection. central server will calculate triggers and send emails, open tickets
+- use sqlite3 database if all zabbix proxies are small (less than 500 NVPS). sqlite3 requires no maintenance. less software to maintain on Zabbix proxy.
+- use zabbix proxies to do data collection and preprocessing. central server will calculate triggers and send emails, open tickets.
 - use table partitioning on central server
 - table partitioning for higly loaded zabbix proxy
 
 
 === performance ===
 - finetune the database engine to utilize the available memory. 'free -h'
-- turn off binlog on Zabbix proxies
+- turn off binlog on Zabbix proxies (MySQL)
 
 
 === misconfiguration ===
 - timeout at agent side must be lower than on proxy/server. lower at least by 1s. Timeout=29 for agent is last acceptable
-- In MYSQL houskeeper settings must match the settings for partitioning script
+- when running central server with MySQL, the houskeeper settings must match the settings for partitioning script
 - every new major version is having new helth templates. this must be manually updated
 
 
 === maintenance, transparency, troubleshooting ===
-- dedicated DB users for frontend, backend, partitioning, backup script
+- dedicated DB users for frontend, backend, partitioning, backup script, grafana. This will ease up troubleshooting in case of overload.
 - do not allow connnections to database from any host
 - do not erase the default value from config file
+- in case of HA used for proxy/server, enable /etc/zabbix/zabbix_server.d, /etc/zabbix/zabbix_proxy.d and keep the main configuration synchronized
+- if all devices are suppose to be online 24/7, then do not set big number for "StartUnreachablePollers". Set "StartUnreachablePollers=1" and do zabbix_proxy -R log_level_increase="unreachable poller". Track down the problem and fix the issue.
 
 
 === max ===
-- if item update frequency is 2m then trigger funtion max(10m) VS max(#5) does the same task. however the '10m' thing will cost "20 CPU cycles" but '#5' will cost 5 CPU cycles
 - for all data collectors use less proccesses. let them be 60% busy in AVG
 - using an IP address to connect to endpoint is more reliable than connection to DNS
 - table "housekeeper" can use black hole table engine
+- if network configuration can offord to use "Remote" templates for Zabbix proxies - this can be more reliable way to get health for proxy when proxy is overloaded.
+
 
 
 === knowledge ===
