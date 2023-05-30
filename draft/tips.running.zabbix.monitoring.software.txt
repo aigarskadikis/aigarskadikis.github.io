@@ -47,6 +47,7 @@ https://www.zabbix.com/documentation/current/en/manual/installation/requirements
 - it's possible to keep/calculate only trends without storing history. A way to save write throuput.
 - recovery message required.
 - repeated notifications
+- if multiple instances (test/preprod/prod), do a crossover health monitoring.
 - TLS 1.3 uses less steps for handshake reducing overall workload. if we have OpenSSL package with version 1.1+ (on all hosts), we can modify agent/proxy/server configuration files to use only TLS 1.3. in large environment it can give 3-5% load reduce (cpu/network latency).
 - trigger for write cache graph has not build correctly. leason learned the hard way. It will create many side effects when write cache is NOT 100% free (or is NOT 0% used) for 5+ minutes. The line must stay straight all the time. No trianges, no parabolic pictures. Actually it is quite impossible to build a meaningfull trigger, because the trigger will not fire up in time, because the write cache is corrupted.
 - NVPS does not count dependent items
