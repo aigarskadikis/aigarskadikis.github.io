@@ -511,6 +511,36 @@ WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;
 
+--all recent metrics which are using units 'B'
+SELECT hosts.host AS host, items.key_ AS itemKey, items.name AS name, (history_uint.value/1024/1024) AS MB
+FROM history_uint
+JOIN (SELECT DISTINCT itemid AS id, MAX(history_uint.clock) AS clock
+FROM history_uint
+WHERE clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
+GROUP BY 1) t2
+JOIN items ON (items.itemid=history_uint.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE
+t2.id=history_uint.itemid
+AND t2.clock=history_uint.clock
+AND items.units='B'
+ORDER BY 1,2;
+
+--all recent metrics which are using units '%'
+SELECT hosts.host AS host, items.key_ AS itemKey, items.name AS name, history.value AS percentage
+FROM history
+JOIN (SELECT DISTINCT itemid AS id, MAX(history.clock) AS clock
+FROM history
+WHERE clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
+GROUP BY 1) t2
+JOIN items ON (items.itemid=history.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE
+t2.id=history.itemid
+AND t2.clock=history.clock
+AND items.units='%'
+ORDER BY 1,2;
+
 --determine which items report unsupported state:
 SELECT COUNT(items.key_), hosts.host, items.key_, item_rtdata.error
 FROM events
