@@ -194,6 +194,9 @@ Take poller #11, increase log level to 5 and stream live situation of what kind 
 zabbix_proxy -R log_level_increase="poller",1
 tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -E 'hostid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'
 tail -99f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -Eo 'hostid:\S+ itemid:\S+ type:\S+|got.*sec.*idle'</code></pre>
+Outgoing ports, persistent connection<pre><code>ss --tcp --numeric --processes | grep zabbix_server</code></pre>
+Test item key<pre><code>zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'
+su zabbix --shell /bin/bash --command "zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'"</code></pre>
 Backup<pre><code>psql z50 -c "COPY (SELECT * FROM trends) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/z50.trends.csv.lz4
 psql z50 -c "COPY (SELECT * FROM trends_uint) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/z50.trends_uint.csv.lz4</code></pre>
 Restore<pre><code>psql z50 -c "\COPY trends FROM PROGRAM 'lz4cat /tmp/z50.trends.csv.lz4' DELIMITER ',' CSV"
@@ -663,12 +666,20 @@ FROM performance_schema.status_by_thread AS sbt
 JOIN performance_schema.threads AS t ON t.thread_id = sbt.thread_id
 JOIN performance_schema.status_by_thread AS t2 ON t2.thread_id = t.thread_id
 WHERE sbt.variable_name = 'Ssl_version' and t2.variable_name = 'Ssl_cipher' ORDER BY tls_version;</code></pre>
+Persistent connections<pre><code>SELECT * FROM information_schema.processlist WHERE command = 'Sleep';</code></pre>
+Create random password for users<pre><code>UPDATE users SET passwd=substring(MD5(RAND()),1,20) WHERE userid NOT IN (1);</code></pre>
+Busy connections<pre><code>SELECT * FROM information_schema.processlist WHERE command != 'Sleep' and time > 1 and user != 'event_scheduler' ORDER BY time DESC, id;</code></pre>
+Mimic SHOW SLAVE STATUS<pre><code>SELECT t.PROCESSLIST_TIME, t.* FROM performance_schema.threads t WHERE NAME IN('thread/sql/slave_io', 'thread/sql/slave_sql');
+SELECT t.PROCESSLIST_TIME, t.* FROM performance_schema.threads t;</code></pre>
 <p>Download this section: <a href="src/mysql.sql">https://aigarskadikis.github.io/src/mysql.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysql.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysql.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="proxy"><label for="proxy">proxy.sql</label><div class="tab">
 How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1)
 FROM proxy_history;</code></pre>
+Skip all cached LLD rules<pre><code>delete from proxy_history where itemid in (select itemid from items where flags=1);</code></pre>
+Delete data which has been sent already<pre><code>DELETE FROM proxy_history WHERE id < (select nextid from ids where table_name = "proxy_history" limit 1);</code></pre>
+Show LLD JSON data<pre><code>SELECT items.hostid, items.hostid, items.key_, proxy_history.value FROM proxy_history, items WHERE proxy_history.itemid=items.itemid AND items.flags=1 ORDER BY clock ASC;</code></pre>
 Optimal query to identify data overload. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT itemid,
 COUNT(*),
 AVG(LENGTH(value))
@@ -1109,12 +1120,78 @@ HAVING COUNT(*)=1
 ORDER BY 1,2;</code></pre>
 Auditlog spaming database<pre><code>SELECT action, resourcetype, COUNT(*) FROM auditlog WHERE clock >= UNIX_TIMESTAMP(NOW() - INTERVAL 2 HOUR) GROUP BY 1,2 ORDER BY COUNT(*) ASC;
 SELECT action, resourcetype, COUNT(*) FROM auditlog WHERE clock >= UNIX_TIMESTAMP(NOW() - INTERVAL 2 HOUR) GROUP BY 1,2 ORDER BY COUNT(*) ASC;</code></pre>
+List all host and template level tags<pre><code>SELECT hosts.status, host_tag.tag, host_tag.value, COUNT(*)
+FROM hosts, host_tag
+WHERE hosts.hostid=host_tag.hostid
+AND hosts.status IN (0,3)
+AND hosts.flags=0
+GROUP BY 1,2,3
+ORDER BY 4 DESC LIMIT 30;</code></pre>
+Statistics about media types and delivery. Zabbix 4.0<pre><code>SELECT actions.name AS actionName, users.alias AS sendTo, media_type.description AS mediaName,
+CASE alerts.status
+WHEN 0 THEN 'NOT_SEN'
+WHEN 1 THEN 'SENT'
+WHEN 2 THEN 'FAILED'
+WHEN 3 THEN 'NEW'
+END AS "alertStatus",
+COUNT(*) AS count
+FROM alerts
+JOIN actions ON (actions.actionid=alerts.actionid)
+JOIN media_type ON (media_type.mediatypeid=alerts.mediatypeid)
+LEFT JOIN users ON (users.userid=alerts.userid)
+WHERE alerts.alerttype=0
+GROUP BY 1,2,3,4
+ORDER BY 5 ASC;</code></pre>
 All active data collector items on enabled hosts. Zabbix 3.0, 4.0, 5.0, 6.0<pre><code>SELECT hosts.host, items.name, items.type, items.key_, items.delay
 FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status=0
 AND items.status=0
 ORDER BY 1,2,3,4,5;</code></pre>
+All recent metrics which are using units 'B'<pre><code>SELECT hosts.host AS host, items.key_ AS itemKey, items.name AS name, (history_uint.value/1024/1024/1024) AS GB
+FROM history_uint
+JOIN items ON (items.itemid=history_uint.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN (SELECT DISTINCT itemid AS id, MAX(history_uint.clock) AS clock
+FROM history_uint
+WHERE clock > UNIX_TIMESTAMP(NOW()-INTERVAL 65 MINUTE)
+GROUP BY 1) t2 ON t2.id=history_uint.itemid
+WHERE history_uint.clock=t2.clock
+AND items.units='B'
+ORDER BY 1,2;</code></pre>
+All recent metrics which are using units '%'<pre><code>SELECT hosts.host AS host, items.key_ AS itemKey, items.name AS name, history.value AS percentage
+FROM history
+JOIN items ON (items.itemid=history.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN (SELECT DISTINCT itemid AS id, MAX(history.clock) AS clock
+FROM history
+WHERE clock > UNIX_TIMESTAMP(NOW()-INTERVAL 65 MINUTE)
+GROUP BY 1) t2 ON t2.id=history.itemid
+WHERE history.clock=t2.clock
+AND items.units='%'
+ORDER BY 1,2;</code></pre>
+PostgreSQL. All recent metrics which are using units 'B'<pre><code>SELECT hosts.host AS host, items.key_ AS itemKey, items.name AS name, (history_uint.value/1024/1024/1024)::NUMERIC(10,2) AS GB
+FROM history_uint
+JOIN items ON (items.itemid=history_uint.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN (SELECT DISTINCT itemid AS id, MAX(history_uint.clock) AS clock
+FROM history_uint
+WHERE clock > EXTRACT(epoch FROM NOW()-INTERVAL '65 MINUTE')
+GROUP BY 1) t2 ON t2.id=history_uint.itemid
+WHERE history_uint.clock=t2.clock
+AND items.units='B'
+ORDER BY 1,2;</code></pre>
+PostgreSQL. All recent metrics which are using units '%'<pre><code>SELECT hosts.host AS host, items.key_ AS itemKey, items.name AS name, history.value::NUMERIC(10,2) AS percentage
+FROM history
+JOIN items ON (items.itemid=history.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN (SELECT DISTINCT itemid AS id, MAX(history.clock) AS clock
+FROM history
+WHERE clock > EXTRACT(epoch FROM NOW()-INTERVAL '65 MINUTE')
+GROUP BY 1) t2 ON t2.id=history.itemid
+WHERE history.clock=t2.clock
+AND items.units='%'
+ORDER BY 1,2;</code></pre>
 Determine which items report unsupported state:<pre><code>SELECT COUNT(items.key_), hosts.host, items.key_, item_rtdata.error
 FROM events
 JOIN items ON (items.itemid=events.objectid)
