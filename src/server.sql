@@ -550,6 +550,9 @@ WHERE history_uint.clock=t2.clock
 AND items.units='B'
 ORDER BY 1,2;
 
+--PostgreSQL. delte sessions. Zabbix 6.0
+DELETE FROM sessions WHERE sessionid IN (SELECT sessionid FROM sessions WHERE lastaccess < EXTRACT(EPOCH FROM (NOW() - INTERVAL '1 DAY')));
+
 --PostgreSQL. all recent metrics which are using units '%'
 SELECT hosts.host AS host, items.key_ AS itemKey, items.name AS name, history.value::NUMERIC(10,2) AS percentage
 FROM history
