@@ -553,6 +553,23 @@ ORDER BY 1,2;
 --PostgreSQL. delte sessions. Zabbix 6.0
 DELETE FROM sessions WHERE sessionid IN (SELECT sessionid FROM sessions WHERE lastaccess < EXTRACT(EPOCH FROM (NOW() - INTERVAL '1 DAY')));
 
+--ratio between working and non-working JMX items. Zabbix 5.0
+SELECT
+proxy.host AS proxy,
+items.delay,
+CASE item_rtdata.state
+WHEN 0 THEN 'normal'
+WHEN 1 THEN 'unsupported'
+END AS state,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN item_rtdata ON (item_rtdata.itemid=items.itemid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE items.type=16 AND items.status=0 AND hosts.status=0
+GROUP BY 1,2,3
+ORDER BY 1,4,3,2 ASC;
+
 --PostgreSQL. all recent metrics which are using units '%'
 SELECT hosts.host AS host, items.key_ AS itemKey, items.name AS name, history.value::NUMERIC(10,2) AS percentage
 FROM history
