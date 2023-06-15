@@ -556,6 +556,15 @@ DELETE FROM sessions WHERE sessionid IN (SELECT sessionid FROM sessions WHERE la
 --MySQL. delete sessions older than 1d. Zabbix 5.0, 6.0
 DELETE FROM sessions WHERE lastaccess < UNIX_TIMESTAMP(NOW()-INTERVAL 24 HOUR);
 
+--which host, item is fulfiling the history_log table the most
+SELECT hosts.host, items.key_, COUNT(*)
+FROM history_log
+JOIN items ON (items.itemid=history_log.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE history_log.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 24 HOUR)
+GROUP BY 1,2
+ORDER BY 3 ASC;
+
 --ratio between working and non-working JMX items. Zabbix 5.0
 SELECT
 proxy.host AS proxy,

@@ -1181,6 +1181,30 @@ GROUP BY 1) t2 ON t2.id=history_uint.itemid
 WHERE history_uint.clock=t2.clock
 AND items.units='B'
 ORDER BY 1,2;</code></pre>
+PostgreSQL. Delte sessions. Zabbix 6.0<pre><code>DELETE FROM sessions WHERE sessionid IN (SELECT sessionid FROM sessions WHERE lastaccess < EXTRACT(EPOCH FROM (NOW() - INTERVAL '1 DAY')));</code></pre>
+MySQL. Delete sessions older than 1d. Zabbix 5.0, 6.0<pre><code>DELETE FROM sessions WHERE lastaccess < UNIX_TIMESTAMP(NOW()-INTERVAL 24 HOUR);</code></pre>
+Which host, item is fulfiling the history_log table the most<pre><code>SELECT hosts.host, items.key_, COUNT(*)
+FROM history_log
+JOIN items ON (items.itemid=history_log.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE history_log.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 24 HOUR)
+GROUP BY 1,2
+ORDER BY 3 ASC;</code></pre>
+Ratio between working and non-working JMX items. Zabbix 5.0<pre><code>SELECT
+proxy.host AS proxy,
+items.delay,
+CASE item_rtdata.state
+WHEN 0 THEN 'normal'
+WHEN 1 THEN 'unsupported'
+END AS state,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN item_rtdata ON (item_rtdata.itemid=items.itemid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE items.type=16 AND items.status=0 AND hosts.status=0
+GROUP BY 1,2,3
+ORDER BY 1,4,3,2 ASC;</code></pre>
 PostgreSQL. All recent metrics which are using units '%'<pre><code>SELECT hosts.host AS host, items.key_ AS itemKey, items.name AS name, history.value::NUMERIC(10,2) AS percentage
 FROM history
 JOIN items ON (items.itemid=history.itemid)
