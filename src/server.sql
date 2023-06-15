@@ -553,6 +553,9 @@ ORDER BY 1,2;
 --PostgreSQL. delte sessions. Zabbix 6.0
 DELETE FROM sessions WHERE sessionid IN (SELECT sessionid FROM sessions WHERE lastaccess < EXTRACT(EPOCH FROM (NOW() - INTERVAL '1 DAY')));
 
+--MySQL. delete sessions older than 1d. Zabbix 5.0, 6.0
+DELETE FROM sessions WHERE lastaccess < UNIX_TIMESTAMP(NOW()-INTERVAL 24 HOUR);
+
 --ratio between working and non-working JMX items. Zabbix 5.0
 SELECT
 proxy.host AS proxy,
