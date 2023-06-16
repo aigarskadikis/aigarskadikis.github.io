@@ -12,8 +12,8 @@ pg_dump \
 
 # restore
 pg_restore \
---dbname=<database> \
---host=<host> \
+--dbname=DATABASE \
+--host=HOST \
 zabbix.dump
 
 # backup individual historical table

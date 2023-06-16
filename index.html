@@ -491,8 +491,8 @@ Extract configuration dump from old server<pre><code>pg_dump \
 --exclude-table-data '*.history*' \
 --exclude-table-data '*.trends*'</code></pre>
 Restore<pre><code>pg_restore \
---dbname=<database> \
---host=<host> \
+--dbname=DATABASE \
+--host=HOST \
 zabbix.dump</code></pre>
 Backup individual historical table<pre><code>PGHOST=127.0.0.1 \
 PGPORT=5432 \
