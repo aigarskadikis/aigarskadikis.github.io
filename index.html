@@ -479,6 +479,32 @@ DBname+".trends_uint"
 <p>Download this section: <a href="src/mysqlsh.sh">https://aigarskadikis.github.io/src/mysqlsh.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysqlsh.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysqlsh.sh</a></p>
 </div>
+<input type="radio" name="tabs" id="pg"><label for="pg">pg</label><div class="tab">
+Extract configuration dump from old server<pre><code>pg_dump \
+--dbname=DATABASE \
+--host=HOST \
+--username=USER \
+--file=zabbix.dump \
+--format=custom \
+--blobs \
+--verbose \
+--exclude-table-data '*.history*' \
+--exclude-table-data '*.trends*'</code></pre>
+Restore<pre><code>pg_restore \
+--dbname=<database> \
+--host=<host> \
+zabbix.dump</code></pre>
+Backup individual historical table<pre><code>PGHOST=127.0.0.1 \
+PGPORT=5432 \
+PGUSER=postgres \
+PGPASSWORD=zabbix \
+psql --dbname=zabbix \
+-c "COPY (SELECT * FROM history_uint) TO stdout DELIMITER ',' CSV" | \
+xz > /tmp/history_uint.csv.xz</code></pre>
+Restore<pre><code>psql zabbix -c "\COPY history_uint FROM PROGRAM 'xzcat /tmp/history_uint.csv.xz' DELIMITER ',' CSV"</code></pre>
+<p>Download this section: <a href="src/pg.sh">https://aigarskadikis.github.io/src/pg.sh</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pg.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pg.sh</a></p>
+</div>
 <input type="radio" name="tabs" id="sed"><label for="sed">sed</label><div class="tab">
 Reinstall values which have been already customized<pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
 sed -i 's|^ValueCacheSize=.*|ValueCacheSize=768M|' /etc/zabbix/zabbix_server.conf && grep ^ValueCacheSize /etc/zabbix/zabbix_server.conf
