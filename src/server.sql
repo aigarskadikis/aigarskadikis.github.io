@@ -565,6 +565,12 @@ WHERE history_log.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 24 HOUR)
 GROUP BY 1,2
 ORDER BY 3 ASC;
 
+--check if different interfaces (ZBX, SNMP) used in host level
+SELECT DISTINCT hosts.host FROM interface first
+JOIN interface second ON (first.hostid=second.hostid)
+JOIN hosts ON (hosts.hostid=first.hostid)
+WHERE first.type <> second.type;
+
 --ratio between working and non-working JMX items. Zabbix 5.0
 SELECT
 proxy.host AS proxy,
