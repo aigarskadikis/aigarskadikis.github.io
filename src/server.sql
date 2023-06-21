@@ -571,6 +571,37 @@ JOIN interface second ON (first.hostid=second.hostid)
 JOIN hosts ON (hosts.hostid=first.hostid)
 WHERE first.type <> second.type;
 
+--list unused AND secondary interfaces. Zabbix 6.0
+SELECT hosts.host,
+CASE interface.type
+WHEN 0 THEN 'interface'
+WHEN 1 THEN 'ZBX'
+WHEN 2 THEN 'SNMP'
+WHEN 3 THEN 'IPMI'
+WHEN 4 THEN 'JMX'
+END AS type,
+interface.ip,interface.dns,interface.port
+FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+WHERE main=0 AND interfaceid NOT IN (SELECT DISTINCT interfaceid FROM items WHERE interfaceid IS NOT NULL);
+
+--list unused AND secondary interfaces. Zabbix 6.0
+DELETE FROM interface WHERE main=0 AND interfaceid NOT IN (SELECT DISTINCT interfaceid FROM items WHERE interfaceid IS NOT NULL);
+
+--Check if all ZBX hosts are NOT using more than one interface
+SELECT DISTINCT hosts.host, COUNT(*) AS interfaces FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+WHERE interface.type=1 AND hosts.status=0 AND hosts.flags IN (0,4)
+GROUP BY 1
+HAVING COUNT(*)>1;
+
+--Check if all SNMP hosts are NOT using more than one interface
+SELECT DISTINCT hosts.host, COUNT(*) AS interfaces FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+WHERE interface.type=2 AND hosts.status=0 AND hosts.flags IN (0,4)
+GROUP BY 1
+HAVING COUNT(*)>1;
+
 --ratio between working and non-working JMX items. Zabbix 5.0
 SELECT
 proxy.host AS proxy,
