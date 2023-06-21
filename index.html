@@ -1220,6 +1220,29 @@ Check if different interfaces (ZBX, SNMP) used in host level<pre><code>SELECT DI
 JOIN interface second ON (first.hostid=second.hostid)
 JOIN hosts ON (hosts.hostid=first.hostid)
 WHERE first.type <> second.type;</code></pre>
+List unused AND secondary interfaces. Zabbix 6.0<pre><code>SELECT hosts.host,
+CASE interface.type
+WHEN 0 THEN 'interface'
+WHEN 1 THEN 'ZBX'
+WHEN 2 THEN 'SNMP'
+WHEN 3 THEN 'IPMI'
+WHEN 4 THEN 'JMX'
+END AS type,
+interface.ip,interface.dns,interface.port
+FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+WHERE main=0 AND interfaceid NOT IN (SELECT DISTINCT interfaceid FROM items WHERE interfaceid IS NOT NULL);</code></pre>
+List unused AND secondary interfaces. Zabbix 6.0<pre><code>DELETE FROM interface WHERE main=0 AND interfaceid NOT IN (SELECT DISTINCT interfaceid FROM items WHERE interfaceid IS NOT NULL);</code></pre>
+Check if all ZBX hosts are NOT using more than one interface<pre><code>SELECT DISTINCT hosts.host, COUNT(*) AS interfaces FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+WHERE interface.type=1 AND hosts.status=0 AND hosts.flags IN (0,4)
+GROUP BY 1
+HAVING COUNT(*)>1;</code></pre>
+Check if all SNMP hosts are NOT using more than one interface<pre><code>SELECT DISTINCT hosts.host, COUNT(*) AS interfaces FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+WHERE interface.type=2 AND hosts.status=0 AND hosts.flags IN (0,4)
+GROUP BY 1
+HAVING COUNT(*)>1;</code></pre>
 Ratio between working and non-working JMX items. Zabbix 5.0<pre><code>SELECT
 proxy.host AS proxy,
 items.delay,
