@@ -743,6 +743,30 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab">
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Query host and interface details. Zabbix 5.0<pre><code>SELECT proxy.host AS proxy, hosts.host,
+hosts.hostid,
+interface.interfaceid,
+interface.main,
+interface.type,
+interface.useip,
+interface.ip,
+interface.dns,
+interface.port,
+interface_snmp.version,
+interface_snmp.bulk,
+interface_snmp.community,
+interface_snmp.securityname,
+interface_snmp.securitylevel,
+interface_snmp.authpassphrase,
+interface_snmp.privpassphrase,
+interface_snmp.authprotocol,
+interface_snmp.privprotocol,
+interface_snmp.contextname
+FROM hosts
+LEFT JOIN interface ON (interface.hostid=hosts.hostid)
+LEFT JOIN interface_snmp ON (interface.interfaceid=interface_snmp.interfaceid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND hosts.flags=0;</code></pre>
 Unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,

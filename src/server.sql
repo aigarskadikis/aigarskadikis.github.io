@@ -4,6 +4,32 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 --active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2
 SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
+--query host and interface details. Zabbix 5.0
+SELECT proxy.host AS proxy, hosts.host,
+hosts.hostid,
+interface.interfaceid,
+interface.main,
+interface.type,
+interface.useip,
+interface.ip,
+interface.dns,
+interface.port,
+interface_snmp.version,
+interface_snmp.bulk,
+interface_snmp.community,
+interface_snmp.securityname,
+interface_snmp.securitylevel,
+interface_snmp.authpassphrase,
+interface_snmp.privpassphrase,
+interface_snmp.authprotocol,
+interface_snmp.privprotocol,
+interface_snmp.contextname
+FROM hosts
+LEFT JOIN interface ON (interface.hostid=hosts.hostid)
+LEFT JOIN interface_snmp ON (interface.interfaceid=interface_snmp.interfaceid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status IN (0,1) AND hosts.flags=0;
+
 --unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
 SELECT
 proxy.host AS proxy,
