@@ -424,6 +424,26 @@ Schema backup for MySQL 8. Credentials embeded in command<pre><code>mysqldump \
 --create-options \
 --no-data \
 zabbix | gzip --fast > schema.sql.gz</code></pre>
+Backup "_old" tables with fastest compression possible<pre><code>DB=zabbix
+DEST=/mnt/zabbixtemp
+mkdir -p "$DEST"
+mysqldump $DB trends_uint_old | lz4 > "$DEST/trends_uint_old.sql.lz4" &
+mysqldump $DB trends_old | lz4 > "$DEST/trends_old.sql.lz4" &
+mysqldump $DB history_uint_old | lz4 > "$DEST/history_uint_old.sql.lz4" &
+mysqldump $DB history_old | lz4 > "$DEST/history_old.sql.lz4" &
+mysqldump $DB history_str_old | lz4 > "$DEST/history_str_old.sql.lz4" &
+mysqldump $DB history_log_old | lz4 > "$DEST/history_log_old.sql.lz4" &
+mysqldump $DB history_text_old | lz4 > "$DEST/history_text_old.sql.lz4" &</code></pre>
+Backup current data tables with fastest compression possible<pre><code>DB=zabbix
+DEST=/mnt/zabbixtemp
+mkdir -p "$DEST"
+mysqldump $DB trends_uint | lz4 > "$DEST/trends_uint.sql.lz4" &
+mysqldump $DB trends | lz4 > "$DEST/trends.sql.lz4" &
+mysqldump $DB history_uint | lz4 > "$DEST/history_uint.sql.lz4" &
+mysqldump $DB history | lz4 > "$DEST/history.sql.lz4" &
+mysqldump $DB history_str | lz4 > "$DEST/history_str.sql.lz4" &
+mysqldump $DB history_log | lz4 > "$DEST/history_log.sql.lz4" &
+mysqldump $DB history_text | lz4 > "$DEST/history_text.sql.lz4" &</code></pre>
 <p>Download this section: <a href="src/my.sh">https://aigarskadikis.github.io/src/my.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh</a></p>
 </div>
@@ -1845,13 +1865,20 @@ RENAME TABLE history_log TO history_log_old; CREATE TABLE history_log LIKE histo
 RENAME TABLE history_text TO history_text_old; CREATE TABLE history_text LIKE history_text_old;
 RENAME TABLE trends TO trends_old; CREATE TABLE trends LIKE trends_old;
 RENAME TABLE trends_uint TO trends_uint_old; CREATE TABLE trends_uint LIKE trends_uint_old;</code></pre>
-CREATE TABLE history_old LIKE history;
+Create old tables like current<pre><code>CREATE TABLE history_old LIKE history;
 CREATE TABLE history_uint_old LIKE history_uint;
 CREATE TABLE history_str_old LIKE history_str;
 CREATE TABLE history_log_old LIKE history_log;
 CREATE TABLE history_text_old LIKE history_text;
 CREATE TABLE trends_old LIKE trends;
 CREATE TABLE trends_uint_old LIKE trends_uint;</code></pre>
+Create current tables like old<pre><code>CREATE TABLE history LIKE history_old;
+CREATE TABLE history_uint LIKE history_uint_old;
+CREATE TABLE history_str LIKE history_str_old;
+CREATE TABLE history_log LIKE history_log_old;
+CREATE TABLE history_text LIKE history_text_old;
+CREATE TABLE trends LIKE trends_old;
+CREATE TABLE trends_uint LIKE trends_uint_old;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>

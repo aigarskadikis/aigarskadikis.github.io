@@ -119,3 +119,27 @@ mysqldump \
 --no-data \
 zabbix | gzip --fast > schema.sql.gz
 
+# backup "_old" tables with fastest compression possible
+DB=zabbix
+DEST=/mnt/zabbixtemp
+mkdir -p "$DEST"
+mysqldump $DB trends_uint_old | lz4 > "$DEST/trends_uint_old.sql.lz4" &
+mysqldump $DB trends_old | lz4 > "$DEST/trends_old.sql.lz4" &
+mysqldump $DB history_uint_old | lz4 > "$DEST/history_uint_old.sql.lz4" &
+mysqldump $DB history_old | lz4 > "$DEST/history_old.sql.lz4" &
+mysqldump $DB history_str_old | lz4 > "$DEST/history_str_old.sql.lz4" &
+mysqldump $DB history_log_old | lz4 > "$DEST/history_log_old.sql.lz4" &
+mysqldump $DB history_text_old | lz4 > "$DEST/history_text_old.sql.lz4" &
+
+# backup current data tables with fastest compression possible
+DB=zabbix
+DEST=/mnt/zabbixtemp
+mkdir -p "$DEST"
+mysqldump $DB trends_uint | lz4 > "$DEST/trends_uint.sql.lz4" &
+mysqldump $DB trends | lz4 > "$DEST/trends.sql.lz4" &
+mysqldump $DB history_uint | lz4 > "$DEST/history_uint.sql.lz4" &
+mysqldump $DB history | lz4 > "$DEST/history.sql.lz4" &
+mysqldump $DB history_str | lz4 > "$DEST/history_str.sql.lz4" &
+mysqldump $DB history_log | lz4 > "$DEST/history_log.sql.lz4" &
+mysqldump $DB history_text | lz4 > "$DEST/history_text.sql.lz4" &
+

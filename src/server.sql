@@ -1314,6 +1314,7 @@ RENAME TABLE history_text TO history_text_old; CREATE TABLE history_text LIKE hi
 RENAME TABLE trends TO trends_old; CREATE TABLE trends LIKE trends_old;
 RENAME TABLE trends_uint TO trends_uint_old; CREATE TABLE trends_uint LIKE trends_uint_old;
 
+--create old tables like current
 CREATE TABLE history_old LIKE history;
 CREATE TABLE history_uint_old LIKE history_uint;
 CREATE TABLE history_str_old LIKE history_str;
@@ -1321,4 +1322,13 @@ CREATE TABLE history_log_old LIKE history_log;
 CREATE TABLE history_text_old LIKE history_text;
 CREATE TABLE trends_old LIKE trends;
 CREATE TABLE trends_uint_old LIKE trends_uint;
+
+--create current tables like old
+CREATE TABLE history LIKE history_old;
+CREATE TABLE history_uint LIKE history_uint_old;
+CREATE TABLE history_str LIKE history_str_old;
+CREATE TABLE history_log LIKE history_log_old;
+CREATE TABLE history_text LIKE history_text_old;
+CREATE TABLE trends LIKE trends_old;
+CREATE TABLE trends_uint LIKE trends_uint_old;
 
