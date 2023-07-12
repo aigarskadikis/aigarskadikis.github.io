@@ -1305,7 +1305,7 @@ AND hosts.status=0
 GROUP BY 1,2,3
 ORDER BY 4 ASC;
 
---detach current table from application layer and set back antoerh table
+--detach current table from application layer and set back another table
 RENAME TABLE history TO history_old; CREATE TABLE history LIKE history_old;
 RENAME TABLE history_uint TO history_uint_old; CREATE TABLE history_uint LIKE history_uint_old;
 RENAME TABLE history_str TO history_str_old; CREATE TABLE history_str LIKE history_str_old;
@@ -1331,4 +1331,22 @@ CREATE TABLE history_log LIKE history_log_old;
 CREATE TABLE history_text LIKE history_text_old;
 CREATE TABLE trends LIKE trends_old;
 CREATE TABLE trends_uint LIKE trends_uint_old;
+
+--truncate old tables
+TRUNCATE TABLE history_uint_old;
+TRUNCATE TABLE trends_uint_old;
+TRUNCATE TABLE history_old;
+TRUNCATE TABLE trends_old;
+TRUNCATE TABLE history_text_old;
+TRUNCATE TABLE history_str_old;
+TRUNCATE TABLE history_log_old;
+
+--truncate current tables
+TRUNCATE TABLE history_uint;
+TRUNCATE TABLE trends_uint;
+TRUNCATE TABLE history;
+TRUNCATE TABLE trends;
+TRUNCATE TABLE history_text;
+TRUNCATE TABLE history_str;
+TRUNCATE TABLE history_log;
 
