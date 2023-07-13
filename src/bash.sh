@@ -204,3 +204,24 @@ WHERE v2 IS NOT NULL
 " | mysql zabbix
 } done
 
+# before starting service 'zabbix-proxy' truncate all data tables
+DB=zabbix_proxy
+CREDENTIALS=/root/.my.cnf
+mysql \
+--defaults-file=$CREDENTIALS \
+--database=$DB \
+--silent \
+--skip-column-names \
+--batch \
+--execute="SELECT COUNT(*) FROM hosts WHERE status=3;" | \
+grep -E "^0$" && mysql \
+--defaults-file=$CREDENTIALS \
+--database=$DB \
+--silent \
+--skip-column-names \
+--batch \
+--execute="SELECT table_name FROM ids" | while IFS= read -r TABLE
+do {
+echo mysql --defaults-file=$CREDENTIALS --database=$DB --execute="TRUNCATE TABLE $TABLE"
+} done || echo "this seems like a central zabbix server, because there are template objects in database"
+

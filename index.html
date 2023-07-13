@@ -297,6 +297,25 @@ WHERE v2 IS NOT NULL
 )
 " | mysql zabbix
 } done</code></pre>
+Before starting service 'zabbix-proxy' truncate all data tables<pre><code>DB=zabbix_proxy
+CREDENTIALS=/root/.my.cnf
+mysql \
+--defaults-file=$CREDENTIALS \
+--database=$DB \
+--silent \
+--skip-column-names \
+--batch \
+--execute="SELECT COUNT(*) FROM hosts WHERE status=3;" | \
+grep -E "^0$" && mysql \
+--defaults-file=$CREDENTIALS \
+--database=$DB \
+--silent \
+--skip-column-names \
+--batch \
+--execute="SELECT table_name FROM ids" | while IFS= read -r TABLE
+do {
+echo mysql --defaults-file=$CREDENTIALS --database=$DB --execute="TRUNCATE TABLE $TABLE"
+} done || echo "this seems like a central zabbix server, because there are template objects in database"</code></pre>
 <p>Download this section: <a href="src/bash.sh">https://aigarskadikis.github.io/src/bash.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/bash.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/bash.sh</a></p>
 </div>
