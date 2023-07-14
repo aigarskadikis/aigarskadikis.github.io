@@ -1305,6 +1305,14 @@ AND hosts.status=0
 GROUP BY 1,2,3
 ORDER BY 4 ASC;
 
+--statistics per calculated item. Zabbix 6.0
+SELECT items.params,COUNT(*) FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE items.type=15
+AND items.status=0
+AND hosts.status=0
+GROUP BY 1 ORDER BY 2 ASC;
+
 --detach current table from application layer and set back another table
 RENAME TABLE history TO history_old; CREATE TABLE history LIKE history_old;
 RENAME TABLE history_uint TO history_uint_old; CREATE TABLE history_uint LIKE history_uint_old;
