@@ -90,6 +90,9 @@ tail -99f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller
 # outgoing ports, persistent connection
 ss --tcp --numeric --processes | grep zabbix_server
 
+# php official memory setting
+find /etc -name zabbix.conf -exec grep --with-filename memory {} \;
+
 # test item key
 zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'
 su zabbix --shell /bin/bash --command "zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'"
