@@ -1313,6 +1313,13 @@ AND items.status=0
 AND hosts.status=0
 GROUP BY 1 ORDER BY 2 ASC;
 
+--interface errors. Zabbix 6.4
+SELECT hosts.host, interface.type, interface.error
+FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+WHERE LENGTH(interface.error)>0
+ORDER BY 3 ASC;
+
 --detach current table from application layer and set back another table
 RENAME TABLE history TO history_old; CREATE TABLE history LIKE history_old;
 RENAME TABLE history_uint TO history_uint_old; CREATE TABLE history_uint LIKE history_uint_old;
