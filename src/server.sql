@@ -1313,6 +1313,33 @@ AND items.status=0
 AND hosts.status=0
 GROUP BY 1 ORDER BY 2 ASC;
 
+--ZBX hosts with errors. Zabbix 6.4
+SELECT proxy.host, hosts.host, interface.ip,interface.port,interface.error
+FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+LEFT JOIN hosts proxy ON (proxy.hostid=hosts.proxy_hostid)
+WHERE LENGTH(interface.error)>0
+AND interface.type=1
+ORDER BY 3 ASC;
+
+--SNMP hosts with errors. Zabbix 6.4
+SELECT proxy.host, hosts.host, interface.ip,interface.port,interface.error
+FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+LEFT JOIN hosts proxy ON (proxy.hostid=hosts.proxy_hostid)
+WHERE LENGTH(interface.error)>0
+AND interface.type=2
+ORDER BY 3 ASC;
+
+--JMX hosts with errors. Zabbix 6.4
+SELECT hosts.host, interface.ip,interface.port,interface.error
+FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+LEFT JOIN hosts proxy ON (proxy.hostid=hosts.proxy_hostid)
+WHERE LENGTH(interface.error)>0
+AND interface.type=4
+ORDER BY 3 ASC;
+
 --interface errors. Zabbix 6.4
 SELECT hosts.host, interface.type, interface.error
 FROM interface
