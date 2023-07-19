@@ -93,6 +93,9 @@ ss --tcp --numeric --processes | grep zabbix_server
 # php official memory setting
 find /etc -name zabbix.conf -exec grep --with-filename memory {} \;
 
+# a sum per column
+ls -lb | grep "history_str#" | awk '{ print $5 }' | python -c "import sys; print(sum(int(l) for l in sys.stdin))"
+
 # test item key
 zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'
 su zabbix --shell /bin/bash --command "zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'"
