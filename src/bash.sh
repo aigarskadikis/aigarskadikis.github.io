@@ -90,6 +90,9 @@ tail -99f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller
 # outgoing ports, persistent connection
 ss --tcp --numeric --processes | grep zabbix_server
 
+# process list with parents
+ps -xafuww > /tmp/process.list.$(hostname).txt
+
 # php official memory setting
 find /etc -name zabbix.conf -exec grep --with-filename memory {} \;
 
