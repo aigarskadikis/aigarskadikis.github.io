@@ -136,6 +136,12 @@ fi
 find /backup -type f -mtime +30
 find /backup -type f -mtime +30 -delete
 
+# insert to a temporary table
+zcat trends_uint.sql.gz | sed 's|trends_uint|trends_uint_old|' | mysql zabbix
+zcat history_uint.sql.gz | sed 's|history_uint|history_uint_old|' | mysql zabbix
+zcat trends.sql.gz | sed 's|trends|trends_old|' | mysql zabbix
+zcat history.sql.gz | sed 's|history|history_old|' | mysql zabbix
+
 # Backup and compress zabbix server config with a purpose to restore it on other machine
 tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo
 

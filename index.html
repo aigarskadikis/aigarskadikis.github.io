@@ -125,6 +125,10 @@ find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.gz' -mtime +$KEEP_DAYS -delete
 fi</code></pre>
 Rotate backups for 30 days<pre><code>find /backup -type f -mtime +30
 find /backup -type f -mtime +30 -delete</code></pre>
+Insert to a temporary table<pre><code>zcat trends_uint.sql.gz | sed 's|trends_uint|trends_uint_old|' | mysql zabbix
+zcat history_uint.sql.gz | sed 's|history_uint|history_uint_old|' | mysql zabbix
+zcat trends.sql.gz | sed 's|trends|trends_old|' | mysql zabbix
+zcat history.sql.gz | sed 's|history|history_old|' | mysql zabbix</code></pre>
 Backup and compress zabbix server config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress partitioning script and configuration files<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
