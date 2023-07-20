@@ -195,6 +195,12 @@ zabbix_proxy -R log_level_increase="poller",1
 tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -E 'hostid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'
 tail -99f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -Eo 'hostid:\S+ itemid:\S+ type:\S+|got.*sec.*idle'</code></pre>
 Outgoing ports, persistent connection<pre><code>ss --tcp --numeric --processes | grep zabbix_server</code></pre>
+Process list with parents<pre><code>ps -xafuww > /tmp/process.list.$(hostname).txt</code></pre>
+Top memory processes<pre><code>ps -eo pcpu,pmem,user,stat,args --sort -rss > /tmp/$(hostname).top.memory.processes.txt</code></pre>
+Hungry CPU processes<pre><code>ps -eo pcpu,pmem,user,stat,args --sort -time > /tmp/$(hostname).hungry.cpu.processes.txt</code></pre>
+All socket statistics<pre><code>ss --tcp --numeric --processes > /tmp/$(hostname).socket.statistics.txt</code></pre>
+Only listening ports and explanation<pre><code>ss --tcp --numeric --listen --processes > /tmp/$(hostname).listening.ports.txt</code></pre>
+All installed package names<pre><code>rpm -qa > /tmp/$(hostname).installed.rpms.txt</code></pre>
 Php official memory setting<pre><code>find /etc -name zabbix.conf -exec grep --with-filename memory {} \;</code></pre>
 A sum per column<pre><code>ls -lb | grep "history_str#" | awk '{ print $5 }' | python -c "import sys; print(sum(int(l) for l in sys.stdin))"</code></pre>
 Test item key<pre><code>zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'

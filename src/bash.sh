@@ -93,6 +93,21 @@ ss --tcp --numeric --processes | grep zabbix_server
 # process list with parents
 ps -xafuww > /tmp/process.list.$(hostname).txt
 
+# top memory processes
+ps -eo pcpu,pmem,user,stat,args --sort -rss > /tmp/$(hostname).top.memory.processes.txt
+
+# hungry CPU processes
+ps -eo pcpu,pmem,user,stat,args --sort -time > /tmp/$(hostname).hungry.cpu.processes.txt
+
+# all socket statistics
+ss --tcp --numeric --processes > /tmp/$(hostname).socket.statistics.txt
+
+# only listening ports and explanation
+ss --tcp --numeric --listen --processes > /tmp/$(hostname).listening.ports.txt
+
+# all installed package names
+rpm -qa > /tmp/$(hostname).installed.rpms.txt
+
 # php official memory setting
 find /etc -name zabbix.conf -exec grep --with-filename memory {} \;
 
