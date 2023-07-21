@@ -1392,3 +1392,36 @@ TRUNCATE TABLE history_text;
 TRUNCATE TABLE history_str;
 TRUNCATE TABLE history_log;
 
+--items which fails with data collection frequently. Zabbix 4.0, 5.0
+SELECT
+CONCAT('items.php?form=update&itemid=', events.objectid) AS 'URL',
+events.name,
+COUNT(*)
+FROM events
+WHERE events.source=3 AND events.object=4 AND LENGTH(events.name)>0
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
+GROUP BY 1,2
+ORDER BY 3 DESC LIMIT 10;
+
+--lld rules which fail. Zabbix 4.0, 5.0
+SELECT
+CONCAT('host_discovery.php?form=update&itemid=', events.objectid) AS 'URL',
+events.name,
+COUNT(*)
+FROM events
+WHERE events.source=3 AND events.object=5 AND LENGTH(events.name)>0
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
+GROUP BY 1,2
+ORDER BY 3 DESC LIMIT 10;
+
+--trigger calculation fail. Zabbix 4.0, 5.0
+SELECT
+CONCAT('triggers.php?form=update&triggerid=', events.objectid) AS 'URL',
+events.name,
+COUNT(*)
+FROM events
+WHERE events.source=3 AND events.object=0 AND LENGTH(events.name)>0
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
+GROUP BY 1,2
+ORDER BY 3 DESC LIMIT 10;
+

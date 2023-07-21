@@ -1981,6 +1981,33 @@ TRUNCATE TABLE trends;
 TRUNCATE TABLE history_text;
 TRUNCATE TABLE history_str;
 TRUNCATE TABLE history_log;</code></pre>
+Items which fails with data collection frequently. Zabbix 4.0, 5.0<pre><code>SELECT
+CONCAT('items.php?form=update&itemid=', events.objectid) AS 'URL',
+events.name,
+COUNT(*)
+FROM events
+WHERE events.source=3 AND events.object=4 AND LENGTH(events.name)>0
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
+GROUP BY 1,2
+ORDER BY 3 DESC LIMIT 10;</code></pre>
+Lld rules which fail. Zabbix 4.0, 5.0<pre><code>SELECT
+CONCAT('host_discovery.php?form=update&itemid=', events.objectid) AS 'URL',
+events.name,
+COUNT(*)
+FROM events
+WHERE events.source=3 AND events.object=5 AND LENGTH(events.name)>0
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
+GROUP BY 1,2
+ORDER BY 3 DESC LIMIT 10;</code></pre>
+Trigger calculation fail. Zabbix 4.0, 5.0<pre><code>SELECT
+CONCAT('triggers.php?form=update&triggerid=', events.objectid) AS 'URL',
+events.name,
+COUNT(*)
+FROM events
+WHERE events.source=3 AND events.object=0 AND LENGTH(events.name)>0
+AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
+GROUP BY 1,2
+ORDER BY 3 DESC LIMIT 10;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
