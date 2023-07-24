@@ -1414,6 +1414,9 @@ AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1,2
 ORDER BY 3 DESC LIMIT 10;
 
+--print a part of sid which can be used to backtrack usage of calls in web servers access.log
+SELECT RIGHT(sessions.sessionid,16), users.alias FROM sessions, users WHERE sessions.userid=users.userid AND users.alias='api';
+
 --events daily
 SELECT COUNT(*) FROM events WHERE clock >= UNIX_TIMESTAMP("2023-07-20 00:00:00") AND clock < UNIX_TIMESTAMP("2023-07-21 00:00:00");
 
