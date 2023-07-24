@@ -1414,6 +1414,9 @@ AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1,2
 ORDER BY 3 DESC LIMIT 10;
 
+--events daily
+SELECT COUNT(*) FROM events WHERE clock >= UNIX_TIMESTAMP("2023-07-20 00:00:00") AND clock < UNIX_TIMESTAMP("2023-07-21 00:00:00");
+
 --trigger calculation fail. Zabbix 4.0, 5.0
 SELECT
 CONCAT('triggers.php?form=update&triggerid=', events.objectid) AS 'URL',
