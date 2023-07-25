@@ -1425,6 +1425,14 @@ DELETE FROM trends WHERE itemid NOT IN (SELECT itemid FROM items);
 --print a part of sid which can be used to backtrack usage of calls in web servers access.log
 SELECT RIGHT(sessions.sessionid,16), users.alias FROM sessions, users WHERE sessions.userid=users.userid AND users.alias='api';
 
+--MySQL biggest tables for database 'zabbix'
+SELECT table_name, table_rows, data_length, index_length,
+ROUND(((data_length + index_length) / 1024 / 1024 / 1024),2) "Size in GB"
+FROM information_schema.tables
+WHERE table_schema = "zabbix"
+ORDER BY ROUND(((data_length + index_length) / 1024 / 1024 / 1024),2) DESC
+LIMIT 20;
+
 --events daily
 SELECT COUNT(*) FROM events WHERE clock >= UNIX_TIMESTAMP("2023-07-20 00:00:00") AND clock < UNIX_TIMESTAMP("2023-07-21 00:00:00");
 
