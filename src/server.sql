@@ -1414,6 +1414,14 @@ AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1,2
 ORDER BY 3 DESC LIMIT 10;
 
+--unexisting integer numbers
+SELECT DISTINCT itemid FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items);
+DELETE FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items);
+
+--unexisting decimal numbers
+SELECT DISTINCT itemid FROM trends WHERE itemid NOT IN (SELECT itemid FROM items);
+DELETE FROM trends WHERE itemid NOT IN (SELECT itemid FROM items);
+
 --print a part of sid which can be used to backtrack usage of calls in web servers access.log
 SELECT RIGHT(sessions.sessionid,16), users.alias FROM sessions, users WHERE sessions.userid=users.userid AND users.alias='api';
 
