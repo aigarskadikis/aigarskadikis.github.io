@@ -2023,6 +2023,23 @@ ORDER BY 3 DESC LIMIT 10;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>
+<input type="radio" name="tabs" id="ts"><label for="ts">ts.sql</label><div class="tab">
+List all chunks. Pg 14.5, ts 2.8.1<pre><code>SELECT show_chunks('history');</code></pre>
+Compress manually one chunk. Pg 14.5, ts 2.8.1<pre><code>SELECT compress_chunk('_timescaledb_internal._hyper_1_489_chunk');</code></pre>
+Explorer how many is compressed and uncompressed. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
+To see if hypertable is compressed. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
+Decompress chunk. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
+Compress all chunks from a time frame. Pg 14.5, ts 2.8.1<pre><code>SELECT compress_chunk(i) from SELECT show_chunks('history',1690372501,0) i;</code></pre>
+Decompress all chunks. Pg 14.5, ts 2.8.1<pre><code>SELECT decompress_chunk(c, true) FROM show_chunks('trends_uint') c;
+SELECT decompress_chunk(c, true) FROM show_chunks('trends') c;
+SELECT decompress_chunk(c, true) FROM show_chunks('history_uint') c;
+SELECT decompress_chunk(c, true) FROM show_chunks('history_str') c;
+SELECT decompress_chunk(c, true) FROM show_chunks('history_log') c;
+SELECT decompress_chunk(c, true) FROM show_chunks('history_text') c;
+SELECT decompress_chunk(c, true) FROM show_chunks('history') c;</code></pre>
+<p>Download this section: <a href="src/ts.sql">https://aigarskadikis.github.io/src/ts.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/ts.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/ts.sql</a></p>
+</div>
 <input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab"><p>Create MySQL users using wizard: <a href="./u/index.html">https://aigarskadikis.github.io/u</a></p>
 Create an empty database with name 'zbx_db'. Zabbix 6.0 LTS<pre><code>CREATE DATABASE zbx_db CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</code></pre>
 DB1. User for replication<pre><code>CREATE USER 'repl'@'192.168.88.101' IDENTIFIED WITH mysql_native_password BY 'PasswordForDBReplication';
