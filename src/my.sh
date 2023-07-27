@@ -156,6 +156,26 @@ mysqldump \
 --ignore-table=zabbix.trends_uint \
 zabbix | gzip --fast > /root/data52.sql.gz
 
+# backup historical data individualu compress with gzip
+tmux
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix trends_uint | gzip --fast > /root/trends_uint.sql.gz
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix trends | gzip --fast > /root/trends.sql.gz
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_uint | gzip --fast > /root/history_uint.sql.gz
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history | gzip --fast > /root/history.sql.gz
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_str | gzip --fast > /root/history_str.sql.gz
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_text | gzip --fast > /root/history_text.sql.gz
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_log | gzip --fast > /root/history_log.sql.gz
+
+# backup historical data individualy. compress with lz4
+tmux
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix trends_uint | lz4 > /root/trends_uint.sql.lz4
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix trends | lz4 > /root/trends.sql.lz4
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_uint | lz4 > /root/history_uint.sql.lz4
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history | lz4 > /root/history.sql.lz4
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_str | lz4 > /root/history_str.sql.lz4
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_text | lz4 > /root/history_text.sql.lz4
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_log | lz4 > /root/history_log.sql.lz4
+
 # backup current data tables with fastest compression possible
 DB=zabbix
 DEST=/mnt/zabbixtemp
