@@ -188,3 +188,21 @@ mysqldump $DB history_str | lz4 > "$DEST/history_str.sql.lz4" &
 mysqldump $DB history_log | lz4 > "$DEST/history_log.sql.lz4" &
 mysqldump $DB history_text | lz4 > "$DEST/history_text.sql.lz4" &
 
+# restore from sql.gz
+time zcat /root/trends_uint.sql.gz | sed 's|trends_uint|trends_uint_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time zcat /root/history_uint.sql.gz | sed 's|history_uint|history_uint_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time zcat /root/trends.sql.gz | sed 's|trends|trends_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time zcat /root/history.sql.gz | sed 's|history|history_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time zcat /root/history_str.sql.gz | sed 's|history_str|history_str_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time zcat /root/history_text.sql.gz | sed 's|history_text|history_text_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time zcat /root/history_log.sql.gz | sed 's|history_log|history_log_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+
+# restore from sql.lz4
+time unlz4 /root/trends_uint.sql.lz4 | sed 's|trends_uint|trends_uint_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time unlz4 /root/history_uint.sql.lz4 | sed 's|history_uint|history_uint_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time unlz4 /root/trends.sql.lz4 | sed 's|trends|trends_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time unlz4 /root/history.sql.lz4 | sed 's|history|history_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time unlz4 /root/history_str.sql.lz4 | sed 's|history_str|history_str_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time unlz4 /root/history_text.sql.lz4 | sed 's|history_text|history_text_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time unlz4 /root/history_log.sql.lz4 | sed 's|history_log|history_log_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+
