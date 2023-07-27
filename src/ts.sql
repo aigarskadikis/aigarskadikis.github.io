@@ -13,6 +13,9 @@ SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('
 --decompress chunk. pg 14.5, ts 2.8.1
 SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');
 
+--another way to print chunks per table
+select * from _timescaledb_catalog.chunk where hypertable_id = (select id from _timescaledb_catalog.hypertable where table_name = 'history');
+
 --compress all chunks from a time frame. pg 14.5, ts 2.8.1
 SELECT compress_chunk(i) from SELECT show_chunks('history',1690372501,0) i;
 

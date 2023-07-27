@@ -445,7 +445,7 @@ On-the-fly configuration backup. Check if this is not the node holding the Virta
 --ignore-table=zabbix.trends \
 --ignore-table=zabbix.trends_uint \
 zabbix | gzip > quick.restore.sql.gz</code></pre>
-Schema backup for MySQL 8. Credentials embeded in command<pre><code>mysqldump \
+MySQL 8.0 schema backup for MySQL 8. Credentials embeded in command<pre><code>mysqldump \
 --host=127.0.0.1 \
 --user=root \
 --password='zabbix' \
@@ -465,6 +465,27 @@ mysqldump $DB history_old | lz4 > "$DEST/history_old.sql.lz4" &
 mysqldump $DB history_str_old | lz4 > "$DEST/history_str_old.sql.lz4" &
 mysqldump $DB history_log_old | lz4 > "$DEST/history_log_old.sql.lz4" &
 mysqldump $DB history_text_old | lz4 > "$DEST/history_text_old.sql.lz4" &</code></pre>
+MariaDB 10.3 schema backup<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+zabbix > /root/schema52.sql</code></pre>
+MariaDB 10.3 data backup without history<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--flush-logs \
+--single-transaction \
+--no-create-info \
+--skip-triggers \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix | gzip --fast > /root/data52.sql.gz</code></pre>
 Backup current data tables with fastest compression possible<pre><code>DB=zabbix
 DEST=/mnt/zabbixtemp
 mkdir -p "$DEST"
@@ -2029,6 +2050,7 @@ Compress manually one chunk. Pg 14.5, ts 2.8.1<pre><code>SELECT compress_chunk('
 Explorer how many is compressed and uncompressed. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
 To see if hypertable is compressed. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
 Decompress chunk. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
+Another way to print chunks per table<pre><code>select * from _timescaledb_catalog.chunk where hypertable_id = (select id from _timescaledb_catalog.hypertable where table_name = 'history');</code></pre>
 Compress all chunks from a time frame. Pg 14.5, ts 2.8.1<pre><code>SELECT compress_chunk(i) from SELECT show_chunks('history',1690372501,0) i;</code></pre>
 Decompress all chunks. Pg 14.5, ts 2.8.1<pre><code>SELECT decompress_chunk(c, true) FROM show_chunks('trends_uint') c;
 SELECT decompress_chunk(c, true) FROM show_chunks('trends') c;

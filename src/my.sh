@@ -107,7 +107,7 @@ ip a | grep "192.168.88.55" || mysqldump \
 --ignore-table=zabbix.trends_uint \
 zabbix | gzip > quick.restore.sql.gz
 
-# schema backup for MySQL 8. credentials embeded in command
+# MySQL 8.0 schema backup for MySQL 8. credentials embeded in command
 mysqldump \
 --host=127.0.0.1 \
 --user=root \
@@ -130,6 +130,31 @@ mysqldump $DB history_old | lz4 > "$DEST/history_old.sql.lz4" &
 mysqldump $DB history_str_old | lz4 > "$DEST/history_str_old.sql.lz4" &
 mysqldump $DB history_log_old | lz4 > "$DEST/history_log_old.sql.lz4" &
 mysqldump $DB history_text_old | lz4 > "$DEST/history_text_old.sql.lz4" &
+
+# MariaDB 10.3 schema backup
+mysqldump \
+--defaults-file=/root/.my.cnf \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+zabbix > /root/schema52.sql
+
+# MariaDB 10.3 data backup without history
+mysqldump \
+--defaults-file=/root/.my.cnf \
+--flush-logs \
+--single-transaction \
+--no-create-info \
+--skip-triggers \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix | gzip --fast > /root/data52.sql.gz
 
 # backup current data tables with fastest compression possible
 DB=zabbix
