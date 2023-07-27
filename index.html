@@ -205,6 +205,7 @@ Hungry CPU processes<pre><code>ps -eo pcpu,pmem,user,stat,args --sort -time > /t
 All socket statistics<pre><code>ss --tcp --numeric --processes > /tmp/$(hostname).socket.statistics.txt</code></pre>
 Only listening ports and explanation<pre><code>ss --tcp --numeric --listen --processes > /tmp/$(hostname).listening.ports.txt</code></pre>
 All installed package names<pre><code>rpm -qa > /tmp/$(hostname).installed.rpms.txt</code></pre>
+Generate random password by using bash tools<pre><code>< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-20};echo;</code></pre>
 Php official memory setting<pre><code>find /etc -name zabbix.conf -exec grep --with-filename memory {} \;</code></pre>
 A sum per column<pre><code>ls -lb | grep "history_str#" | awk '{ print $5 }' | python -c "import sys; print(sum(int(l) for l in sys.stdin))"</code></pre>
 Test item key<pre><code>zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'
