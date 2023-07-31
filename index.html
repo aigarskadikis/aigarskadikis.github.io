@@ -195,8 +195,13 @@ echo -n 'guest_nice: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest_nice
 echo '------------'
 sleep 1; done;</code></pre>
 Compress /var/lib/mysql by using gzip<pre><code>tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
+Restore<pre><code>rm /var/lib/mysql/* -rf
+tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql</code></pre>
 Compress /var/lib/mysql by using lz4<pre><code>dnf install lz4
 tar --create --verbose --use-compress-program='lz4' --file=/tmp/var.lib.mysql.tar.lz4 /var/lib/mysql</code></pre>
+Restore<pre><code>rm /var/lib/mysql/* -rf
+cd /
+unlz4 /tmp/var.lib.mysql.tar.lz4 | tar xvf -</code></pre>
 Track when trends are completed<pre><code>watch -n.2 'mysql -e "show full processlist;" | grep insert'</code></pre>
 Take poller #11, increase log level to 5 and stream live situation of what kind of items are fetched and how fast. Zabbix 6.0, 6.2, 6.4<pre><code>zabbix_proxy -R log_level_increase="poller",11
 zabbix_proxy -R log_level_increase="poller",11

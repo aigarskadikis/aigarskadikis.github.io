@@ -69,9 +69,18 @@ sleep 1; done;
 # compress /var/lib/mysql by using gzip
 tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql
 
+# restore
+rm /var/lib/mysql/* -rf
+tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql
+
 # compress /var/lib/mysql by using lz4
 dnf install lz4
 tar --create --verbose --use-compress-program='lz4' --file=/tmp/var.lib.mysql.tar.lz4 /var/lib/mysql
+
+# restore
+rm /var/lib/mysql/* -rf
+cd /
+unlz4 /tmp/var.lib.mysql.tar.lz4 | tar xvf -
 
 # track when trends are completed
 watch -n.2 'mysql -e "show full processlist;" | grep insert'
