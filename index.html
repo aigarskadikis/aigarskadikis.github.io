@@ -2074,6 +2074,19 @@ FROM information_schema.tables
 WHERE table_schema = "zabbix"
 ORDER BY ROUND(((data_length + index_length) / 1024 / 1024 / 1024),2) DESC
 LIMIT 20;</code></pre>
+Items and delay<pre><code>SELECT items.delay, CASE items.type WHEN 0 THEN 'Zabbix agent' WHEN 1 THEN 'SNMPv1 agent' WHEN 2 THEN 'Zabbix trapper' WHEN 3 THEN 'Simple check' WHEN 4 THEN 'SNMPv2 agent' WHEN 5 THEN 'Zabbix internal' WHEN 6 THEN 'SNMPv3 agent' WHEN 7 THEN 'Zabbix agent (active) check' WHEN 8 THEN 'Aggregate' WHEN 9 THEN 'HTTP test (web monitoring scenario step)' WHEN 10 THEN 'External check' WHEN 11 THEN 'Database monitor' WHEN 12 THEN 'IPMI agent' WHEN 13 THEN 'SSH agent' WHEN 14 THEN 'TELNET agent' WHEN 15 THEN 'Calculated' WHEN 16 THEN 'JMX agent' WHEN 17 THEN 'SNMP trap' WHEN 18 THEN 'Dependent item' WHEN 19 THEN 'HTTP agent' WHEN 20 THEN 'SNMP agent' WHEN 21 THEN 'Script item' END AS type,  COUNT(*)
+FROM hosts, items
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0 AND items.status=0 AND hosts.flags IN (0,4) AND items.flags IN (0,4)
+GROUP BY 1,2
+ORDER BY 1 ASC;</code></pre>
+Special item update frequency<pre><code>SELECT items.delay, items.params,  COUNT(*)
+FROM hosts, items
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0 AND items.status=0 AND hosts.flags IN (0,4) AND items.flags IN (0,4)
+AND items.type=15
+GROUP BY 1,2
+ORDER BY 1 ASC;</code></pre>
 Events daily<pre><code>SELECT COUNT(*) FROM events WHERE clock >= UNIX_TIMESTAMP("2023-07-20 00:00:00") AND clock < UNIX_TIMESTAMP("2023-07-21 00:00:00");</code></pre>
 Trigger calculation fail. Zabbix 4.0, 5.0<pre><code>SELECT
 CONCAT('triggers.php?form=update&triggerid=', events.objectid) AS 'URL',
