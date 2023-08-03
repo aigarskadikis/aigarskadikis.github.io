@@ -69,6 +69,16 @@ sleep 1; done;
 # compress /var/lib/mysql by using gzip
 tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql
 
+# suggestions based on OS
+cat /etc/*release* > /tmp/$(hostname).os.txt
+df -m > /tmp/$(hostname).disk.txt
+free -m > /tmp/$(hostname).memory.usage.txt
+cat /proc/meminfo > /tmp/$(hostname).meminfo.txt
+cat /proc/cpuinfo > /tmp/$(hostname).cpuinfo.txt
+mysql -e "show variables" > /tmp/$(hostname).mysql.variables.txt
+sysctl -a > /tmp/$(hostname).kernel.settings.txt
+ps -xafuww > /tmp/$(hostname).process.list.tree.txt
+
 # restore
 rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql

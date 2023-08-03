@@ -195,6 +195,14 @@ echo -n 'guest_nice: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest_nice
 echo '------------'
 sleep 1; done;</code></pre>
 Compress /var/lib/mysql by using gzip<pre><code>tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
+Suggestions based on OS<pre><code>cat /etc/*release* > /tmp/$(hostname).os.txt
+df -m > /tmp/$(hostname).disk.txt
+free -m > /tmp/$(hostname).memory.usage.txt
+cat /proc/meminfo > /tmp/$(hostname).meminfo.txt
+cat /proc/cpuinfo > /tmp/$(hostname).cpuinfo.txt
+mysql -e "show variables" > /tmp/$(hostname).mysql.variables.txt
+sysctl -a > /tmp/$(hostname).kernel.settings.txt
+ps -xafuww > /tmp/$(hostname).process.list.tree.txt</code></pre>
 Restore<pre><code>rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql</code></pre>
 Compress /var/lib/mysql by using lz4<pre><code>dnf install lz4
