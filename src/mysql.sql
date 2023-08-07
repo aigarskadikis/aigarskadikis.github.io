@@ -6,6 +6,9 @@ JOIN performance_schema.threads AS t ON t.thread_id = sbt.thread_id
 JOIN performance_schema.status_by_thread AS t2 ON t2.thread_id = t.thread_id
 WHERE sbt.variable_name = 'Ssl_version' and t2.variable_name = 'Ssl_cipher' ORDER BY tls_version;
 
+--list show mysql users and databases, permissions
+SELECT host,db,user FROM mysql.db;
+
 --disable redo log on global level
 ALTER INSTANCE DISABLE INNODB REDO_LOG;
 
