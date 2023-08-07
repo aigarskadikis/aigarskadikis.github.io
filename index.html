@@ -2093,6 +2093,17 @@ WHERE hosts.hostid=items.hostid
 AND hosts.status=0 AND items.status=0 AND hosts.flags IN (0,4) AND items.flags IN (0,4)
 GROUP BY 1,2
 ORDER BY 1 ASC;</code></pre>
+ODBC items, database monitor items<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0 AND items.status=0
+AND items.type=11
+GROUP BY 1,2
+ORDER BY 1,2 DESC;</code></pre>
 Special item update frequency<pre><code>SELECT items.delay, items.params,  COUNT(*)
 FROM hosts, items
 WHERE hosts.hostid=items.hostid

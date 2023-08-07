@@ -1441,6 +1441,19 @@ AND hosts.status=0 AND items.status=0 AND hosts.flags IN (0,4) AND items.flags I
 GROUP BY 1,2
 ORDER BY 1 ASC;
 
+--ODBC items, database monitor items
+SELECT
+proxy.host AS proxy,
+hosts.host,
+COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0 AND items.status=0
+AND items.type=11
+GROUP BY 1,2
+ORDER BY 1,2 DESC;
+
 --special item update frequency
 SELECT items.delay, items.params,  COUNT(*)
 FROM hosts, items
