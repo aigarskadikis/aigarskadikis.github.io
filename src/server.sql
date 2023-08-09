@@ -1454,6 +1454,14 @@ AND items.type=11
 GROUP BY 1,2
 ORDER BY 1,2 DESC;
 
+--profiling
+SET profiling = 1;
+SELECT * FROM sessions;
+SHOW PROFILES;
+SHOW PROFILE FOR QUERY 1;
+EXPLAIN SELECT * FROM sessions\G
+SET profiling = 0;
+
 --special item update frequency
 SELECT items.delay, items.params,  COUNT(*)
 FROM hosts, items

@@ -2104,6 +2104,12 @@ WHERE hosts.status=0 AND items.status=0
 AND items.type=11
 GROUP BY 1,2
 ORDER BY 1,2 DESC;</code></pre>
+Profiling<pre><code>SET profiling = 1;
+SELECT * FROM sessions;
+SHOW PROFILES;
+SHOW PROFILE FOR QUERY 1;
+EXPLAIN SELECT * FROM sessions\G
+SET profiling = 0;</code></pre>
 Special item update frequency<pre><code>SELECT items.delay, items.params,  COUNT(*)
 FROM hosts, items
 WHERE hosts.hostid=items.hostid
