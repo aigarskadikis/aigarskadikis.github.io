@@ -170,6 +170,17 @@ END AS UserType
 FROM users
 JOIN role ON (users.roleid=role.roleid);
 
+--variety of items key-wise
+SELECT DISTINCT items.key_, COUNT(*)
+FROM items, hosts
+WHERE items.hostid=hosts.hostid
+AND items.status=0
+AND hosts.status=0
+AND items.flags IN (0,1,2)
+AND hosts.flags IN (0,4)
+GROUP BY 1
+ORDER BY 2 ASC;
+
 --active and disabled hosts and items. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2, 5.4, 6.0
 SELECT
 proxy.host AS proxy,
