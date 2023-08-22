@@ -210,10 +210,10 @@ FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status IN (0,1) AND items.status IN (0,1)
-GROUP BY proxy.host, items.type
+GROUP BY 1,2,3,4
 ORDER BY 1,2,3,4,5 DESC;
 
---most recent data collector items. Zabbix 4.2, 4.4, 5.0
+--Most recent data collector items. Zabbix 4.2, 4.4, 5.0
 SELECT proxy.host AS proxy, hosts.host, items.itemid, items.key_
 FROM items, hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
