@@ -218,6 +218,7 @@ Take poller #11, increase log level to 5 and stream live situation of what kind 
 zabbix_proxy -R log_level_increase="poller",1
 tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -E 'hostid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'
 tail -99f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -Eo 'hostid:\S+ itemid:\S+ type:\S+|got.*sec.*idle'</code></pre>
+Active checks failing<pre><code>grep -Eo "cannot send list of active checks.*" /var/log/zabbix/zabbix_proxy.log | sort | uniq -c</code></pre>
 Outgoing ports, persistent connection<pre><code>ss --tcp --numeric --processes | grep zabbix_server</code></pre>
 Process list with parents<pre><code>ps -xafuww > /tmp/process.list.$(hostname).txt</code></pre>
 Top memory processes<pre><code>ps -eo pcpu,pmem,user,stat,args --sort -rss > /tmp/$(hostname).top.memory.processes.txt</code></pre>
