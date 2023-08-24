@@ -25,3 +25,12 @@ DROP TABLE history_text_tmp;
 DROP TABLE trends_tmp;
 DROP TABLE trends_uint_tmp;
 
+--drop old
+DROP TABLE history_uint_old;
+DROP TABLE trends_uint_old;
+DROP TABLE history_old;
+DROP TABLE trends_old;
+DROP TABLE history_text_old;
+DROP TABLE history_str_old;
+DROP TABLE history_log_old;
+
