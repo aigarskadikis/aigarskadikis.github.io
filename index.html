@@ -454,7 +454,7 @@ host=192.168.88.101
 user=zbx_ro
 password=passwd_ro_zbx
 EOF</code></pre>
-Extend open_files_limit for service mysqld<pre><code>mkdir -p /etc/systemd/system/mysqld.service.d && cd /etc/systemd/system/mysqld.service.d && cat << 'EOF' > override.conf
+Extend open_files_limit for service mysqld. Could not increase number of max_open_files to more than<pre><code>mkdir -p /etc/systemd/system/mysqld.service.d && cd /etc/systemd/system/mysqld.service.d && cat << 'EOF' > override.conf
 [Service]
 LimitNOFILE=65535
 EOF

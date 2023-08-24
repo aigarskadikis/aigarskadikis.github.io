@@ -92,7 +92,7 @@ user=zbx_ro
 password=passwd_ro_zbx
 EOF
 
-# extend open_files_limit for service mysqld
+# extend open_files_limit for service mysqld. Could not increase number of max_open_files to more than
 mkdir -p /etc/systemd/system/mysqld.service.d && cd /etc/systemd/system/mysqld.service.d && cat << 'EOF' > override.conf
 [Service]
 LimitNOFILE=65535
