@@ -92,6 +92,15 @@ user=zbx_ro
 password=passwd_ro_zbx
 EOF
 
+# extend open_files_limit for service mysqld
+mkdir -p /etc/systemd/system/mysqld.service.d && cd /etc/systemd/system/mysqld.service.d && cat << 'EOF' > override.conf
+[Service]
+LimitNOFILE=65535
+EOF
+systemctl --system daemon-reload
+mysql_pid=$(ps aux | grep "mysql" | head -n 1 | awk '{print $2}')
+cat /proc/$mysql_pid/limits 
+
 # on-the-fly configuration backup. check if this is not the node holding the Virtaul IP address. Do a backup on slave
 ip a | grep "192.168.88.55" || mysqldump \
 --defaults-file=/root/.my.cnf \
