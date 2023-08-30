@@ -1127,6 +1127,9 @@ AND hosts.status=1
 AND items.status=0
 );
 
+--how monitoring has been used
+SELECT proxy.host AS proxy, CASE items.type WHEN 0 THEN 'Zabbix agent' WHEN 1 THEN 'SNMPv1 agent' WHEN 2 THEN 'Zabbix trapper' WHEN 3 THEN 'Simple check' WHEN 4 THEN 'SNMPv2 agent' WHEN 5 THEN 'Zabbix internal' WHEN 6 THEN 'SNMPv3 agent' WHEN 7 THEN 'Zabbix agent (active) check' WHEN 8 THEN 'Aggregate' WHEN 9 THEN 'HTTP test (web monitoring scenario step)' WHEN 10 THEN 'External check' WHEN 11 THEN 'Database monitor' WHEN 12 THEN 'IPMI agent' WHEN 13 THEN 'SSH agent' WHEN 14 THEN 'TELNET agent' WHEN 15 THEN 'Calculated' WHEN 16 THEN 'JMX agent' WHEN 17 THEN 'SNMP trap' WHEN 18 THEN 'Dependent item' WHEN 19 THEN 'HTTP agent' WHEN 20 THEN 'SNMP agent' WHEN 21 THEN 'Script item' END AS type, COUNT(*) FROM items JOIN hosts ON (hosts.hostid=items.hostid) LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid) WHERE hosts.status IN (0) AND items.status IN (0) GROUP BY 1,2 ORDER BY 1,2,3 DESC;
+
 --show internal events for items which is working right now. Zabbix 5.0
 SELECT events.name FROM events
 WHERE source=3 AND object=4
