@@ -997,6 +997,14 @@ FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status=0
 AND LENGTH(hosts.error) > 0;</code></pre>
+Unreachable ZBX hosts. Zabbix 6.4, 7.0<pre><code>SELECT proxy.name,
+hosts.host,
+interface.error,
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxyid=proxy.proxyid)
+JOIN interface ON (interface.hostid=hosts.hostid)
+WHERE LENGTH(interface.error) > 0 AND interface.type=1;</code></pre>
 Unreachable SNMP hosts. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
