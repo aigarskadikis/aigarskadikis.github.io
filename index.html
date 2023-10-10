@@ -690,6 +690,9 @@ Ensure service is listening on UDP 162<pre><code>ss --udp --listen --numeric --p
 Check if tcp port listens. Make sure it really listens on destination server before checking<pre><code>nc -v servername 3306</code></pre>
 Check if port is open without external tools. If it reports 0, the port is reachable and in the listening state<pre><code>{ echo >/dev/tcp/127.0.0.1/3306 ; } 2>/dev/null; echo $?</code></pre>
 Capture all SNMP traps traffic<pre><code>tcpdump -i any udp dst port 162 >> /var/log/zabbix/zabbix_traps.tcpdump</code></pre>
+SNMP traffic and ICMP ping probles<pre><code>tcpdump -i any 'port 161 or icmp' -w /tmp/out.pcap</code></pre>
+Replace 127.0.0.1 with real IP<pre><code>tcpdump -i any 'port 10051 and (dst 127.0.0.1 and src 127.0.0.1)' -w /tmp/out.pcap</code></pre>
+UDP traffic<pre><code>tcpdump -i any port 161 -w /tmp/out.pcap</code></pre>
 Activity for each block device, pretty-print  device  names, report task creation and system switching activity.<pre><code>sar -d -p -w 1</code></pre>
 10 seconds of disk usage<pre><code>sar -d -wp 1 10 >> /tmp/disk.activity.txt</code></pre>
 Installed packages on EL7 or EL8 system<pre><code>rpm -qa > /tmp/installed.packages.txt</code></pre>

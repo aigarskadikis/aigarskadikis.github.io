@@ -16,6 +16,15 @@ nc -v servername 3306
 # capture all SNMP traps traffic
 tcpdump -i any udp dst port 162 >> /var/log/zabbix/zabbix_traps.tcpdump
 
+# SNMP traffic and ICMP ping probles
+tcpdump -i any 'port 161 or icmp' -w /tmp/out.pcap
+
+# replace 127.0.0.1 with real IP
+tcpdump -i any 'port 10051 and (dst 127.0.0.1 and src 127.0.0.1)' -w /tmp/out.pcap
+
+# UDP traffic
+tcpdump -i any port 161 -w /tmp/out.pcap
+
 # activity for each block device, pretty-print  device  names, report task creation and system switching activity.
 sar -d -p -w 1
 
