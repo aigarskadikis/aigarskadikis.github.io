@@ -51,6 +51,13 @@ LEFT JOIN hosts proxy ON (hosts.proxyid=proxy.proxyid)
 JOIN interface ON (interface.hostid=hosts.hostid)
 WHERE LENGTH(interface.error) > 0 AND interface.type=1;
 
+--which template has JSONPath preprocessing. Zabbix 6.0
+SELECT hosts.host, items.name, item_preproc
+FROM hosts, items, item_preproc
+WHERE hosts.hostid=items.hostid AND items.itemid=item_preproc.itemid
+AND item_preproc.type=12
+AND item_preproc.params LIKE '%memory.sum%';
+
 --unreachable SNMP hosts. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
 SELECT
 proxy.host AS proxy,
