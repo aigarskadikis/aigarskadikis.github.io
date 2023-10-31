@@ -964,6 +964,23 @@ GROUP BY 1 ORDER BY 3,2;</code></pre>
 <p>Download this section: <a href="src/proxy.sql">https://aigarskadikis.github.io/src/proxy.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/proxy.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/proxy.sql</a></p>
 </div>
+<input type="radio" name="tabs" id="psql"><label for="psql">psql.sql</label><div class="tab">
+Long running queries. Postgres. PostgreSQL<pre><code>SELECT
+pid,
+user,
+pg_stat_activity.query_start,
+NOW() - pg_stat_activity.query_start AS query_time,
+query,
+state,
+wait_event_type,
+wait_event
+FROM pg_stat_activity
+WHERE (NOW() - pg_stat_activity.query_start) > interval '3 seconds';</code></pre>
+Monitor process. Postgres. PostgreSQL<pre><code>SELECT * FROM pg_stat_activity WHERE state != 'idle';</code></pre>
+What is minor version of Zabbix<pre><code>SELECT * FROM dbversion;</code></pre>
+<p>Download this section: <a href="src/psql.sql">https://aigarskadikis.github.io/src/psql.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/psql.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/psql.sql</a></p>
+</div>
 <input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab">
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
@@ -1008,6 +1025,11 @@ FROM hosts
 LEFT JOIN hosts proxy ON (hosts.proxyid=proxy.proxyid)
 JOIN interface ON (interface.hostid=hosts.hostid)
 WHERE LENGTH(interface.error) > 0 AND interface.type=1;</code></pre>
+Which template has JSONPath preprocessing. Zabbix 6.0<pre><code>SELECT hosts.host, items.name, item_preproc
+FROM hosts, items, item_preproc
+WHERE hosts.hostid=items.hostid AND items.itemid=item_preproc.itemid
+AND item_preproc.type=12
+AND item_preproc.params LIKE '%memory.sum%';</code></pre>
 Unreachable SNMP hosts. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
