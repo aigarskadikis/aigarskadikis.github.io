@@ -51,6 +51,11 @@ LEFT JOIN hosts proxy ON (hosts.proxyid=proxy.proxyid)
 JOIN interface ON (interface.hostid=hosts.hostid)
 WHERE LENGTH(interface.error) > 0 AND interface.type=1;
 
+--blindly select metrics from a partition without knowing the total amount. aggregate statistics
+SELECT itemid, COUNT(*) FROM (
+SELECT itemid FROM history_uint PARTITION (p202310290000) LIMIT 9999
+) b GROUP BY 1 ORDER BY 2 DESC;
+
 --which template has JSONPath preprocessing. Zabbix 6.0
 SELECT hosts.host, items.name, item_preproc
 FROM hosts, items, item_preproc
