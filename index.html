@@ -1605,7 +1605,8 @@ DELETE FROM trends_uint WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items);
-DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);</code></pre>
+DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);
+DELETE FROM history_uint WHERE itemid NOT IN (SELECT itemid FROM items);</code></pre>
 Drop table partition in MySQL<pre><code>ALTER TABLE history_uint DROP PARTITION p2018_06_06;</code></pre>
 Don't replicate transactions to the other servers in pool. Don't write to binlog<pre><code>SET SESSION SQL_LOG_BIN=0;</code></pre>
 Few MySQL key settings<pre><code>SELECT

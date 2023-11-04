@@ -749,6 +749,7 @@ DELETE FROM history_text WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM history_str WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM history_log WHERE itemid NOT IN (SELECT itemid FROM items);
 DELETE FROM history WHERE itemid NOT IN (SELECT itemid FROM items);
+DELETE FROM history_uint WHERE itemid NOT IN (SELECT itemid FROM items);
 
 --drop table partition in MySQL
 ALTER TABLE history_uint DROP PARTITION p2018_06_06;
