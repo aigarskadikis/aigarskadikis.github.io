@@ -2242,6 +2242,15 @@ WHERE events.source=3 AND events.object=0 AND LENGTH(events.name)>0
 AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1,2
 ORDER BY 3 DESC LIMIT 10;</code></pre>
+Which deciaml number takes the most hits in trends table. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT hosts.host, items.key_ FROM (
+SELECT COUNT(*), itemid FROM trends WHERE itemid IN (
+SELECT DISTINCT itemid FROM items WHERE value_type=0
+)
+GROUP BY 2
+ORDER BY 1 DESC
+LIMIT 50) table1, items, hosts
+WHERE table1.itemid=items.itemid
+AND hosts.hostid=items.hostid;</code></pre>
 <p>Download this section: <a href="src/server.sql">https://aigarskadikis.github.io/src/server.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/server.sql</a></p>
 </div>

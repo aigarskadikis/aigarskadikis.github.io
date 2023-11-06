@@ -1522,3 +1522,14 @@ AND clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)
 GROUP BY 1,2
 ORDER BY 3 DESC LIMIT 10;
 
+--which deciaml number takes the most hits in trends table. Zabbix 4.0, 5.0, 6.0
+SELECT hosts.host, items.key_ FROM (
+SELECT COUNT(*), itemid FROM trends WHERE itemid IN (
+SELECT DISTINCT itemid FROM items WHERE value_type=0
+)
+GROUP BY 2
+ORDER BY 1 DESC
+LIMIT 50) table1, items, hosts
+WHERE table1.itemid=items.itemid
+AND hosts.hostid=items.hostid;
+
