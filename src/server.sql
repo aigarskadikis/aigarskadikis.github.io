@@ -1269,7 +1269,7 @@ AND items.flags<>2
 GROUP BY 1,2
 ORDER BY 3 ASC;
 
---size of MySQL DB
+--size of MySQL DB. size of biggest tables
 SELECT
 ENGINE,
 TABLE_TYPE,
