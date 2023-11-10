@@ -34,6 +34,7 @@
     padding:.4rem
 }
 body{
+	width:98%;
     #background:#dcdcdc;
     min-height:100vh;
     box-sizing:border-box;
