@@ -35,7 +35,6 @@
 }
 body{
 	width:97%;
-    #background:#dcdcdc;
     min-height:100vh;
     box-sizing:border-box;
     font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;
@@ -48,7 +47,6 @@ pre{
     margin:0 0 1em;
     background-color:#FFF7F0;
     border-radius:3px;
-    #border:1px solid #CCCCCC;
 	white-space: pre-wrap;
     overflow-x: auto;
   word-wrap: break-word;
@@ -111,7 +109,6 @@ a:hover{
     text-decoration:underline
 }
 ol li{
-   # list-style-type:none
    padding:0 0 0 1.2em;
    margin:0 0 0 1.2em;
 }
