@@ -16,6 +16,9 @@ sed 's/^[\t ]*//g;s/[\t ]*$//g'
 # endless loop to deliver metric
 while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done
 
+# statistics per history write cache
+while true; do echo "$(date '+%Y-%m-%d %H:%M:%S') $(zabbix_server -R diaginfo=historycache | grep -A1 "Top.values" | grep "[i]temid")" >> /tmp/top.itemid.log; sleep 1; done
+
 # test disk throughput
 cd /var/lib/mysql
 dd if=/dev/urandom of=512M bs=1M count=512 oflag=direct
