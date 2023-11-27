@@ -154,10 +154,13 @@ echo $LINE
 } done</code></pre>
 Remove leading and trailing space with sed<pre><code>sed 's/^[\t ]*//g;s/[\t ]*$//g'</code></pre>
 Endless loop to deliver metric<pre><code>while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done</code></pre>
-Test disk throughput<pre><code>dd if=/dev/urandom of=/db/mount/point/512M bs=1M count=512 oflag=direct
-dd if=/dev/urandom of=/db/mount/point/5GB bs=1M count=5120 oflag=direct
-dd if=/dev/urandom of=/db/mount/point/50GB bs=1M count=51200 oflag=direct
-dd if=/dev/urandom of=/db/mount/point/65GB bs=1M count=65536 oflag=direct</code></pre>
+Test disk throughput<pre><code>cd /var/lib/mysql
+dd if=/dev/urandom of=512M bs=1M count=512 oflag=direct
+rm 512M
+dd if=/dev/urandom of=5GB bs=1M count=5120 oflag=direct
+rm 5GB
+dd if=/dev/urandom of=50GB bs=1M count=51200 oflag=direct
+rm 50GB</code></pre>
 Simulate javascript code without placing file in filesystem<pre><code>zabbix_js --script <(echo 'return 1;') --param '' --loglevel 4 --timeout 60</code></pre>
 Feed the output of file into javascript program<pre><code>zabbix_js --script <(echo 'return value;') --loglevel 3 --timeout 60 --input <(grep -v "^$\|#" /etc/zabbix/zabbix_agentd.conf | sort)</code></pre>
 Erase dublicate data in table 'history_text'. This does NOT work like discard unchanged<pre><code>mysql \

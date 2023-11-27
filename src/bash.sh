@@ -17,10 +17,13 @@ sed 's/^[\t ]*//g;s/[\t ]*$//g'
 while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done
 
 # test disk throughput
-dd if=/dev/urandom of=/db/mount/point/512M bs=1M count=512 oflag=direct
-dd if=/dev/urandom of=/db/mount/point/5GB bs=1M count=5120 oflag=direct
-dd if=/dev/urandom of=/db/mount/point/50GB bs=1M count=51200 oflag=direct
-dd if=/dev/urandom of=/db/mount/point/65GB bs=1M count=65536 oflag=direct
+cd /var/lib/mysql
+dd if=/dev/urandom of=512M bs=1M count=512 oflag=direct
+rm 512M
+dd if=/dev/urandom of=5GB bs=1M count=5120 oflag=direct
+rm 5GB
+dd if=/dev/urandom of=50GB bs=1M count=51200 oflag=direct
+rm 50GB
 
 # simulate javascript code without placing file in filesystem
 zabbix_js --script <(echo 'return 1;') --param '' --loglevel 4 --timeout 60
