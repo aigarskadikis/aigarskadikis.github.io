@@ -1185,6 +1185,52 @@ AND hosts.flags IN (0,4)
 AND LENGTH(item_rtdata.error)=0
 );
 
+--mimic information of Zabbix. unsupported, disabled, active items. Zabbix 6.0
+SELECT COUNT(*), CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS hostStatus,
+CASE item_rtdata.state
+WHEN 0 THEN 'normal'
+WHEN 1 THEN 'unsupported'
+END AS itemState,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS itemStatus
+FROM items
+JOIN item_rtdata ON (item_rtdata.itemid=items.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1) AND items.flags IN (0,4)
+GROUP BY 2,3,4
+ORDER BY 2,3;
+
+--mimic information of Zabbix. extended. including LLD rules Zabbix 6.0
+SELECT COUNT(*), CASE hosts.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS hostStatus,
+CASE item_rtdata.state
+WHEN 0 THEN 'normal'
+WHEN 1 THEN 'unsupported'
+END AS itemState,
+CASE items.status
+WHEN 0 THEN 'Active'
+WHEN 1 THEN 'Disabled'
+END AS itemStatus,
+CASE items.flags
+WHEN 0 THEN 'normal item'
+WHEN 1 THEN 'LLD rule'
+WHEN 2 THEN 'Prototype'
+WHEN 4 THEN 'auto created item'
+END AS itemFlags
+FROM items
+JOIN item_rtdata ON (item_rtdata.itemid=items.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status IN (0,1) AND items.status IN (0,1) AND items.flags IN (0,1,4)
+GROUP BY 2,3,4,5
+ORDER BY 2,3;
+
 --detete internal events for items which is working right now. Zabbix 5.0
 DELETE FROM events
 WHERE source=3 AND object=4
