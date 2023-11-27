@@ -1205,6 +1205,11 @@ WHERE hosts.status IN (0,1) AND items.status IN (0,1) AND items.flags IN (0,4)
 GROUP BY 2,3,4
 ORDER BY 2,3;
 
+--reset scan of network discovery. Zabbix 6.0
+SELECT * FROM drules;
+UPDATE drules SET nextcheck=0;
+SELECT * FROM drules;
+
 --mimic information of Zabbix. extended. including LLD rules Zabbix 6.0
 SELECT COUNT(*), CASE hosts.status
 WHEN 0 THEN 'Active'

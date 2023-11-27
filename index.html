@@ -1989,6 +1989,9 @@ JOIN hosts ON (hosts.hostid=items.hostid)
 WHERE hosts.status IN (0,1) AND items.status IN (0,1) AND items.flags IN (0,4)
 GROUP BY 2,3,4
 ORDER BY 2,3;</code></pre>
+Reset scan of network discovery. Zabbix 6.0<pre><code>SELECT * FROM drules;
+UPDATE drules SET nextcheck=0;
+SELECT * FROM drules;</code></pre>
 Mimic information of Zabbix. Extended. including LLD rules Zabbix 6.0<pre><code>SELECT COUNT(*), CASE hosts.status
 WHEN 0 THEN 'Active'
 WHEN 1 THEN 'Disabled'
