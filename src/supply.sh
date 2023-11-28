@@ -1,6 +1,13 @@
 # listening TCP ports
 ss --tcp --listen --numeric
 
+# trouble simple
+tail -1000000 /var/log/messages > /tmp/messages.txt
+free -h > /tmp/memory.txt
+df -h > /tmp/disk.txt
+dmesg > /tmp/dmesg.txt
+ps -xafuww > /tmp/process.list.tree.txt
+
 # listening TCP ports with process identification
 ss --tcp --listen --numeric --process
 
