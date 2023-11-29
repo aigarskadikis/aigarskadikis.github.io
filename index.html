@@ -225,8 +225,8 @@ tail -99f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller
 Active checks failing<pre><code>grep -Eo "cannot send list of active checks.*" /var/log/zabbix/zabbix_proxy.log | sort | uniq -c</code></pre>
 Outgoing ports, persistent connection<pre><code>ss --tcp --numeric --processes | grep zabbix_server</code></pre>
 Process list with parents<pre><code>ps -xafuww > /tmp/process.list.$(hostname).txt</code></pre>
-Top memory processes<pre><code>ps -eo pcpu,pmem,user,stat,args --sort -rss > /tmp/$(hostname).top.memory.processes.txt</code></pre>
-Hungry CPU processes<pre><code>ps -eo pcpu,pmem,user,stat,args --sort -time > /tmp/$(hostname).hungry.cpu.processes.txt</code></pre>
+Top memory processes<pre><code>ps -eo time,start_time,pcpu,pmem,user,args --sort pmem > /tmp/top.mem.txt</code></pre>
+Hungry CPU processes<pre><code>ps -eo time,start_time,pcpu,pmem,user,args --sort time > /tmp/top.cpu.txt</code></pre>
 All socket statistics<pre><code>ss --tcp --numeric --processes > /tmp/$(hostname).socket.statistics.txt</code></pre>
 Only listening ports and explanation<pre><code>ss --tcp --numeric --listen --processes > /tmp/$(hostname).listening.ports.txt</code></pre>
 All installed package names<pre><code>rpm -qa > /tmp/$(hostname).installed.rpms.txt</code></pre>

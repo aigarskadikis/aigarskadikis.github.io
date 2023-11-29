@@ -122,10 +122,10 @@ ss --tcp --numeric --processes | grep zabbix_server
 ps -xafuww > /tmp/process.list.$(hostname).txt
 
 # top memory processes
-ps -eo pcpu,pmem,user,stat,args --sort -rss > /tmp/$(hostname).top.memory.processes.txt
+ps -eo time,start_time,pcpu,pmem,user,args --sort pmem > /tmp/top.mem.txt
 
 # hungry CPU processes
-ps -eo pcpu,pmem,user,stat,args --sort -time > /tmp/$(hostname).hungry.cpu.processes.txt
+ps -eo time,start_time,pcpu,pmem,user,args --sort time > /tmp/top.cpu.txt
 
 # all socket statistics
 ss --tcp --numeric --processes > /tmp/$(hostname).socket.statistics.txt
