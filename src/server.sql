@@ -4,6 +4,12 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 --active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2
 SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
+--sessions in last day. Zabbix 6.0
+SELECT users.username,COUNT(*) FROM sessions, users WHERE
+sessions.userid = users.userid
+AND sessions.lastaccess > sessions.lastaccess-(3600*24)
+GROUP BY 1;
+
 --query host and interface details. Zabbix 5.0
 SELECT proxy.host AS proxy, hosts.host,
 hosts.hostid,

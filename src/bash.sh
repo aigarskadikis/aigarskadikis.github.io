@@ -10,6 +10,9 @@ do {
 echo $LINE
 } done
 
+# poller busy
+watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
+
 # remove leading and trailing space with sed
 sed 's/^[\t ]*//g;s/[\t ]*$//g'
 
