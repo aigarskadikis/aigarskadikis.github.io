@@ -10,6 +10,13 @@ sessions.userid = users.userid
 AND sessions.lastaccess > sessions.lastaccess-(3600*24)
 GROUP BY 1;
 
+--most of items at host level
+SELECT hosts.host, COUNT(*) FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status IN (0,1) AND hosts.flags IN (0,4)
+GROUP BY 1
+ORDER BY 2 ASC;
+
 --query host and interface details. Zabbix 5.0
 SELECT proxy.host AS proxy, hosts.host,
 hosts.hostid,

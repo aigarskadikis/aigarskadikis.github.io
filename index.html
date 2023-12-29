@@ -998,6 +998,11 @@ Sessions in last day. Zabbix 6.0<pre><code>SELECT users.username,COUNT(*) FROM s
 sessions.userid = users.userid
 AND sessions.lastaccess > sessions.lastaccess-(3600*24)
 GROUP BY 1;</code></pre>
+Most of items at host level<pre><code>SELECT hosts.host, COUNT(*) FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status IN (0,1) AND hosts.flags IN (0,4)
+GROUP BY 1
+ORDER BY 2 ASC;</code></pre>
 Query host and interface details. Zabbix 5.0<pre><code>SELECT proxy.host AS proxy, hosts.host,
 hosts.hostid,
 interface.interfaceid,
