@@ -56,3 +56,10 @@ https://www.zabbix.com/documentation/current/en/manual/installation/requirements
 - a repeted/failed notification will degrate performance of problems page.
 - a non-super administrator requires more validations for DB server. The best frontend speed will be always for "Zabbix Super Admin"
 
+
+=== db ===
+- vacuum must be working. no dead tuples
+- for intensive load db partitioning must be implemented
+- housekeeper not 100% busy
+- if a log of memory, hugepages must be usead
+

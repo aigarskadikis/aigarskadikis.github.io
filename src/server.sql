@@ -259,6 +259,21 @@ WHERE hosts.status IN (0,1) AND items.status IN (0,1)
 GROUP BY 1,2,3,4
 ORDER BY 1,2,3,4,5 DESC;
 
+--Plain items at the template level which use positional macro. Zabbix 4.0
+SELECT items.name, hosts.host AS template, CONCAT('items.php?form=update&itemid=',items.itemid) AS URL
+FROM hosts, items
+WHERE hosts.hostid=items.hostid
+AND hosts.status=3
+AND items.flags IN (0)
+AND items.name LIKE '%$%' AND items.name NOT LIKE '%{$%';
+
+--prototype items at template level which use positional macro. Zabbix 4.0
+SELECT items.name, hosts.host AS template, CONCAT('disc_prototypes.php?form=update&parent_discoveryid=',item_discovery.parent_itemid,'&itemid=',items.itemid) AS URL FROM hosts, items, item_discovery
+WHERE hosts.hostid=items.hostid AND items.itemid=item_discovery.itemid
+AND hosts.status=3
+AND items.flags IN (2)
+AND items.name LIKE '%$%' AND items.name NOT LIKE '%{$%';
+
 --Most recent data collector items. Zabbix 4.2, 4.4, 5.0
 SELECT proxy.host AS proxy, hosts.host, items.itemid, items.key_
 FROM items, hosts
