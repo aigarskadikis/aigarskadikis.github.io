@@ -153,6 +153,7 @@ do {
 echo $LINE
 } done</code></pre>
 Poller busy<pre><code>watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'</code></pre>
+History syncer running<pre><code>watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"</code></pre>
 Remove leading and trailing space with sed<pre><code>sed 's/^[\t ]*//g;s/[\t ]*$//g'</code></pre>
 Endless loop to deliver metric<pre><code>while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done</code></pre>
 Statistics per history write cache<pre><code>while true; do echo "$(date '+%Y-%m-%d %H:%M:%S') $(zabbix_server -R diaginfo=historycache | grep -A1 "Top.values" | grep "[i]temid")" >> /tmp/top.itemid.log; sleep 1; done</code></pre>
@@ -228,7 +229,7 @@ Outgoing ports, persistent connection<pre><code>ss --tcp --numeric --processes |
 Process list with parents<pre><code>ps -xafuww > /tmp/process.list.$(hostname).txt</code></pre>
 Top memory processes<pre><code>ps -eo time,start_time,pcpu,pmem,user,args --sort pmem > /tmp/top.mem.txt</code></pre>
 Hungry CPU processes<pre><code>ps -eo time,start_time,pcpu,pmem,user,args --sort time > /tmp/top.cpu.txt</code></pre>
-All socket statistics<pre><code>ss --tcp --numeric --processes > /tmp/$(hostname).socket.statistics.txt</code></pre>
+All socket statistics<pre><code>ss --all --numeric --processes > /tmp/$(hostname).socket.statistics.txt</code></pre>
 Only listening ports and explanation<pre><code>ss --tcp --numeric --listen --processes > /tmp/$(hostname).listening.ports.txt</code></pre>
 All installed package names<pre><code>rpm -qa > /tmp/$(hostname).installed.rpms.txt</code></pre>
 Generate random password by using bash tools<pre><code>< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-20};echo;</code></pre>

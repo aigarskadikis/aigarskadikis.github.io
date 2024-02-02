@@ -13,6 +13,9 @@ echo $LINE
 # poller busy
 watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
 
+# history syncer running
+watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"
+
 # remove leading and trailing space with sed
 sed 's/^[\t ]*//g;s/[\t ]*$//g'
 
@@ -131,7 +134,7 @@ ps -eo time,start_time,pcpu,pmem,user,args --sort pmem > /tmp/top.mem.txt
 ps -eo time,start_time,pcpu,pmem,user,args --sort time > /tmp/top.cpu.txt
 
 # all socket statistics
-ss --tcp --numeric --processes > /tmp/$(hostname).socket.statistics.txt
+ss --all --numeric --processes > /tmp/$(hostname).socket.statistics.txt
 
 # only listening ports and explanation
 ss --tcp --numeric --listen --processes > /tmp/$(hostname).listening.ports.txt
