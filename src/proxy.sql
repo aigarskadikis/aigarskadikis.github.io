@@ -11,6 +11,23 @@ DELETE FROM proxy_history WHERE id < (select nextid from ids where table_name = 
 --show LLD JSON data
 SELECT items.hostid, items.hostid, items.key_, proxy_history.value FROM proxy_history, items WHERE proxy_history.itemid=items.itemid AND items.flags=1 ORDER BY clock ASC;
 
+--biggest values
+SELECT itemid,flags,
+COUNT(*),
+AVG(LENGTH(value))
+FROM proxy_history
+GROUP BY 1,2 ORDER BY 4 DESC LIMIT 20;
+
+--most occurences
+SELECT itemid,flags,
+COUNT(*),
+AVG(LENGTH(value))
+FROM proxy_history
+GROUP BY 1,2 ORDER BY 3 DESC LIMIT 20;
+
+--biggest values and occurences
+SELECT itemid,flags,COUNT(*) * AVG(LENGTH(value)) FROM proxy_history GROUP BY 1,2 ORDER BY 3 DESC LIMIT 20;
+
 --Optimal query to identify data overload. Zabbix 4.0, 5.0, 6.0
 SELECT itemid,
 COUNT(*),
