@@ -20,13 +20,13 @@ show global status like '%redo%';
 ALTER INSTANCE ENABLE INNODB REDO_LOG;
 
 --persistent connections
-SELECT * FROM information_schema.processlist WHERE command = 'Sleep';
+SELECT * FROM INFORMATION_SCHEMA.processlist WHERE command = 'Sleep';
 
 --create random password for users
 UPDATE users SET passwd=substring(MD5(RAND()),1,20) WHERE userid NOT IN (1);
 
 --busy connections
-SELECT * FROM information_schema.processlist WHERE command != 'Sleep' and time > 1 and user != 'event_scheduler' ORDER BY time DESC, id;
+SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND != 'Sleep' AND TIME > 1 AND USER != 'EVENT_SCHEDULER' ORDER BY TIME DESC, ID;
 
 --mimic SHOW SLAVE STATUS
 SELECT t.PROCESSLIST_TIME, t.* FROM performance_schema.threads t WHERE NAME IN('thread/sql/slave_io', 'thread/sql/slave_sql');

@@ -847,9 +847,9 @@ SELECT host, user FROM mysql.user;</code></pre>
 Disable redo log on global level<pre><code>ALTER INSTANCE DISABLE INNODB REDO_LOG;</code></pre>
 Check status of redo log<pre><code>show global status like '%redo%';</code></pre>
 Enable redo log<pre><code>ALTER INSTANCE ENABLE INNODB REDO_LOG;</code></pre>
-Persistent connections<pre><code>SELECT * FROM information_schema.processlist WHERE command = 'Sleep';</code></pre>
+Persistent connections<pre><code>SELECT * FROM INFORMATION_SCHEMA.processlist WHERE command = 'Sleep';</code></pre>
 Create random password for users<pre><code>UPDATE users SET passwd=substring(MD5(RAND()),1,20) WHERE userid NOT IN (1);</code></pre>
-Busy connections<pre><code>SELECT * FROM information_schema.processlist WHERE command != 'Sleep' and time > 1 and user != 'event_scheduler' ORDER BY time DESC, id;</code></pre>
+Busy connections<pre><code>SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND != 'Sleep' AND TIME > 1 AND USER != 'EVENT_SCHEDULER' ORDER BY TIME DESC, ID;</code></pre>
 Mimic SHOW SLAVE STATUS<pre><code>SELECT t.PROCESSLIST_TIME, t.* FROM performance_schema.threads t WHERE NAME IN('thread/sql/slave_io', 'thread/sql/slave_sql');
 SELECT t.PROCESSLIST_TIME, t.* FROM performance_schema.threads t;</code></pre>
 <p>Download this section: <a href="src/mysql.sql">https://aigarskadikis.github.io/src/mysql.sql</a><br />
