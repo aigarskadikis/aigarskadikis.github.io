@@ -267,6 +267,16 @@ AND hosts.status=3
 AND items.flags IN (0)
 AND items.name LIKE '%$%' AND items.name NOT LIKE '%{$%';
 
+--Monitoring => Service problem. Zabbix 6.0
+SELECT services.name,
+service_alarms.clock,
+service_alarms.value,
+service_alarms.serviceid,
+service_alarms.servicealarmid
+FROM service_alarms, services
+WHERE service_alarms.serviceid=services.serviceid
+ORDER BY 1,2,3,4,5;
+
 --prototype items at template level which use positional macro. Zabbix 4.0
 SELECT items.name, hosts.host AS template, CONCAT('disc_prototypes.php?form=update&parent_discoveryid=',item_discovery.parent_itemid,'&itemid=',items.itemid) AS URL FROM hosts, items, item_discovery
 WHERE hosts.hostid=items.hostid AND items.itemid=item_discovery.itemid
