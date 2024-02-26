@@ -277,6 +277,9 @@ FROM service_alarms, services
 WHERE service_alarms.serviceid=services.serviceid
 ORDER BY 1,2,3,4,5;
 
+--processes MySQL
+SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
+
 --prototype items at template level which use positional macro. Zabbix 4.0
 SELECT items.name, hosts.host AS template, CONCAT('disc_prototypes.php?form=update&parent_discoveryid=',item_discovery.parent_itemid,'&itemid=',items.itemid) AS URL FROM hosts, items, item_discovery
 WHERE hosts.hostid=items.hostid AND items.itemid=item_discovery.itemid
