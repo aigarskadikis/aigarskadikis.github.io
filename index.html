@@ -1232,6 +1232,15 @@ FROM service_alarms, services
 WHERE service_alarms.serviceid=services.serviceid
 ORDER BY 1,2,3,4,5;</code></pre>
 Processes MySQL<pre><code>SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;</code></pre>
+Backtrack origin of host prototypes. Zabbix 6.0, 6.2, 6.4<pre><code>SELECT hosts.name,
+hosts2.host
+FROM hosts
+JOIN host_discovery ON (hosts.hostid=host_discovery.hostid)
+LEFT JOIN hosts parent ON (parent.hostid=host_discovery.parent_hostid)
+JOIN host_discovery host_discovery2 ON (parent.hostid=host_discovery2.hostid)
+JOIN items items2 ON (items2.itemid=host_discovery2.parent_itemid)
+JOIN hosts hosts2 ON (hosts2.hostid=items2.hostid)
+WHERE hosts.flags=4;</code></pre>
 Prototype items at template level which use positional macro. Zabbix 4.0<pre><code>SELECT items.name, hosts.host AS template, CONCAT('disc_prototypes.php?form=update&parent_discoveryid=',item_discovery.parent_itemid,'&itemid=',items.itemid) AS URL FROM hosts, items, item_discovery
 WHERE hosts.hostid=items.hostid AND items.itemid=item_discovery.itemid
 AND hosts.status=3
