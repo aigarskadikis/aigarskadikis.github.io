@@ -280,6 +280,23 @@ ORDER BY 1,2,3,4,5;
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 
+--heaviest LLD rules. most of items. amount of items per LLD. Zabbix 6.0
+SELECT COUNT(discovery.key_),
+hosts.host,
+discovery.key_,
+discovery.delay
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN item_discovery ON (item_discovery.itemid=items.itemid)
+JOIN items discovery ON (discovery.itemid=item_discovery.parent_itemid)
+WHERE items.status=0
+AND items.flags=4
+GROUP BY discovery.key_,
+discovery.delay,
+hosts.host
+ORDER BY COUNT(discovery.key_) DESC
+LIMIT 10;
+
 --backtrack origin of host prototypes. Zabbix 6.0, 6.2, 6.4
 SELECT hosts.name,
 hosts2.host

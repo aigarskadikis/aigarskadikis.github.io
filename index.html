@@ -1232,6 +1232,21 @@ FROM service_alarms, services
 WHERE service_alarms.serviceid=services.serviceid
 ORDER BY 1,2,3,4,5;</code></pre>
 Processes MySQL<pre><code>SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;</code></pre>
+Heaviest LLD rules. Most of items. amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
+hosts.host,
+discovery.key_,
+discovery.delay
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+JOIN item_discovery ON (item_discovery.itemid=items.itemid)
+JOIN items discovery ON (discovery.itemid=item_discovery.parent_itemid)
+WHERE items.status=0
+AND items.flags=4
+GROUP BY discovery.key_,
+discovery.delay,
+hosts.host
+ORDER BY COUNT(discovery.key_) DESC
+LIMIT 10;</code></pre>
 Backtrack origin of host prototypes. Zabbix 6.0, 6.2, 6.4<pre><code>SELECT hosts.name,
 hosts2.host
 FROM hosts
