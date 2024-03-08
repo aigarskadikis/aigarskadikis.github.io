@@ -277,6 +277,22 @@ FROM service_alarms, services
 WHERE service_alarms.serviceid=services.serviceid
 ORDER BY 1,2,3,4,5;
 
+--statistics per maintenance. Zabbix 6.0
+SELECT maintenance_status, maintenance_type, COUNT(*) FROM hosts WHERE flags IN (0,4) AND status=0 GROUP BY 1,2;
+
+--statistics per maintenance including starting time. Zabbix 6.0
+SELECT maintenance_status, maintenance_type, maintenance_from, COUNT(*) FROM hosts WHERE flags IN (0,4) AND status=0 GROUP BY 1,2,3;
+
+--start time explained for postgreSQL. Zabbix 6.0
+SELECT maintenance_status, maintenance_type, TO_CHAR(DATE(TO_TIMESTAMP(maintenance_from)),'YYYY-MM-DD HH:mm'), COUNT(*) FROM hosts WHERE flags IN (0,4) AND status=0 GROUP BY 1,2,3 ORDER BY 3;
+
+--hosts in the maintenance window and responsible profile. Zabbix 6.0
+SELECT maintenances.name, TO_CHAR(DATE(TO_TIMESTAMP(maintenance_from)),'YYYY-MM-DD HH:mm'), COUNT(*)
+FROM hosts
+JOIN maintenances_hosts ON (maintenances_hosts.hostid=hosts.hostid)
+JOIN maintenances ON (maintenances.maintenanceid=maintenances_hosts.maintenanceid)
+WHERE hosts.flags IN (0,4) AND hosts.status=0 AND hosts.maintenance_status=1 GROUP BY 1,2 ORDER BY 2;
+
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 

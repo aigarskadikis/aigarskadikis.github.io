@@ -1231,6 +1231,14 @@ service_alarms.servicealarmid
 FROM service_alarms, services
 WHERE service_alarms.serviceid=services.serviceid
 ORDER BY 1,2,3,4,5;</code></pre>
+Statistics per maintenance. Zabbix 6.0<pre><code>SELECT maintenance_status, maintenance_type, COUNT(*) FROM hosts WHERE flags IN (0,4) AND status=0 GROUP BY 1,2;</code></pre>
+Statistics per maintenance including starting time. Zabbix 6.0<pre><code>SELECT maintenance_status, maintenance_type, maintenance_from, COUNT(*) FROM hosts WHERE flags IN (0,4) AND status=0 GROUP BY 1,2,3;</code></pre>
+Start time explained for postgreSQL. Zabbix 6.0<pre><code>SELECT maintenance_status, maintenance_type, TO_CHAR(DATE(TO_TIMESTAMP(maintenance_from)),'YYYY-MM-DD HH:mm'), COUNT(*) FROM hosts WHERE flags IN (0,4) AND status=0 GROUP BY 1,2,3 ORDER BY 3;</code></pre>
+Hosts in the maintenance window and responsible profile. Zabbix 6.0<pre><code>SELECT maintenances.name, TO_CHAR(DATE(TO_TIMESTAMP(maintenance_from)),'YYYY-MM-DD HH:mm'), COUNT(*)
+FROM hosts
+JOIN maintenances_hosts ON (maintenances_hosts.hostid=hosts.hostid)
+JOIN maintenances ON (maintenances.maintenanceid=maintenances_hosts.maintenanceid)
+WHERE hosts.flags IN (0,4) AND hosts.status=0 AND hosts.maintenance_status=1 GROUP BY 1,2 ORDER BY 2;</code></pre>
 Processes MySQL<pre><code>SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;</code></pre>
 Heaviest LLD rules. Most of items. amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
 hosts.host,
