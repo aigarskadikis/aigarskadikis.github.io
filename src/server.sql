@@ -293,6 +293,12 @@ JOIN maintenances_hosts ON (maintenances_hosts.hostid=hosts.hostid)
 JOIN maintenances ON (maintenances.maintenanceid=maintenances_hosts.maintenanceid)
 WHERE hosts.flags IN (0,4) AND hosts.status=0 AND hosts.maintenance_status=1 GROUP BY 1,2 ORDER BY 2;
 
+--alerts
+SELECT status, actionid, mediatypeid, COUNT(*) FROM alerts GROUP BY 1,2,3 ORDER BY 4 DESC;
+
+--alerts in last 7 days
+SELECT status, actionid, mediatypeid, COUNT(*) FROM alerts WHERE clock > UNIX_TIMESTAMP(NOW()-INTERVAL 7 DAY) GROUP BY 1,2,3 ORDER BY 4 DESC;
+
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 
