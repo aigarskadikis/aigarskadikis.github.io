@@ -154,6 +154,12 @@ echo $LINE
 } done</code></pre>
 Poller busy<pre><code>watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'</code></pre>
 History syncer running<pre><code>watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"</code></pre>
+Install iperf3, iostat fio<pre><code>dnf install sysstat fio iperf3</code></pre>
+Test disk speed<pre><code>cd /var/lib/mysql
+fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting</code></pre>
+Set iperf3 on listening port<pre><code>iperf3 -s -p 10050</code></pre>
+Send data<pre><code>iperf3 -c address.of.agent.server -p 10050 -t 10</code></pre>
+Disk utilisation<pre><code>iostat -x 1</code></pre>
 Remove leading and trailing space with sed<pre><code>sed 's/^[\t ]*//g;s/[\t ]*$//g'</code></pre>
 Endless loop to deliver metric<pre><code>while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done</code></pre>
 Statistics per history write cache<pre><code>while true; do echo "$(date '+%Y-%m-%d %H:%M:%S') $(zabbix_server -R diaginfo=historycache | grep -A1 "Top.values" | grep "[i]temid")" >> /tmp/top.itemid.log; sleep 1; done</code></pre>
@@ -936,8 +942,8 @@ DROP TABLE history_old;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/part.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/part.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="proxy"><label for="proxy">proxy.sql</label><div class="tab">
-How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1)
-FROM proxy_history;</code></pre>
+How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1) FROM proxy_history;</code></pre>
+Values behind PostgreSQL Zabbix proxy<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name='proxy_history' LIMIT 1) FROM proxy_history;</code></pre>
 Skip all cached LLD rules<pre><code>delete from proxy_history where itemid in (select itemid from items where flags=1);</code></pre>
 Delete data which has been sent already<pre><code>DELETE FROM proxy_history WHERE id < (select nextid from ids where table_name = "proxy_history" limit 1);</code></pre>
 Show LLD JSON data<pre><code>SELECT items.hostid, items.hostid, items.key_, proxy_history.value FROM proxy_history, items WHERE proxy_history.itemid=items.itemid AND items.flags=1 ORDER BY clock ASC;</code></pre>
