@@ -16,6 +16,22 @@ watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
 # history syncer running
 watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"
 
+# install iperf3, iostat fio
+dnf install sysstat fio iperf3
+
+# test disk speed
+cd /var/lib/mysql
+fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+
+# set iperf3 on listening port
+iperf3 -s -p 10050
+
+# send data
+iperf3 -c address.of.agent.server -p 10050 -t 10
+
+# disk utilisation
+iostat -x 1
+
 # remove leading and trailing space with sed
 sed 's/^[\t ]*//g;s/[\t ]*$//g'
 

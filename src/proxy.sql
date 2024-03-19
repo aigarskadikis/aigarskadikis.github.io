@@ -1,6 +1,8 @@
 --How many values is in the backlog. does not work on oracle proxy becuase of LIMIT. Zabbix 4.0, 5.0, 6.0
-SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1)
-FROM proxy_history;
+SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name="proxy_history" LIMIT 1) FROM proxy_history;
+
+--values behind PostgreSQL Zabbix proxy
+SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name='proxy_history' LIMIT 1) FROM proxy_history;
 
 --skip all cached LLD rules
 delete from proxy_history where itemid in (select itemid from items where flags=1);
