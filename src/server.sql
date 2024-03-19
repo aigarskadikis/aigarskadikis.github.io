@@ -299,6 +299,18 @@ SELECT status, actionid, mediatypeid, COUNT(*) FROM alerts GROUP BY 1,2,3 ORDER 
 --alerts in last 7 days
 SELECT status, actionid, mediatypeid, COUNT(*) FROM alerts WHERE clock > UNIX_TIMESTAMP(NOW()-INTERVAL 7 DAY) GROUP BY 1,2,3 ORDER BY 4 DESC;
 
+--show SNMPv3 devices. Zabbix 5.0
+SELECT proxy.host, interface.ip
+FROM interface
+JOIN hosts ON hosts.hostid=interface.hostid
+JOIN interface_snmp ON interface_snmp.interfaceid=interface.interfaceid
+JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE interface.main=1
+AND interface.type=2
+AND interface_snmp.version=3
+AND hosts.status=0
+ORDER BY 1,2;
+
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 
