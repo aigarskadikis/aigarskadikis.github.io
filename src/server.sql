@@ -311,6 +311,25 @@ AND interface_snmp.version=3
 AND hosts.status=0
 ORDER BY 1,2;
 
+--how many 'nodata' functions are applied
+SELECT COUNT(*)
+FROM triggers
+JOIN functions ON functions.triggerid=triggers.triggerid
+JOIN items ON items.itemid=functions.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+WHERE hosts.status=0 AND items.status=0 AND triggers.status=0
+AND functions.name='nodata';
+
+--nodata functions per host
+SELECT COUNT(*), hosts.name
+FROM triggers
+JOIN functions ON functions.triggerid=triggers.triggerid
+JOIN items ON items.itemid=functions.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+WHERE hosts.status=0 AND items.status=0 AND triggers.status=0
+AND functions.name='nodata'
+GROUP BY 2 ORDER BY 1 DESC LIMIT 30;
+
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 

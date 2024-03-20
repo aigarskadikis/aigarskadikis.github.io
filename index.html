@@ -1257,6 +1257,21 @@ AND interface.type=2
 AND interface_snmp.version=3
 AND hosts.status=0
 ORDER BY 1,2;</code></pre>
+How many 'nodata' functions are applied<pre><code>SELECT COUNT(*)
+FROM triggers
+JOIN functions ON functions.triggerid=triggers.triggerid
+JOIN items ON items.itemid=functions.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+WHERE hosts.status=0 AND items.status=0 AND triggers.status=0
+AND functions.name='nodata';</code></pre>
+Nodata functions per host<pre><code>SELECT COUNT(*), hosts.name
+FROM triggers
+JOIN functions ON functions.triggerid=triggers.triggerid
+JOIN items ON items.itemid=functions.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+WHERE hosts.status=0 AND items.status=0 AND triggers.status=0
+AND functions.name='nodata'
+GROUP BY 2 ORDER BY 1 DESC LIMIT 30;</code></pre>
 Processes MySQL<pre><code>SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;</code></pre>
 Heaviest LLD rules. Most of items. amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
 hosts.host,
