@@ -139,6 +139,7 @@ gzip --stdout | ssh root@192.168.88.15 "cat > /dev/shm/history_text.sql.gz"</cod
 Backup and compress zabbix server config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
 Backup and compress partitioning script and configuration files<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
+Compress frontend config and logs and split into 15 MB parts<pre><code>tar --create --verbose --use-compress-program='xz' /etc/zabbix /etc/nginx /etc/httpd /etc/apache2 /etc/php-fpm.d /var/log/nginx /var/log/httpd /var/log/apache2 /var/log/php-fpm  | split -b 15MiB - /tmp/frontend.config.and.logs.tar.xz_</code></pre>
 Backup all frontend modules with 'xz' compression<pre><code>tar --create --verbose --use-compress-program='xz -9' /usr/share/zabbix/modules | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | unxz | tar -xv%' && echo</code></pre>
 <p>Download this section: <a href="src/backup.sh">https://aigarskadikis.github.io/src/backup.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh</a></p>
@@ -157,6 +158,7 @@ History syncer running<pre><code>watch -n1 "ps auxww | grep -Eo '[:] history syn
 Install iperf3, iostat fio<pre><code>dnf install sysstat fio iperf3</code></pre>
 Test disk speed<pre><code>cd /var/lib/mysql
 fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting</code></pre>
+Process list for 120 (24x5) seconds<pre><code>for i in `seq 1 24`; do echo $(date) >> /tmp/process.list.txt && ps auxww >> /tmp/process.list.txt && echo "=======" >> /tmp/process.list.txt && sleep 5; done</code></pre>
 Set iperf3 on listening port<pre><code>iperf3 -s -p 10050</code></pre>
 Send data<pre><code>iperf3 -c address.of.agent.server -p 10050 -t 10</code></pre>
 Disk utilisation<pre><code>iostat -x 1</code></pre>

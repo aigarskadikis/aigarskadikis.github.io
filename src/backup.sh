@@ -160,6 +160,9 @@ tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent
 # Backup and compress partitioning script and configuration files
 tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo
 
+# compress frontend config and logs and split into 15 MB parts
+tar --create --verbose --use-compress-program='xz' /etc/zabbix /etc/nginx /etc/httpd /etc/apache2 /etc/php-fpm.d /var/log/nginx /var/log/httpd /var/log/apache2 /var/log/php-fpm  | split -b 15MiB - /tmp/frontend.config.and.logs.tar.xz_
+
 # Backup all frontend modules with 'xz' compression
 tar --create --verbose --use-compress-program='xz -9' /usr/share/zabbix/modules | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | unxz | tar -xv%' && echo
 

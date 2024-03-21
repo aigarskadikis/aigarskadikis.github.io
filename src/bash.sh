@@ -23,6 +23,9 @@ dnf install sysstat fio iperf3
 cd /var/lib/mysql
 fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
 
+# process list for 120 (24x5) seconds
+for i in `seq 1 24`; do echo $(date) >> /tmp/process.list.txt && ps auxww >> /tmp/process.list.txt && echo "=======" >> /tmp/process.list.txt && sleep 5; done
+
 # set iperf3 on listening port
 iperf3 -s -p 10050
 
