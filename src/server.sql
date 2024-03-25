@@ -330,12 +330,19 @@ WHERE hosts.status=0 AND items.status=0 AND triggers.status=0
 AND functions.name='nodata'
 GROUP BY 2 ORDER BY 1 DESC LIMIT 30;
 
---which proxy and host the item belongs
+--If the "items.type" is 2 (Zabbix trapper) or 7 (Zabbix agent active), there's a bigger chance of having this "Duplicate entry" problem because of misconfiguration
 SELECT proxy.host, hosts.host, items.type, items.itemid, items.delay, items.key_, items.flags
 FROM items
 JOIN hosts ON hosts.hostid=items.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE items.itemid IN (12,34,56);
+
+--reconstruct auditlog
+CREATE TABLE auditlog_temp LIKE auditlog;
+INSERT INTO auditlog_temp SELECT * FROM auditlog WHERE clock > UNIX_TIMESTAMP(NOW() - INTERVAL 5 DAYS);
+TRUNCATE TABLE auditlog;
+INSERT INTO auditlog SELECT * FROM auditlog_temp;
+DROP TABLE auditlog_temp;
 
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
