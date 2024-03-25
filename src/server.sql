@@ -330,6 +330,13 @@ WHERE hosts.status=0 AND items.status=0 AND triggers.status=0
 AND functions.name='nodata'
 GROUP BY 2 ORDER BY 1 DESC LIMIT 30;
 
+--which proxy and host the item belongs
+SELECT proxy.host, hosts.host, items.type, items.itemid, items.delay, items.key_, items.flags
+FROM items
+JOIN hosts ON hosts.hostid=items.hostid
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
+WHERE items.itemid IN (12,34,56);
+
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 
