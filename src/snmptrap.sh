@@ -1,6 +1,12 @@
 # install dependencies on ubuntu 22
 apt install snmp snmptrapd libsnmp-perl snmptt snmp-mibs-downloader -y
 
+# mimic SNMP traps
+echo "$(date +%Y%m%d.%H%M%S) ZBXTRAP 10.10.10.10
+2nd line
+3rd line
+4rt line" | tee --append /tmp/zabbix_traps.tmp
+
 # turn down 'snmpd'. this was installed to solve dependencies
 systemctl stop snmpd && systemctl disable snmpd
 

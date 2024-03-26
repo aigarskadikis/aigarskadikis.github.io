@@ -664,6 +664,10 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="snmptrap"><label for="snmptrap">snmptrap</label><div class="tab">
 Install dependencies on ubuntu 22<pre><code>apt install snmp snmptrapd libsnmp-perl snmptt snmp-mibs-downloader -y</code></pre>
+Mimic SNMP traps<pre><code>echo "$(date +%Y%m%d.%H%M%S) ZBXTRAP 10.10.10.10
+2nd line
+3rd line
+4rt line" | tee --append /tmp/zabbix_traps.tmp</code></pre>
 Turn down 'snmpd'. This was installed to solve dependencies<pre><code>systemctl stop snmpd && systemctl disable snmpd</code></pre>
 Turn down 'snmptrapd' to reconfigure service<pre><code>systemctl stop snmptrapd</code></pre>
 Make a backup of old config, install new<pre><code>mv /etc/snmp/snmptrapd.conf /etc/snmp/original.snmptrapd.conf</code></pre>
