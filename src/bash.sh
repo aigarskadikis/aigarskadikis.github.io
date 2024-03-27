@@ -13,8 +13,15 @@ echo $LINE
 # poller busy
 watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
 
+# test port
+nc -zv ip 10050
+
 # history syncer running
 watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"
+
+# see the origin of data collection
+strace -f -v -o /tmp/sar.log sar 1 1
+cat /tmp/sar.log | grep '/proc/stat'
 
 # install iperf3, iostat fio
 dnf install sysstat fio iperf3
