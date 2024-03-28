@@ -344,6 +344,36 @@ TRUNCATE TABLE auditlog;
 INSERT INTO auditlog SELECT * FROM auditlog_temp;
 DROP TABLE auditlog_temp;
 
+--list not discovered triggers
+SELECT DISTINCT triggers.triggerid, triggers.description, hosts.host FROM triggers
+JOIN functions ON functions.triggerid=triggers.triggerid
+JOIN items ON items.itemid=functions.itemid
+JOIN hosts ON items.hostid=hosts.hostid
+WHERE items.itemid IN (
+SELECT
+items.itemid
+FROM items
+JOIN item_discovery ON item_discovery.itemid=items.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+WHERE item_discovery.ts_delete > 0
+);
+
+--delete not discovered triggers
+DELETE FROM triggers WHERE triggerid IN (
+SELECT DISTINCT triggers.triggerid FROM triggers
+JOIN functions ON functions.triggerid=triggers.triggerid
+JOIN items ON items.itemid=functions.itemid
+JOIN hosts ON items.hostid=hosts.hostid
+WHERE items.itemid IN (
+SELECT
+items.itemid
+FROM items
+JOIN item_discovery ON item_discovery.itemid=items.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+WHERE item_discovery.ts_delete > 0
+) LIMIT 100
+);
+
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 

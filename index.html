@@ -156,7 +156,7 @@ echo $LINE
 Poller busy<pre><code>watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'</code></pre>
 Test port<pre><code>nc -zv ip 10050</code></pre>
 History syncer running<pre><code>watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"</code></pre>
-See the origin of data collection<pre><code>strace -f -v -o /tmp/sar.log sar 1 1
+See the origin of data collection<pre><code>strace -s 2048 -f -v -o /tmp/sar.log sar 1 1
 cat /tmp/sar.log | grep '/proc/stat'</code></pre>
 Install iperf3, iostat fio<pre><code>dnf install sysstat fio iperf3</code></pre>
 Test disk speed<pre><code>cd /var/lib/mysql
@@ -1292,6 +1292,32 @@ INSERT INTO auditlog_temp SELECT * FROM auditlog WHERE clock > UNIX_TIMESTAMP(NO
 TRUNCATE TABLE auditlog;
 INSERT INTO auditlog SELECT * FROM auditlog_temp;
 DROP TABLE auditlog_temp;</code></pre>
+List not discovered triggers<pre><code>SELECT DISTINCT triggers.triggerid, triggers.description, hosts.host FROM triggers
+JOIN functions ON functions.triggerid=triggers.triggerid
+JOIN items ON items.itemid=functions.itemid
+JOIN hosts ON items.hostid=hosts.hostid
+WHERE items.itemid IN (
+SELECT
+items.itemid
+FROM items
+JOIN item_discovery ON item_discovery.itemid=items.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+WHERE item_discovery.ts_delete > 0
+);</code></pre>
+Delete not discovered triggers<pre><code>DELETE FROM triggers WHERE triggerid IN (
+SELECT DISTINCT triggers.triggerid FROM triggers
+JOIN functions ON functions.triggerid=triggers.triggerid
+JOIN items ON items.itemid=functions.itemid
+JOIN hosts ON items.hostid=hosts.hostid
+WHERE items.itemid IN (
+SELECT
+items.itemid
+FROM items
+JOIN item_discovery ON item_discovery.itemid=items.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+WHERE item_discovery.ts_delete > 0
+) LIMIT 100
+);</code></pre>
 Processes MySQL<pre><code>SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;</code></pre>
 Heaviest LLD rules. Most of items. amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
 hosts.host,
