@@ -374,6 +374,26 @@ WHERE item_discovery.ts_delete > 0
 ) LIMIT 100
 );
 
+--unreachable ZBX hosts with IP and error message. Zabbix 6.0, 6.4
+SELECT proxy.host AS proxy, interface.ip, interface.port, hosts.host, interface.error
+FROM hosts
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
+JOIN interface ON interface.hostid=hosts.hostid
+WHERE LENGTH(interface.error) > 0
+AND interface.type=1
+AND interface.main=1
+ORDER BY 1,2;
+
+--unreachable SNMP hosts with IP and error message. Zabbix 6.0, 6.4
+SELECT proxy.host AS proxy, interface.ip, interface.port, hosts.host, interface.error
+FROM hosts
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
+JOIN interface ON interface.hostid=hosts.hostid
+WHERE LENGTH(interface.error) > 0
+AND interface.type=2
+AND interface.main=1
+ORDER BY 1,2;
+
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 

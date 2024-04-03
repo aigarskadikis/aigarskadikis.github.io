@@ -16,6 +16,9 @@ ALTER INSTANCE DISABLE INNODB REDO_LOG;
 --check status of redo log
 show global status like '%redo%';
 
+--remove bin logs logbin binlog log_bin bin_log
+PURGE BINARY LOGS BEFORE '2024-03-27 00:00:00';
+
 --enable redo log
 ALTER INSTANCE ENABLE INNODB REDO_LOG;
 

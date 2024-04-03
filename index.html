@@ -863,6 +863,7 @@ List show mysql users and databases, permissions<pre><code>SELECT host, db, user
 SELECT host, user FROM mysql.user;</code></pre>
 Disable redo log on global level<pre><code>ALTER INSTANCE DISABLE INNODB REDO_LOG;</code></pre>
 Check status of redo log<pre><code>show global status like '%redo%';</code></pre>
+Remove bin logs logbin binlog log_bin bin_log<pre><code>PURGE BINARY LOGS BEFORE '2024-03-27 00:00:00';</code></pre>
 Enable redo log<pre><code>ALTER INSTANCE ENABLE INNODB REDO_LOG;</code></pre>
 Persistent connections<pre><code>SELECT * FROM INFORMATION_SCHEMA.processlist WHERE command = 'Sleep';</code></pre>
 Create random password for users<pre><code>UPDATE users SET passwd=substring(MD5(RAND()),1,20) WHERE userid NOT IN (1);</code></pre>
@@ -1318,6 +1319,22 @@ JOIN hosts ON hosts.hostid=items.hostid
 WHERE item_discovery.ts_delete > 0
 ) LIMIT 100
 );</code></pre>
+Unreachable ZBX hosts with IP and error message. Zabbix 6.0, 6.4<pre><code>SELECT proxy.host AS proxy, interface.ip, interface.port, hosts.host, interface.error
+FROM hosts
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
+JOIN interface ON interface.hostid=hosts.hostid
+WHERE LENGTH(interface.error) > 0
+AND interface.type=1
+AND interface.main=1
+ORDER BY 1,2;</code></pre>
+Unreachable SNMP hosts with IP and error message. Zabbix 6.0, 6.4<pre><code>SELECT proxy.host AS proxy, interface.ip, interface.port, hosts.host, interface.error
+FROM hosts
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
+JOIN interface ON interface.hostid=hosts.hostid
+WHERE LENGTH(interface.error) > 0
+AND interface.type=2
+AND interface.main=1
+ORDER BY 1,2;</code></pre>
 Processes MySQL<pre><code>SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;</code></pre>
 Heaviest LLD rules. Most of items. amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
 hosts.host,
