@@ -394,6 +394,22 @@ AND interface.type=2
 AND interface.main=1
 ORDER BY 1,2;
 
+--Zabbix queue. Zabbix 6.4
+SELECT proxy.host AS proxy, hosts.host,
+CASE interface.type
+WHEN 0 THEN 'interface'
+WHEN 1 THEN 'ZBX'
+WHEN 2 THEN 'SNMP'
+WHEN 3 THEN 'IPMI'
+WHEN 4 THEN 'JMX'
+END AS type,
+interface.ip, interface.dns, interface.port,
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+FROM interface
+JOIN hosts ON hosts.hostid=interface.hostid
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
+WHERE interface.main=1 AND interface.available=2 AND LENGTH(interface.error) > 0 AND hosts.status=0;
+
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 
