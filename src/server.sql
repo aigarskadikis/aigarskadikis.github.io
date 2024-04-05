@@ -403,7 +403,7 @@ WHEN 2 THEN 'SNMP'
 WHEN 3 THEN 'IPMI'
 WHEN 4 THEN 'JMX'
 END AS type,
-interface.ip, interface.dns, interface.port,
+interface.ip, interface.dns, interface.port, interface.error
 CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
 FROM interface
 JOIN hosts ON hosts.hostid=interface.hostid
