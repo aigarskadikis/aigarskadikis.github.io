@@ -410,6 +410,9 @@ JOIN hosts ON hosts.hostid=interface.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE interface.main=1 AND interface.available=2 AND LENGTH(interface.error) > 0 AND hosts.status=0;
 
+--set all HA nodes as gracefuly shut down. this must be done after kill -9
+UPDATE ha_node SET status=1;
+
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 
