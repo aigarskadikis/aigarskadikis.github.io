@@ -413,6 +413,11 @@ WHERE interface.main=1 AND interface.available=2 AND LENGTH(interface.error) > 0
 --set all HA nodes as gracefuly shut down. this must be done after kill -9
 UPDATE ha_node SET status=1;
 
+--increase the height of widget. Zabbix 6.4
+UPDATE widget SET height=128 WHERE dashboard_pageid IN (
+SELECT dashboard_pageid FROM dashboard_page WHERE dashboardid=327
+);
+
 --processes MySQL
 SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;
 
