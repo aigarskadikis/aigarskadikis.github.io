@@ -176,6 +176,9 @@ rpm -qa > /tmp/$(hostname).installed.rpms.txt
 
 # generate random password by using bash tools
 < /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-20};echo;
+< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-24};echo;
+< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-32};echo;
+< /dev/urandom tr -dc 'A-Za-z0-9~!@#$%^&*()-+<>.,/\"' | head -c${1:-20};echo;
 
 # php official memory setting
 find /etc -name zabbix.conf -exec grep --with-filename memory {} \;
