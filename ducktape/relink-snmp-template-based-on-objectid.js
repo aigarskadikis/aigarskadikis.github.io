@@ -1,10 +1,8 @@
-// works on Zabbix 6.4
-
 // where Zabbix API endpoint is located
 var json_rpc = 'http://127.0.0.1/api_jsonrpc.php';
 
 // static token
-var token = 'sessionTokenHere';
+var token = 'tokenHere';
 
 // everything needed for "curl"
 var req = new HttpRequest();
@@ -124,4 +122,3 @@ for (m in allTogether) {
 
 
 return allTogether.length;
-
