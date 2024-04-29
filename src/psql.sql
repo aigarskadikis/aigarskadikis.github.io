@@ -10,6 +10,9 @@ SELECT * FROM pg_stat_activity WHERE state != 'idle';
 --what is minor version of Zabbix
 SELECT * FROM dbversion;
 
+--process list without any condition. PostgreSQL
+SELECT datid,datname,pid,usesysid,usename,client_addr,client_port,backend_start,query_start,state_change,wait_event_type,wait_event,state,query_id FROM pg_stat_activity;
+
 --size of hyper tables. size of biggest tables
 SELECT *, pg_size_pretty(total_bytes) AS total, pg_size_pretty(index_bytes) AS index, pg_size_pretty(toast_bytes) AS toast, pg_size_pretty(table_bytes) AS table
 FROM (SELECT *, total_bytes-index_bytes-coalesce(toast_bytes, 0) AS table_bytes

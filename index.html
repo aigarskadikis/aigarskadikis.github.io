@@ -245,7 +245,10 @@ Hungry CPU processes<pre><code>ps -eo time,start_time,pcpu,pmem,user,args --sort
 All socket statistics<pre><code>ss --all --numeric --processes > /tmp/$(hostname).socket.statistics.txt</code></pre>
 Only listening ports and explanation<pre><code>ss --tcp --numeric --listen --processes > /tmp/$(hostname).listening.ports.txt</code></pre>
 All installed package names<pre><code>rpm -qa > /tmp/$(hostname).installed.rpms.txt</code></pre>
-Generate random password by using bash tools<pre><code>< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-20};echo;</code></pre>
+Generate random password by using bash tools<pre><code>< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-20};echo;
+< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-24};echo;
+< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-32};echo;
+< /dev/urandom tr -dc 'A-Za-z0-9~!@#$%^&*()-+<>.,/\"' | head -c${1:-20};echo;</code></pre>
 Php official memory setting<pre><code>find /etc -name zabbix.conf -exec grep --with-filename memory {} \;</code></pre>
 A sum per column<pre><code>ls -lb | grep "history_str#" | awk '{ print $5 }' | python -c "import sys; print(sum(int(l) for l in sys.stdin))"</code></pre>
 Test item key<pre><code>zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'
@@ -1010,6 +1013,7 @@ FROM pg_stat_activity
 WHERE (NOW() - pg_stat_activity.query_start) > interval '3 seconds';</code></pre>
 Monitor process. Postgres. PostgreSQL<pre><code>SELECT * FROM pg_stat_activity WHERE state != 'idle';</code></pre>
 What is minor version of Zabbix<pre><code>SELECT * FROM dbversion;</code></pre>
+Process list without any condition. PostgreSQL<pre><code>SELECT datid,datname,pid,usesysid,usename,client_addr,client_port,backend_start,query_start,state_change,wait_event_type,wait_event,state,query_id FROM pg_stat_activity;</code></pre>
 Size of hyper tables. Size of biggest tables<pre><code>SELECT *, pg_size_pretty(total_bytes) AS total, pg_size_pretty(index_bytes) AS index, pg_size_pretty(toast_bytes) AS toast, pg_size_pretty(table_bytes) AS table
 FROM (SELECT *, total_bytes-index_bytes-coalesce(toast_bytes, 0) AS table_bytes
 FROM (SELECT c.oid, nspname AS table_schema, relname AS table_name, c.reltuples AS row_estimate, pg_total_relation_size(c.oid) AS total_bytes, pg_indexes_size(c.oid) AS index_bytes, pg_total_relation_size(reltoastrelid) AS toast_bytes
