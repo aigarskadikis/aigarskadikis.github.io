@@ -42,6 +42,9 @@ fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m 
 # process list for 120 (24x5) seconds
 for i in `seq 1 24`; do echo $(date) >> /tmp/process.list.txt && ps auxww >> /tmp/process.list.txt && echo "=======" >> /tmp/process.list.txt && sleep 5; done
 
+# size of table partitions
+du -lah /var/lib/mysql | awk '{ print $2,"",$1 }' | grep "#" | sort
+
 # TCP state statistics for 2 minutes
 for i in `seq 1 120`; do echo $(date) | tee -a /tmp/tcp.state.txt && awk '{print $4}' /proc/net/tcp /proc/net/tcp6 | grep -v st | sort | uniq -c | tee -a /tmp/tcp.state.txt && wc -l /proc/net/tcp | tee -a /tmp/tcp.state.txt && wc -l /proc/net/tcp6 | tee -a /tmp/tcp.state.txt && echo "=======" | tee -a /tmp/tcp.state.txt && sleep 1; done
 
