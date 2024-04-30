@@ -417,21 +417,16 @@ UPDATE ha_node SET status=1;
 SELECT hosts.host, COUNT(*) FROM functions, items, hosts
 WHERE functions.itemid=items.itemid
 AND items.hostid=hosts.hostid
-AND hosts.status IN (0)
-AND items.status IN (0)
+AND hosts.status=0 AND items.status=0 AND items.flags IN (0,4) AND hosts.flags IN (0,4)
 AND functions.name IN ('nodata','time','fuzzytime','now','date','dayofmonth','dayofweek')
 GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;
 
 --statistics of all trigger functions
-SELECT functions.name, COUNT(*) FROM functions, items, hosts
-WHERE functions.itemid=items.itemid
-AND items.hostid=hosts.hostid
-AND hosts.status IN (0)
-AND items.status IN (0)
-GROUP BY 1
-ORDER BY 2 ASC;
+SELECT COUNT(*), hosts.host FROM hosts, items
+WHERE hosts.hostid=items.hostid AND hosts.status=0 AND items.status=0 AND items.flags IN (0,4) AND hosts.flags IN (0,4)
+GROUP BY 2 ORDER BY 1 ASC;
 
 --increase the height of widget. Zabbix 6.4
 UPDATE widget SET height=128 WHERE dashboard_pageid IN (
