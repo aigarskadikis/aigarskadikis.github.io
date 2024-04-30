@@ -1357,6 +1357,22 @@ JOIN hosts ON hosts.hostid=interface.hostid
 LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
 WHERE interface.main=1 AND interface.available=2 AND LENGTH(interface.error) > 0 AND hosts.status=0;</code></pre>
 Set all HA nodes as gracefuly shut down. This must be done after kill -9<pre><code>UPDATE ha_node SET status=1;</code></pre>
+The occurance of time mased functions<pre><code>SELECT hosts.host, COUNT(*) FROM functions, items, hosts
+WHERE functions.itemid=items.itemid
+AND items.hostid=hosts.hostid
+AND hosts.status IN (0)
+AND items.status IN (0)
+AND functions.name IN ('nodata','time','fuzzytime','now','date','dayofmonth','dayofweek')
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 20;</code></pre>
+Statistics of all trigger functions<pre><code>SELECT functions.name, COUNT(*) FROM functions, items, hosts
+WHERE functions.itemid=items.itemid
+AND items.hostid=hosts.hostid
+AND hosts.status IN (0)
+AND items.status IN (0)
+GROUP BY 1
+ORDER BY 2 ASC;</code></pre>
 Increase the height of widget. Zabbix 6.4<pre><code>UPDATE widget SET height=128 WHERE dashboard_pageid IN (
 SELECT dashboard_pageid FROM dashboard_page WHERE dashboardid=327
 );</code></pre>

@@ -413,6 +413,26 @@ WHERE interface.main=1 AND interface.available=2 AND LENGTH(interface.error) > 0
 --set all HA nodes as gracefuly shut down. this must be done after kill -9
 UPDATE ha_node SET status=1;
 
+--the occurance of time mased functions
+SELECT hosts.host, COUNT(*) FROM functions, items, hosts
+WHERE functions.itemid=items.itemid
+AND items.hostid=hosts.hostid
+AND hosts.status IN (0)
+AND items.status IN (0)
+AND functions.name IN ('nodata','time','fuzzytime','now','date','dayofmonth','dayofweek')
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 20;
+
+--statistics of all trigger functions
+SELECT functions.name, COUNT(*) FROM functions, items, hosts
+WHERE functions.itemid=items.itemid
+AND items.hostid=hosts.hostid
+AND hosts.status IN (0)
+AND items.status IN (0)
+GROUP BY 1
+ORDER BY 2 ASC;
+
 --increase the height of widget. Zabbix 6.4
 UPDATE widget SET height=128 WHERE dashboard_pageid IN (
 SELECT dashboard_pageid FROM dashboard_page WHERE dashboardid=327
