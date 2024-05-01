@@ -720,6 +720,7 @@ free -h > /tmp/memory.txt
 df -h > /tmp/disk.txt
 dmesg > /tmp/dmesg.txt
 ps -xafuww > /tmp/process.list.tree.txt</code></pre>
+Process saturation and diag info<pre><code>while true; do  echo $(date) >> /tmp/process.list.txt && ps -xafuww >> /tmp/process.list.txt && zabbix_server -R diaginfo >> /tmp/process.list.txt && echo "=======" >> /tmp/process.list.txt ; sleep 60; done</code></pre>
 Listening TCP ports with process identification<pre><code>ss --tcp --listen --numeric --process</code></pre>
 Ensure service is listening on UDP 162<pre><code>ss --udp --listen --numeric --process | grep 162</code></pre>
 Check if tcp port listens. Make sure it really listens on destination server before checking<pre><code>nc -v servername 3306</code></pre>

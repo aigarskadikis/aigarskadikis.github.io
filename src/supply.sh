@@ -8,6 +8,9 @@ df -h > /tmp/disk.txt
 dmesg > /tmp/dmesg.txt
 ps -xafuww > /tmp/process.list.tree.txt
 
+# process saturation and diag info
+while true; do  echo $(date) >> /tmp/process.list.txt && ps -xafuww >> /tmp/process.list.txt && zabbix_server -R diaginfo >> /tmp/process.list.txt && echo "=======" >> /tmp/process.list.txt ; sleep 60; done
+
 # listening TCP ports with process identification
 ss --tcp --listen --numeric --process
 
