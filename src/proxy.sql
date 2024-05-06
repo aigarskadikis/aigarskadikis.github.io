@@ -10,6 +10,14 @@ DELETE FROM proxy_history WHERE id < (SELECT nextid FROM ids WHERE table_name = 
 --show LLD JSON data
 SELECT items.hostid, items.hostid, items.key_, proxy_history.value FROM proxy_history, items WHERE proxy_history.itemid=items.itemid AND items.flags=1 ORDER BY clock ASC;
 
+--which host are giving the biggest values
+SELECT h.host,i.key_,max(length(ph.value)) as max_length,count(*)
+FROM proxy_history ph
+JOIN items i ON ph.itemid = i.itemid
+JOIN hosts h ON (h.hostid = i.hostid)
+WHERE clock >= UNIX_TIMESTAMP(NOW() - INTERVAL 2 HOUR)
+GROUP BY h.host,i.key_ ORDER BY max_length DESC LIMIT 100; 
+
 --biggest values
 SELECT itemid,flags,
 COUNT(*),
