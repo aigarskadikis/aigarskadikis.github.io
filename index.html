@@ -226,6 +226,9 @@ cat /proc/cpuinfo > /tmp/$(hostname).cpuinfo.txt
 mysql -e "show variables" > /tmp/$(hostname).mysql.variables.txt
 sysctl -a > /tmp/$(hostname).kernel.settings.txt
 ps -xafuww > /tmp/$(hostname).process.list.tree.txt</code></pre>
+Stats about MySQL data directory<pre><code>du -lah /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.human.readable.txt
+du -lab /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.size.in.bytes.txt
+du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files</code></pre>
 Restore<pre><code>rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql</code></pre>
 Compress /var/lib/mysql by using lz4<pre><code>dnf install lz4
@@ -966,6 +969,12 @@ How many values is in the backlog. Does not work on oracle proxy becuase of LIMI
 Skip all cached LLD rules<pre><code>DELETE FROM proxy_history WHERE itemid IN (SELECT itemid FROM items WHERE flags=1);</code></pre>
 Delete data which has been sent already<pre><code>DELETE FROM proxy_history WHERE id < (SELECT nextid FROM ids WHERE table_name = "proxy_history" LIMIT 1);</code></pre>
 Show LLD JSON data<pre><code>SELECT items.hostid, items.hostid, items.key_, proxy_history.value FROM proxy_history, items WHERE proxy_history.itemid=items.itemid AND items.flags=1 ORDER BY clock ASC;</code></pre>
+Which host are giving the biggest values<pre><code>SELECT h.host,i.key_,max(length(ph.value)) as max_length,count(*)
+FROM proxy_history ph
+JOIN items i ON ph.itemid = i.itemid
+JOIN hosts h ON (h.hostid = i.hostid)
+WHERE clock >= UNIX_TIMESTAMP(NOW() - INTERVAL 2 HOUR)
+GROUP BY h.host,i.key_ ORDER BY max_length DESC LIMIT 100;</code></pre>
 Biggest values<pre><code>SELECT itemid,flags,
 COUNT(*),
 AVG(LENGTH(value))
@@ -1370,6 +1379,14 @@ LIMIT 20;</code></pre>
 Statistics of all trigger functions<pre><code>SELECT COUNT(*), hosts.host FROM hosts, items
 WHERE hosts.hostid=items.hostid AND hosts.status=0 AND items.status=0 AND items.flags IN (0,4) AND hosts.flags IN (0,4)
 GROUP BY 2 ORDER BY 1 ASC;</code></pre>
+Biggest text metrics<pre><code>SELECT LENGTH(history_text.value) AS length,
+hosts.host,
+items.key_,
+CONCAT('history.php?itemids%5B0%5D=', history_text.itemid,'&action=showlatest') AS 'URL'
+FROM history_text
+JOIN items ON items.itemid=history_text.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+WHERE LENGTH(history_text.value) > 50000 LIMIT 20\G</code></pre>
 Increase the height of widget. Zabbix 6.4<pre><code>UPDATE widget SET height=128 WHERE dashboard_pageid IN (
 SELECT dashboard_pageid FROM dashboard_page WHERE dashboardid=327
 );</code></pre>

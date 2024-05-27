@@ -135,6 +135,11 @@ mysql -e "show variables" > /tmp/$(hostname).mysql.variables.txt
 sysctl -a > /tmp/$(hostname).kernel.settings.txt
 ps -xafuww > /tmp/$(hostname).process.list.tree.txt
 
+# stats about MySQL data directory
+du -lah /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.human.readable.txt
+du -lab /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.size.in.bytes.txt
+du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files
+
 # restore
 rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql

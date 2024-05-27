@@ -428,6 +428,16 @@ SELECT COUNT(*), hosts.host FROM hosts, items
 WHERE hosts.hostid=items.hostid AND hosts.status=0 AND items.status=0 AND items.flags IN (0,4) AND hosts.flags IN (0,4)
 GROUP BY 2 ORDER BY 1 ASC;
 
+--biggest text metrics
+SELECT LENGTH(history_text.value) AS length,
+hosts.host,
+items.key_,
+CONCAT('history.php?itemids%5B0%5D=', history_text.itemid,'&action=showlatest') AS 'URL'
+FROM history_text
+JOIN items ON items.itemid=history_text.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+WHERE LENGTH(history_text.value) > 50000 LIMIT 20\G
+
 --increase the height of widget. Zabbix 6.4
 UPDATE widget SET height=128 WHERE dashboard_pageid IN (
 SELECT dashboard_pageid FROM dashboard_page WHERE dashboardid=327
