@@ -428,6 +428,18 @@ SELECT COUNT(*), hosts.host FROM hosts, items
 WHERE hosts.hostid=items.hostid AND hosts.status=0 AND items.status=0 AND items.flags IN (0,4) AND hosts.flags IN (0,4)
 GROUP BY 2 ORDER BY 1 ASC;
 
+--how many active sessions in last 10 minutes. Zabbix 5.0
+SELECT COUNT(*)
+FROM sessions
+WHERE sessions.status=0
+AND sessions.lastaccess > UNIX_TIMESTAMP(NOW() - INTERVAL 10 MINUTE);
+
+--if there is any trigger which contains a lot of problems
+SELECT COUNT(*),source,object,objectid FROM problem GROUP BY 2,3,4 ORDER BY 1 DESC LIMIT 10;
+
+--print URLs for triggers dominating in escalation
+SELECT COUNT(*),CONCAT('triggers.php?form=update&triggerid=', triggerid) AS 'URL' FROM escalations GROUP BY 2 ORDER BY 1 DESC LIMIT 10;
+
 --biggest text metrics
 SELECT LENGTH(history_text.value) AS length,
 hosts.host,
