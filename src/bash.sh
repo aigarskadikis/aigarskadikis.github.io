@@ -140,9 +140,18 @@ du -lah /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.huma
 du -lab /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.size.in.bytes.txt
 du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files
 
+# follow unreachable poller with 2 digits. print IP address
+tail -999f /var/log/zabbix/zabbix_proxy.log | grep $(ps auxww|grep "[u]nreachable poller #99" | awk '{ print $2 }'): | grep -E "\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\]"
+
 # restore
 rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql
+
+# transport data. on destination server go to directory where files must be places. set to listen on port 1234
+nc -l 1234 | tar -xvf -
+
+# transport data. on source server. start sending. replace x.y.z.w with real IP address
+tar cf - . | nc x.y.z.w 1234
 
 # compress /var/lib/mysql by using lz4
 dnf install lz4
@@ -337,4 +346,74 @@ grep -E "^0$" && mysql \
 do {
 echo mysql --defaults-file=$CREDENTIALS --database=$DB --execute="TRUNCATE TABLE $TABLE"
 } done || echo "this seems like a central zabbix server, because there are template objects in database"
+
+# history_text discard unchanged (value_type=4)
+echo "polishing history_text (value_type=4)"
+PGHOST=pg16 PGPORT=7416 psql z70 --tuples-only --no-align --command="
+SELECT items.itemid
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status IN (0,1)
+AND items.value_type=4
+AND items.flags IN (0,4)
+" | \
+while IFS= read -r ITEMID
+do {
+echo -n "$ITEMID "
+echo "
+DELETE FROM history_text WHERE itemid=$ITEMID AND clock IN (
+SELECT clock from (
+SELECT clock, value, r, v2 FROM (
+SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2,
+CASE
+WHEN value <> LEAD(value,1) OVER (order by clock)
+THEN value
+ELSE 'zero'
+END AS r
+FROM history_text WHERE itemid=$ITEMID
+) x2
+where r = 'zero'
+) x3
+WHERE v2 IS NOT NULL
+)" | PGHOST=pg16 PGPORT=7416 psql z70
+} done
+
+# history_str discard unchanged
+echo "polishing history_str (value_type=1)"
+PGHOST=pg16 PGPORT=7416 psql z70 --tuples-only --no-align --command="
+SELECT items.itemid
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status IN (0,1)
+AND items.value_type=1
+AND items.flags IN (0,4)
+" | \
+while IFS= read -r ITEMID
+do {
+echo -n "$ITEMID "
+echo "
+DELETE FROM history_str WHERE itemid=$ITEMID AND clock IN (
+SELECT clock from (
+SELECT clock, value, r, v2 FROM (
+SELECT clock, value, LEAD(value,1) OVER (order by clock) AS v2,
+CASE
+WHEN value <> LEAD(value,1) OVER (order by clock)
+THEN value
+ELSE 'zero'
+END AS r
+FROM history_str WHERE itemid=$ITEMID
+) x2
+where r = 'zero'
+) x3
+WHERE v2 IS NOT NULL
+)" | PGHOST=pg16 PGPORT=7416 psql z70
+} done
+
+# maintain timescaledb partitions
+PGHOST=pg16 PGPORT=7416 psql z70 -c "
+SELECT drop_chunks(relation=>'history_log', older_than=>extract(epoch from now()::DATE - 5)::integer);
+SELECT drop_chunks(relation=>'history_uint', older_than=>extract(epoch from now()::DATE - 9)::integer);
+SELECT drop_chunks(relation=>'history', older_than=>extract(epoch from now()::DATE - 9)::integer);
+SELECT drop_chunks(relation=>'history_bin', older_than=>extract(epoch from now()::DATE - 3)::integer);
+"
 
