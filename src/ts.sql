@@ -28,3 +28,9 @@ SELECT decompress_chunk(c, true) FROM show_chunks('history_log') c;
 SELECT decompress_chunk(c, true) FROM show_chunks('history_text') c;
 SELECT decompress_chunk(c, true) FROM show_chunks('history') c;
 
+--list chunk sizes of hypertables
+SELECT h.table_name, c.interval_length
+FROM _timescaledb_catalog.dimension c
+JOIN _timescaledb_catalog.hypertable h
+ON h.id = c.hypertable_id;
+

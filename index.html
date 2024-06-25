@@ -2642,6 +2642,10 @@ SELECT decompress_chunk(c, true) FROM show_chunks('history_str') c;
 SELECT decompress_chunk(c, true) FROM show_chunks('history_log') c;
 SELECT decompress_chunk(c, true) FROM show_chunks('history_text') c;
 SELECT decompress_chunk(c, true) FROM show_chunks('history') c;</code></pre>
+List chunk sizes of hypertables<pre><code>SELECT h.table_name, c.interval_length
+FROM _timescaledb_catalog.dimension c
+JOIN _timescaledb_catalog.hypertable h
+ON h.id = c.hypertable_id;</code></pre>
 <p>Download this section: <a href="src/ts.sql">https://aigarskadikis.github.io/src/ts.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/ts.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/ts.sql</a></p>
 </div>
