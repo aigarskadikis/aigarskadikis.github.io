@@ -17,6 +17,15 @@ WHERE hosts.status IN (0,1) AND hosts.flags IN (0,4)
 GROUP BY 1
 ORDER BY 2 ASC;
 
+--error messages by category. Zabbix 7.0
+SELECT DISTINCT item_rtdata.error, GROUP_CONCAT(hosts.host) AS hosts, COUNT(*) AS count FROM item_rtdata,items,hosts
+WHERE item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid
+AND hosts.status=0
+AND item_rtdata.error NOT IN ('')
+GROUP BY 1
+ORDER BY 3 ASC;
+
 --query host and interface details. Zabbix 5.0
 SELECT proxy.host AS proxy, hosts.host,
 hosts.hostid,
