@@ -52,6 +52,15 @@ LEFT JOIN interface_snmp ON (interface.interfaceid=interface_snmp.interfaceid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE hosts.status IN (0,1) AND hosts.flags=0;
 
+--show events which got suppressed. query does not shwo the timestamp of start suppress
+SELECT FROM_UNIXTIME(events.clock) AS problemTime, FROM_UNIXTIME(event_suppress.suppress_until) AS suppressUntil, events.name
+FROM events, event_suppress, triggers
+WHERE events.eventid=event_suppress.eventid
+AND events.source=0 AND events.object=0
+AND triggers.triggerid=events.objectid
+AND triggers.priority IN (0,1,2,3,4,5)
+AND events.clock >= UNIX_TIMESTAMP("2024-01-01 00:00:00") AND events.clock < UNIX_TIMESTAMP("2025-02-01 00:00:00");
+
 --unreachable ZBX host. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
 SELECT
 proxy.host AS proxy,
