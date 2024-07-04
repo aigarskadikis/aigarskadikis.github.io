@@ -1180,6 +1180,23 @@ FROM hosts, items, item_preproc
 WHERE hosts.hostid=items.hostid AND items.itemid=item_preproc.itemid
 AND item_preproc.type=12
 AND item_preproc.params LIKE '%memory.sum%';</code></pre>
+Base memory GB<pre><code>SELECT ( @@key_buffer_size
++ @@innodb_buffer_pool_size
++ @@innodb_log_buffer_size )
+/ (1024 * 1024 * 1024) AS BASE_MEMORY_GB;</code></pre>
+Max memory GB<pre><code>SELECT ( @@key_buffer_size
++ @@innodb_buffer_pool_size
++ @@innodb_log_buffer_size
++ @@max_connections * (
+@@read_buffer_size
++ @@read_rnd_buffer_size
++ @@sort_buffer_size
++ @@join_buffer_size
++ @@binlog_cache_size
++ @@thread_stack
++ @@max_heap_table_size
+)
+) / (1024 * 1024 * 1024) AS MAX_MEMORY_GB;</code></pre>
 Unreachable SNMP hosts. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,

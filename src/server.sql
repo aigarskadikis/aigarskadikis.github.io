@@ -94,6 +94,27 @@ WHERE hosts.hostid=items.hostid AND items.itemid=item_preproc.itemid
 AND item_preproc.type=12
 AND item_preproc.params LIKE '%memory.sum%';
 
+--base memory GB
+SELECT ( @@key_buffer_size
++ @@innodb_buffer_pool_size
++ @@innodb_log_buffer_size )
+/ (1024 * 1024 * 1024) AS BASE_MEMORY_GB;
+
+--max memory GB
+SELECT ( @@key_buffer_size
++ @@innodb_buffer_pool_size
++ @@innodb_log_buffer_size
++ @@max_connections * (
+@@read_buffer_size
++ @@read_rnd_buffer_size
++ @@sort_buffer_size
++ @@join_buffer_size
++ @@binlog_cache_size
++ @@thread_stack
++ @@max_heap_table_size
+)
+) / (1024 * 1024 * 1024) AS MAX_MEMORY_GB;
+
 --unreachable SNMP hosts. Zabbix 4.0, 4.2, 4.4, 5.0, 5.2
 SELECT
 proxy.host AS proxy,
