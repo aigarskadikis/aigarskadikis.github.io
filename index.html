@@ -1180,6 +1180,15 @@ FROM hosts, items, item_preproc
 WHERE hosts.hostid=items.hostid AND items.itemid=item_preproc.itemid
 AND item_preproc.type=12
 AND item_preproc.params LIKE '%memory.sum%';</code></pre>
+Default update frequency for dashboard and dasboard page. If display_period=0 for page, then dashboard refresh is used. Zabbix 6.4<pre><code>SELECT DISTINCT dashboard.name AS dashBoardName,
+dashboard_page.dashboardid,
+dashboard.display_period AS dasboardRefresh,
+dashboard_page.name AS pageName,
+dashboard_page.dashboard_pageid,
+dashboard_page.display_period AS pageRefresh
+FROM dashboard_page, dashboard
+WHERE dashboard_page.dashboardid=dashboard.dashboardid
+AND dashboard.templateid IS NULL;</code></pre>
 Base memory GB<pre><code>SELECT ( @@key_buffer_size
 + @@innodb_buffer_pool_size
 + @@innodb_log_buffer_size )
