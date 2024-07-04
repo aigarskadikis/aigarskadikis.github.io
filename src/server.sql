@@ -105,6 +105,18 @@ FROM dashboard_page, dashboard
 WHERE dashboard_page.dashboardid=dashboard.dashboardid
 AND dashboard.templateid IS NULL;
 
+--set all global dashboards to use 5 minute update frequency. Zabbix 6.4
+UPDATE dashboard SET display_period=300 WHERE display_period<>300 AND templateid IS NULL;
+
+--set all global dashboard pages to respect the default dashboard update frequency. Zabbix 6.4
+UPDATE dashboard_page SET display_period=0 WHERE display_period<>0 AND dashboardid IN (SELECT dashboardid FROM dashboard WHERE templateid IS NULL);
+
+--set maximum refresh rate (15 minutes) for widget where user installed a custom refresh rate. Zabbix 6.4
+UPDATE profiles SET value_int=900 WHERE idx='web.dashboard.widget.rf_rate';
+
+--remove any override user made to individual widget. Zabbix 6.4
+DELETE FROM profiles WHERE idx='web.dashboard.widget.rf_rate';
+
 --base memory GB
 SELECT ( @@key_buffer_size
 + @@innodb_buffer_pool_size
