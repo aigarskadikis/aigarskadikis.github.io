@@ -147,6 +147,9 @@ tail -999f /var/log/zabbix/zabbix_proxy.log | grep $(ps auxww|grep "[u]nreachabl
 rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql
 
+# send all UDP 162 traffic into a human readable log
+tcpdump -l -i any udp dst port 162 -x -vv 1>&2 >/tmp/udp162.log
+
 # transport data. on destination server go to directory where files must be places. set to listen on port 1234
 nc -l 1234 | tar -xvf -
 

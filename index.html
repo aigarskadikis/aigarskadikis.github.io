@@ -232,6 +232,7 @@ du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files</code></pre>
 Follow unreachable poller with 2 digits. Print IP address<pre><code>tail -999f /var/log/zabbix/zabbix_proxy.log | grep $(ps auxww|grep "[u]nreachable poller #99" | awk '{ print $2 }'): | grep -E "\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\]"</code></pre>
 Restore<pre><code>rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql</code></pre>
+Send all UDP 162 traffic into a human readable log<pre><code>tcpdump -l -i any udp dst port 162 -x -vv 1>&2 >/tmp/udp162.log</code></pre>
 Transport data. On destination server go to directory where files must be places. set to listen on port 1234<pre><code>nc -l 1234 | tar -xvf -</code></pre>
 Transport data. On source server. start sending. replace x.y.z.w with real IP address<pre><code>tar cf - . | nc x.y.z.w 1234</code></pre>
 Compress /var/lib/mysql by using lz4<pre><code>dnf install lz4
