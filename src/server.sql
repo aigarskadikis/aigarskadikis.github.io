@@ -124,6 +124,12 @@ SELECT triggerid FROM triggers
 ) LIMIT 10
 );
 
+--orphaned events, posthres, Zabbix 6.0
+DELETE FROM event_recovery WHERE eventid IN (SELECT eventid FROM event_recovery WHERE eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
+DELETE FROM event_recovery WHERE r_eventid IN (SELECT r_eventid FROM event_recovery WHERE r_eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
+DELETE FROM event_recovery WHERE c_eventid IN (SELECT c_eventid FROM event_recovery WHERE c_eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
+DELETE FROM event_suppress WHERE eventid IN (SELECT eventid FROM event_suppress WHERE eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
+
 --base memory GB
 SELECT ( @@key_buffer_size
 + @@innodb_buffer_pool_size
