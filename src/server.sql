@@ -117,6 +117,13 @@ UPDATE profiles SET value_int=900 WHERE idx='web.dashboard.widget.rf_rate';
 --remove any override user made to individual widget. Zabbix 6.4
 DELETE FROM profiles WHERE idx='web.dashboard.widget.rf_rate';
 
+--delete orhaned events. use limit in PostgreSQL
+DELETE FROM events WHERE eventid IN (
+SELECT eventid FROM events WHERE object=0 AND source=0 AND objectid NOT IN (
+SELECT triggerid FROM triggers
+) LIMIT 10
+);
+
 --base memory GB
 SELECT ( @@key_buffer_size
 + @@innodb_buffer_pool_size
