@@ -124,6 +124,11 @@ SELECT triggerid FROM triggers
 ) LIMIT 10
 );
 
+--delete orhnaned events in batches. Works on PosthreSQL, do not work on MySQL
+DELETE FROM events WHERE eventid IN (
+SELECT eventid FROM events WHERE object = 0 AND source = 0 AND NOT EXISTS (SELECT 1 FROM triggers t WHERE t.triggerid = events.objectid) LIMIT 1000
+);
+
 --orphaned events, posthres, Zabbix 6.0
 DELETE FROM event_recovery WHERE eventid IN (SELECT eventid FROM event_recovery WHERE eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
 DELETE FROM event_recovery WHERE r_eventid IN (SELECT r_eventid FROM event_recovery WHERE r_eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
