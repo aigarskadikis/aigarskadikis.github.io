@@ -749,6 +749,7 @@ Mimic SNMP traps<pre><code>echo "$(date +%Y%m%d.%H%M%S) ZBXTRAP 10.10.10.10
 2nd line
 3rd line
 4rt line" | tee --append /tmp/zabbix_traps.tmp</code></pre>
+Snmptrapd in foreground<pre><code>strace -s 1024 -o /tmp/snmptrapd.strace.log snmptrapd -f -C -Le -Dusm -c /etc/snmp/snmptrapd.conf</code></pre>
 Turn down 'snmpd'. This was installed to solve dependencies<pre><code>systemctl stop snmpd && systemctl disable snmpd</code></pre>
 Turn down 'snmptrapd' to reconfigure service<pre><code>systemctl stop snmptrapd</code></pre>
 Make a backup of old config, install new<pre><code>mv /etc/snmp/snmptrapd.conf /etc/snmp/original.snmptrapd.conf</code></pre>

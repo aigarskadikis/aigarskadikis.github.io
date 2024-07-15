@@ -7,6 +7,9 @@ echo "$(date +%Y%m%d.%H%M%S) ZBXTRAP 10.10.10.10
 3rd line
 4rt line" | tee --append /tmp/zabbix_traps.tmp
 
+# snmptrapd in foreground
+strace -s 1024 -o /tmp/snmptrapd.strace.log snmptrapd -f -C -Le -Dusm -c /etc/snmp/snmptrapd.conf
+
 # turn down 'snmpd'. this was installed to solve dependencies
 systemctl stop snmpd && systemctl disable snmpd
 
