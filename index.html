@@ -232,6 +232,7 @@ du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files</code></pre>
 Follow unreachable poller with 2 digits. Print IP address<pre><code>tail -999f /var/log/zabbix/zabbix_proxy.log | grep $(ps auxww|grep "[u]nreachable poller #99" | awk '{ print $2 }'): | grep -E "\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\]"</code></pre>
 Restore<pre><code>rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql</code></pre>
+List biggest partitions<pre><code>ls --sort=size -lh | grep '#' | tac</code></pre>
 Send all UDP 162 traffic into a human readable log<pre><code>tcpdump -l -i any udp dst port 162 -x -vv 1>&2 >/tmp/udp162.log</code></pre>
 Transport data. On destination server go to directory where files must be places. set to listen on port 1234<pre><code>nc -l 1234 | tar -xvf -</code></pre>
 Transport data. On source server. start sending. replace x.y.z.w with real IP address<pre><code>tar cf - . | nc x.y.z.w 1234</code></pre>
@@ -1203,6 +1204,7 @@ SELECT triggerid FROM triggers
 Delete orhnaned events in batches. Works on PosthreSQL, do not work on MySQL<pre><code>DELETE FROM events WHERE eventid IN (
 SELECT eventid FROM events WHERE object = 0 AND source = 0 AND NOT EXISTS (SELECT 1 FROM triggers t WHERE t.triggerid = events.objectid) LIMIT 1000
 );</code></pre>
+Biggest data per itemid per partition<pre><code>SELECT SUM(LENGTH(value)) AS total,itemid FROM history_log PARTITION (p202407130000) GROUP BY 2 ORDER BY 1 DESC LIMIT 10;</code></pre>
 Orphaned events, posthres, Zabbix 6.0<pre><code>DELETE FROM event_recovery WHERE eventid IN (SELECT eventid FROM event_recovery WHERE eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
 DELETE FROM event_recovery WHERE r_eventid IN (SELECT r_eventid FROM event_recovery WHERE r_eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
 DELETE FROM event_recovery WHERE c_eventid IN (SELECT c_eventid FROM event_recovery WHERE c_eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
