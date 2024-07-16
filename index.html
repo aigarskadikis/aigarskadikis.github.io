@@ -1205,6 +1205,10 @@ Delete orhnaned events in batches. Works on PosthreSQL, do not work on MySQL<pre
 SELECT eventid FROM events WHERE object = 0 AND source = 0 AND NOT EXISTS (SELECT 1 FROM triggers t WHERE t.triggerid = events.objectid) LIMIT 1000
 );</code></pre>
 Biggest data per itemid per partition<pre><code>SELECT SUM(LENGTH(value)) AS total,itemid FROM history_log PARTITION (p202407130000) GROUP BY 2 ORDER BY 1 DESC LIMIT 10;</code></pre>
+Faster way to pick up some data for aggregation<pre><code>SELECT SUM(LENGTH(value)),itemid FROM (
+SELECT * FROM history_text PARTITION (p202407130000) LIMIT 10000
+) t1
+GROUP BY 2 ORDER BY 1 DESC LIMIT 9;</code></pre>
 Orphaned events, posthres, Zabbix 6.0<pre><code>DELETE FROM event_recovery WHERE eventid IN (SELECT eventid FROM event_recovery WHERE eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
 DELETE FROM event_recovery WHERE r_eventid IN (SELECT r_eventid FROM event_recovery WHERE r_eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
 DELETE FROM event_recovery WHERE c_eventid IN (SELECT c_eventid FROM event_recovery WHERE c_eventid NOT IN (SELECT eventid FROM events) LIMIT 100);

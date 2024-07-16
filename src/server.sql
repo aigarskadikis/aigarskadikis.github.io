@@ -132,6 +132,12 @@ SELECT eventid FROM events WHERE object = 0 AND source = 0 AND NOT EXISTS (SELEC
 --biggest data per itemid per partition
 SELECT SUM(LENGTH(value)) AS total,itemid FROM history_log PARTITION (p202407130000) GROUP BY 2 ORDER BY 1 DESC LIMIT 10;
 
+--faster way to pick up some data for aggregation
+SELECT SUM(LENGTH(value)),itemid FROM (
+SELECT * FROM history_text PARTITION (p202407130000) LIMIT 10000
+) t1
+GROUP BY 2 ORDER BY 1 DESC LIMIT 9;
+
 --orphaned events, posthres, Zabbix 6.0
 DELETE FROM event_recovery WHERE eventid IN (SELECT eventid FROM event_recovery WHERE eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
 DELETE FROM event_recovery WHERE r_eventid IN (SELECT r_eventid FROM event_recovery WHERE r_eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
