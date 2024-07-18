@@ -143,6 +143,9 @@ du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files
 # follow unreachable poller with 2 digits. print IP address
 tail -999f /var/log/zabbix/zabbix_proxy.log | grep $(ps auxww|grep "[u]nreachable poller #99" | awk '{ print $2 }'): | grep -E "\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\]"
 
+# screenshot
+chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink
+
 # restore
 rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql
