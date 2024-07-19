@@ -144,6 +144,7 @@ du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files
 tail -999f /var/log/zabbix/zabbix_proxy.log | grep $(ps auxww|grep "[u]nreachable poller #99" | awk '{ print $2 }'): | grep -E "\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\]"
 
 # screenshot
+google-chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink
 chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink
 
 # restore

@@ -230,7 +230,8 @@ Stats about MySQL data directory<pre><code>du -lah /var/lib/mysql | awk '{ print
 du -lab /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.size.in.bytes.txt
 du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files</code></pre>
 Follow unreachable poller with 2 digits. Print IP address<pre><code>tail -999f /var/log/zabbix/zabbix_proxy.log | grep $(ps auxww|grep "[u]nreachable poller #99" | awk '{ print $2 }'): | grep -E "\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\]"</code></pre>
-Screenshot<pre><code>chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink</code></pre>
+Screenshot<pre><code>google-chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink
+chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink</code></pre>
 Restore<pre><code>rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql</code></pre>
 List biggest partitions<pre><code>ls --sort=size -lh | grep '#' | tac</code></pre>
