@@ -1211,6 +1211,39 @@ Faster way to pick up some data for aggregation<pre><code>SELECT SUM(LENGTH(valu
 SELECT * FROM history_text PARTITION (p202407130000) LIMIT 10000
 ) t1
 GROUP BY 2 ORDER BY 1 DESC LIMIT 9;</code></pre>
+What is host, item name for the item id. Usefull to detect if storing data with wrong timestamp. Zabbix 6.0<pre><code>SELECT proxy.host AS proxy,
+hosts.host,
+CASE items.type
+WHEN 0 THEN 'Zabbix agent'
+WHEN 1 THEN 'SNMPv1 agent'
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 3 THEN 'Simple check'
+WHEN 4 THEN 'SNMPv2 agent'
+WHEN 5 THEN 'Zabbix internal'
+WHEN 6 THEN 'SNMPv3 agent'
+WHEN 7 THEN 'Zabbix agent (active) check'
+WHEN 8 THEN 'Aggregate'
+WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+WHEN 10 THEN 'External check'
+WHEN 11 THEN 'Database monitor'
+WHEN 12 THEN 'IPMI agent'
+WHEN 13 THEN 'SSH agent'
+WHEN 14 THEN 'TELNET agent'
+WHEN 15 THEN 'Calculated'
+WHEN 16 THEN 'JMX agent'
+WHEN 17 THEN 'SNMP trap'
+WHEN 18 THEN 'Dependent item'
+WHEN 19 THEN 'HTTP agent'
+WHEN 20 THEN 'SNMP agent'
+WHEN 21 THEN 'Script item'
+END AS type,
+items.name
+FROM hosts
+JOIN items ON items.hostid=hosts.hostid
+LEFT JOIN hosts proxy ON hosts.proxy_hostid=proxy.hostid
+WHERE hosts.status=0
+AND items.status=0
+AND items.itemid IN (123,456);</code></pre>
 Orphaned events, posthres, Zabbix 6.0<pre><code>DELETE FROM event_recovery WHERE eventid IN (SELECT eventid FROM event_recovery WHERE eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
 DELETE FROM event_recovery WHERE r_eventid IN (SELECT r_eventid FROM event_recovery WHERE r_eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
 DELETE FROM event_recovery WHERE c_eventid IN (SELECT c_eventid FROM event_recovery WHERE c_eventid NOT IN (SELECT eventid FROM events) LIMIT 100);
