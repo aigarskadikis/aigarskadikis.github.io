@@ -1211,6 +1211,18 @@ Faster way to pick up some data for aggregation<pre><code>SELECT SUM(LENGTH(valu
 SELECT * FROM history_text PARTITION (p202407130000) LIMIT 10000
 ) t1
 GROUP BY 2 ORDER BY 1 DESC LIMIT 9;</code></pre>
+Permissions checks. Zabbix 5.0<pre><code>SELECT DISTINCT users.alias, FROM_UNIXTIME(sessions.lastaccess)
+FROM users, users_groups, sessions, usrgrp, rights, hstgrp
+WHERE sessions.status=0
+AND users.userid=users_groups.userid
+AND users.userid=sessions.userid
+AND users_groups.usrgrpid=usrgrp.usrgrpid
+AND users_groups.userid=users.userid
+AND usrgrp.usrgrpid=rights.groupid
+AND rights.id=hstgrp.groupid
+AND rights.groupid IN (28)
+AND users.type < 3
+ORDER BY 2 DESC LIMIT 20;</code></pre>
 What is host, item name for the item id. Usefull to detect if storing data with wrong timestamp. Zabbix 6.0<pre><code>SELECT proxy.host AS proxy,
 hosts.host,
 CASE items.type
