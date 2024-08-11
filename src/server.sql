@@ -152,6 +152,13 @@ AND rights.groupid IN (28)
 AND users.type < 3
 ORDER BY 2 DESC LIMIT 20;
 
+--consume most space in history_text table. PostgreSQL. Zabbix 7.0
+SELECT SUM(LENGTH(history_text.value)) AS length, history_text.itemid
+FROM history_text
+GROUP BY 2
+ORDER BY 1
+DESC LIMIT 20;
+
 --what is host, item name for the item id. usefull to detect if storing data with wrong timestamp. Zabbix 6.0
 SELECT proxy.host AS proxy,
 hosts.host,
