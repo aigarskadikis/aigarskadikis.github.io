@@ -194,6 +194,18 @@ FROM items
 WHERE type=6
 GROUP BY 1,2,3,4,5,6,7;
 
+--Zabbix agent interface with errors. Zabbix 7.0
+SELECT proxy.name, hosts.host, interface.dns, interface.ip, interface.useip, interface.error FROM hosts
+LEFT JOIN proxy ON (hosts.proxyid=proxy.proxyid)
+JOIN interface ON (interface.hostid=hosts.hostid)
+WHERE LENGTH(interface.error) > 0 AND interface.type=1;
+
+--SNMP interface with errors. Zabbix 7.0
+SELECT proxy.name, hosts.host, interface.dns, interface.ip, interface.useip, interface.error FROM hosts
+LEFT JOIN proxy ON (hosts.proxyid=proxy.proxyid)
+JOIN interface ON (interface.hostid=hosts.hostid)
+WHERE LENGTH(interface.error) > 0 AND interface.type=2;
+
 --what is host, item name for the item id. usefull to detect if storing data with wrong timestamp. Zabbix 6.0
 SELECT proxy.host AS proxy,
 hosts.host,
