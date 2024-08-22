@@ -206,6 +206,19 @@ LEFT JOIN proxy ON (hosts.proxyid=proxy.proxyid)
 JOIN interface ON (interface.hostid=hosts.hostid)
 WHERE LENGTH(interface.error) > 0 AND interface.type=2;
 
+--amount of unsupported items on host. Zabbix 7.0
+SELECT
+hosts.host,
+COUNT(*)
+FROM items, item_rtdata, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=0
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid
+GROUP BY 1
+ORDER BY 2 ASC;
+
 --what is host, item name for the item id. usefull to detect if storing data with wrong timestamp. Zabbix 6.0
 SELECT proxy.host AS proxy,
 hosts.host,
