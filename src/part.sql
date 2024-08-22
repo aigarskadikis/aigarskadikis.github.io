@@ -5,7 +5,23 @@ RENAME TABLE history_str TO history_str_tmp; RENAME TABLE history_str_old TO his
 RENAME TABLE history_log TO history_log_tmp; RENAME TABLE history_log_old TO history_log;
 RENAME TABLE history_text TO history_text_tmp; RENAME TABLE history_text_old TO history_text; 
 RENAME TABLE trends TO trends_tmp; RENAME TABLE trends_old TO trends; 
-RENAME TABLE trends_uint TO trends_uint_tmp; RENAME TABLE trends_uint_old TO trends_uint; 
+RENAME TABLE trends_uint TO trends_uint_tmp; RENAME TABLE trends_uint_old TO trends_uint;
+
+--create dedicated user for MySQL 8
+DROP USER IF EXISTS 'zbx_part'@'127.0.0.1';
+CREATE USER 'zbx_part'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY '';
+GRANT SELECT, ALTER, DROP ON zabbix.history TO 'zbx_part'@'127.0.0.1';
+GRANT SELECT, ALTER, DROP ON zabbix.history_uint TO 'zbx_part'@'127.0.0.1';
+GRANT SELECT, ALTER, DROP ON zabbix.history_str TO 'zbx_part'@'127.0.0.1';
+GRANT SELECT, ALTER, DROP ON zabbix.history_text TO 'zbx_part'@'127.0.0.1';
+GRANT SELECT, ALTER, DROP ON zabbix.history_log TO 'zbx_part'@'127.0.0.1';
+GRANT SELECT, ALTER, DROP ON zabbix.history_bin TO 'zbx_part'@'127.0.0.1';
+GRANT SELECT, ALTER, DROP ON zabbix.trends TO 'zbx_part'@'127.0.0.1';
+GRANT SELECT, ALTER, DROP ON zabbix.trends_uint TO 'zbx_part'@'127.0.0.1';
+GRANT SELECT, ALTER, DROP ON zabbix.auditlog TO 'zbx_part'@'127.0.0.1';
+GRANT SELECT ON zabbix.dbversion TO 'zbx_part'@'127.0.0.1';
+GRANT SELECT,DELETE ON zabbix.housekeeper TO 'zbx_part'@'127.0.0.1';
+FLUSH PRIVILEGES;
 
 --restore back most recent data
 INSERT IGNORE INTO history SELECT * FROM history_tmp;
