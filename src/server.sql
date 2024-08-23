@@ -230,6 +230,22 @@ AND item_rtdata.itemid=items.itemid
 AND hosts.hostid=items.hostid
 AND item_rtdata.error like '%Unknown user name%';
 
+--store textual garbage. Zabbix 7.0
+SELECT SUM(LENGTH(value)) AS total,
+CONCAT('history.php?itemids%5B0%5D=',itemid,'&action=showlatest')
+FROM history_text PARTITION (p2024_08_19) GROUP BY 2 ORDER BY 1 DESC LIMIT 10;
+
+--store textual garbage without. scan full table. Zabbix 7.0
+SELECT SUM(LENGTH(value)) AS total,
+CONCAT('history.php?itemids%5B0%5D=',itemid,'&action=showlatest')
+FROM history_text GROUP BY 2 ORDER BY 1 DESC LIMIT 10;
+
+--active checks are not reporting back. Zabbix 7.0
+SELECT proxy.name,hosts.host FROM hosts
+JOIN host_rtdata ON hosts.hostid=host_rtdata.hostid
+LEFT JOIN proxy ON hosts.proxyid=proxy.proxyid
+WHERE host_rtdata.active_available=2;
+
 --what is host, item name for the item id. usefull to detect if storing data with wrong timestamp. Zabbix 6.0
 SELECT proxy.host AS proxy,
 hosts.host,
