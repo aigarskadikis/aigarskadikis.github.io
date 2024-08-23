@@ -246,6 +246,16 @@ JOIN host_rtdata ON hosts.hostid=host_rtdata.hostid
 LEFT JOIN proxy ON hosts.proxyid=proxy.proxyid
 WHERE host_rtdata.active_available=2;
 
+--failed actions. Zabbix 5.0, 6.0, 7.0
+SELECT FROM_UNIXTIME(alerts.clock) AS clock,
+CONCAT('tr_events.php?triggerid=',events.objectid,'&eventid=',alerts.eventid) AS URL,
+alerts.error,
+actions.name
+FROM alerts
+JOIN events ON alerts.eventid=events.eventid
+JOIN actions ON actions.actionid=alerts.actionid
+WHERE alerts.status=2 ORDER BY 1 ASC
+
 --what is host, item name for the item id. usefull to detect if storing data with wrong timestamp. Zabbix 6.0
 SELECT proxy.host AS proxy,
 hosts.host,
