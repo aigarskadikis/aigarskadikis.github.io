@@ -13,6 +13,12 @@ echo $LINE
 # poller busy
 watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
 
+# convert to readable date
+tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(..\)/\2-\3-\4 \5:\6:\7/'
+
+# convert to readable date including PID
+tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(......\)/\2-\3-\4 \5:\6:\7 PID:\1/'
+
 # test port
 nc -zv ip 10050
 

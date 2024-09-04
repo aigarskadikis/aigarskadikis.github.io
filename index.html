@@ -154,6 +154,8 @@ do {
 echo $LINE
 } done</code></pre>
 Poller busy<pre><code>watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'</code></pre>
+Convert to readable date<pre><code>tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(..\)/\2-\3-\4 \5:\6:\7/'</code></pre>
+Convert to readable date including PID<pre><code>tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(......\)/\2-\3-\4 \5:\6:\7 PID:\1/'</code></pre>
 Test port<pre><code>nc -zv ip 10050</code></pre>
 History syncer running<pre><code>watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"</code></pre>
 See the origin of data collection<pre><code>strace -s 2048 -f -v -o /tmp/sar.log sar 1 1
