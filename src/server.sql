@@ -10,6 +10,14 @@ sessions.userid = users.userid
 AND sessions.lastaccess > sessions.lastaccess-(3600*24)
 GROUP BY 1;
 
+--detect when Keep lost resources period is not installed in danger. Zabbix 5.2
+SELECT hosts.host,items.name FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND items.status=0
+AND hosts.status=0
+AND items.flags=1
+AND items.lifetime IN ('0','0d','0h','0m','0s');
+
 --most of items at host level
 SELECT hosts.host, COUNT(*) FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
