@@ -937,6 +937,11 @@ WHERE v2 IS NOT NULL
 <p>Download this section: <a href="src/delete.sql">https://aigarskadikis.github.io/src/delete.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/delete.sql</a></p>
 </div>
+<input type="radio" name="tabs" id="insert"><label for="insert">insert.sql</label><div class="tab">
+Copy data from one table to another<pre><code>INSERT INTO history_uint SELECT 88656,clock,value,ns FROM history_uint WHERE itemid=88641;</code></pre>
+<p>Download this section: <a href="src/insert.sql">https://aigarskadikis.github.io/src/insert.sql</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/insert.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/insert.sql</a></p>
+</div>
 <input type="radio" name="tabs" id="mysql"><label for="mysql">mysql.sql</label><div class="tab">
 Ssl connection information for MySQL<pre><code>SELECT sbt.variable_value AS tls_version, t2.variable_value AS cipher,
 processlist_user AS user, processlist_host AS host
@@ -2814,6 +2819,22 @@ AND items.type=15
 GROUP BY 1,2
 ORDER BY 1 ASC;</code></pre>
 Events daily<pre><code>SELECT COUNT(*) FROM events WHERE clock >= UNIX_TIMESTAMP("2023-07-20 00:00:00") AND clock < UNIX_TIMESTAMP("2023-07-21 00:00:00");</code></pre>
+All SNMPv3 credentials in use. Zabbix 7.0<pre><code>SET SESSION group_concat_max_len = 1000000; SELECT interface_snmp.version,
+interface_snmp.bulk,
+interface_snmp.community,
+interface_snmp.securityname,
+interface_snmp.securitylevel,
+interface_snmp.authpassphrase,
+interface_snmp.privpassphrase,
+interface_snmp.authprotocol,
+interface_snmp.privprotocol,
+interface_snmp.contextname,
+GROUP_CONCAT(interface.ip) AS hosts
+FROM hosts
+LEFT JOIN interface ON (interface.hostid=hosts.hostid)
+LEFT JOIN interface_snmp ON (interface.interfaceid=interface_snmp.interfaceid)
+WHERE hosts.status IN (0,1) AND hosts.flags=0 AND interface.type=2
+GROUP BY 1,2,3,4,5,6,7,8,9,10\G</code></pre>
 Trigger calculation fail. Zabbix 4.0, 5.0<pre><code>SELECT
 CONCAT('triggers.php?form=update&triggerid=', events.objectid) AS 'URL',
 events.name,

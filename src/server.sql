@@ -2077,6 +2077,24 @@ ORDER BY 1 ASC;
 --events daily
 SELECT COUNT(*) FROM events WHERE clock >= UNIX_TIMESTAMP("2023-07-20 00:00:00") AND clock < UNIX_TIMESTAMP("2023-07-21 00:00:00");
 
+--all SNMPv3 credentials in use. Zabbix 7.0
+SET SESSION group_concat_max_len = 1000000; SELECT interface_snmp.version,
+interface_snmp.bulk,
+interface_snmp.community,
+interface_snmp.securityname,
+interface_snmp.securitylevel,
+interface_snmp.authpassphrase,
+interface_snmp.privpassphrase,
+interface_snmp.authprotocol,
+interface_snmp.privprotocol,
+interface_snmp.contextname,
+GROUP_CONCAT(interface.ip) AS hosts
+FROM hosts
+LEFT JOIN interface ON (interface.hostid=hosts.hostid)
+LEFT JOIN interface_snmp ON (interface.interfaceid=interface_snmp.interfaceid)
+WHERE hosts.status IN (0,1) AND hosts.flags=0 AND interface.type=2
+GROUP BY 1,2,3,4,5,6,7,8,9,10\G
+
 --trigger calculation fail. Zabbix 4.0, 5.0
 SELECT
 CONCAT('triggers.php?form=update&triggerid=', events.objectid) AS 'URL',
