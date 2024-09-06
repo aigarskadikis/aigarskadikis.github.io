@@ -144,7 +144,7 @@ ps -xafuww > /tmp/$(hostname).process.list.tree.txt
 # stats about MySQL data directory
 du -lah /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.human.readable.txt
 du -lab /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.size.in.bytes.txt
-du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files
+du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files.txt
 
 # follow unreachable poller with 2 digits. print IP address
 tail -999f /var/log/zabbix/zabbix_proxy.log | grep $(ps auxww|grep "[u]nreachable poller #99" | awk '{ print $2 }'): | grep -E "\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\]"
