@@ -16,7 +16,20 @@ FROM proxy_history ph
 JOIN items i ON ph.itemid = i.itemid
 JOIN hosts h ON (h.hostid = i.hostid)
 WHERE clock >= UNIX_TIMESTAMP(NOW() - INTERVAL 2 HOUR)
-GROUP BY h.host,i.key_ ORDER BY max_length DESC LIMIT 100; 
+GROUP BY h.host,i.key_ ORDER BY max_length DESC LIMIT 100;
+
+--fastest way to show stats
+SELECT SUM(LENGTH(value)),itemid FROM (
+SELECT * FROM proxy_history LIMIT 10000
+) t1
+GROUP BY 2 ORDER BY 1 DESC LIMIT 9;
+
+--stats with URL
+SELECT SUM(LENGTH(value)),
+CONCAT('history.php?itemids%5B0%5D=',itemid,'&action=showlatest') AS 'URL' FROM (
+SELECT * FROM proxy_history WHERE flags<>1 LIMIT 10000
+) t1
+GROUP BY 2 ORDER BY 1 DESC LIMIT 9;
 
 --biggest values
 SELECT itemid,flags,
