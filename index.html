@@ -236,6 +236,9 @@ Screenshot<pre><code>google-chrome --no-sandbox --headless --print-to-pdf=/tmp/z
 chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink</code></pre>
 Restore<pre><code>rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql</code></pre>
+Backup /etc<pre><code>tar --create --verbose --use-compress-program='gzip --best' --file=/tmp/etc.tar.gz /etc</code></pre>
+Backup /etc with maximum compression<pre><code>tar --create --verbose --use-compress-program='xz' --file=/tmp/etc.tar.xz /etc</code></pre>
+Backup etc to home directory in deadable format<pre><code>cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
 List biggest partitions<pre><code>ls --sort=size -lh | grep '#' | tac</code></pre>
 Send all UDP 162 traffic into a human readable log<pre><code>tcpdump -l -i any udp dst port 162 -x -vv 1>&2 >/tmp/udp162.log</code></pre>
 Transport data. On destination server go to directory where files must be places. set to listen on port 1234<pre><code>nc -l 1234 | tar -xvf -</code></pre>
@@ -1136,7 +1139,7 @@ FROM (SELECT c.oid, nspname AS table_schema, relname AS table_name, c.reltuples 
 FROM pg_class c
 LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE relkind = 'r' ) a) a
-ORDER BY 3;</code></pre>
+ORDER BY 5 DESC LIMIT 500;</code></pre>
 <p>Download this section: <a href="src/psql.sql">https://aigarskadikis.github.io/src/psql.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/psql.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/psql.sql</a></p>
 </div>

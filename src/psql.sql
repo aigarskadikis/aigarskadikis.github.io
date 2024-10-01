@@ -20,5 +20,5 @@ FROM (SELECT c.oid, nspname AS table_schema, relname AS table_name, c.reltuples 
 FROM pg_class c
 LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE relkind = 'r' ) a) a
-ORDER BY 3;
+ORDER BY 5 DESC LIMIT 500;
 

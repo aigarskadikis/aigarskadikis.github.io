@@ -157,6 +157,15 @@ chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontend
 rm /var/lib/mysql/* -rf
 tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql
 
+# backup /etc
+tar --create --verbose --use-compress-program='gzip --best' --file=/tmp/etc.tar.gz /etc
+
+# backup /etc with maximum compression
+tar --create --verbose --use-compress-program='xz' --file=/tmp/etc.tar.xz /etc
+
+# backup etc to home directory in deadable format
+cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
+
 # list biggest partitions
 ls --sort=size -lh | grep '#' | tac
 
