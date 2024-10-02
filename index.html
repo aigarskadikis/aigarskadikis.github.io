@@ -1143,6 +1143,8 @@ ORDER BY 5 DESC LIMIT 500;</code></pre>
 biggest tables<pre><code>SELECT relname AS table_name, pg_size_pretty(pg_total_relation_size(relid)) AS total_size
 FROM pg_catalog.pg_stat_user_tables
 ORDER BY pg_total_relation_size(relid) DESC LIMIT 10;</code></pre>
+Relation between hyper table and table<pre><code>select * from _timescaledb_catalog.hypertable;</code></pre>
+Version of extension<pre><code>SELECT * FROM pg_extension;</code></pre>
 <p>Download this section: <a href="src/psql.sql">https://aigarskadikis.github.io/src/psql.sql</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/psql.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/psql.sql</a></p>
 </div>

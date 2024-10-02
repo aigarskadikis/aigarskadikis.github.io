@@ -27,3 +27,9 @@ SELECT relname AS table_name, pg_size_pretty(pg_total_relation_size(relid)) AS t
 FROM pg_catalog.pg_stat_user_tables
 ORDER BY pg_total_relation_size(relid) DESC LIMIT 10;
 
+--relation between hyper table and table
+select * from _timescaledb_catalog.hypertable;
+
+--version of extension
+SELECT * FROM pg_extension;
+
