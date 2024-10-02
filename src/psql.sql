@@ -22,3 +22,8 @@ LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE relkind = 'r' ) a) a
 ORDER BY 5 DESC LIMIT 500;
 
+-- biggest tables
+SELECT relname AS table_name, pg_size_pretty(pg_total_relation_size(relid)) AS total_size
+FROM pg_catalog.pg_stat_user_tables
+ORDER BY pg_total_relation_size(relid) DESC LIMIT 10;
+
