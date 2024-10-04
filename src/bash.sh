@@ -163,6 +163,12 @@ tar --create --verbose --use-compress-program='gzip --best' --file=/tmp/etc.tar.
 # backup /etc with maximum compression
 tar --create --verbose --use-compress-program='xz' --file=/tmp/etc.tar.xz /etc
 
+# show printable charactars
+cat file.html | tr -d '\n' | tr -cd '[:print:]'
+
+# show printable characters on windows
+cat file.html | tr -cd '[:print:]'
+
 # backup etc to home directory in deadable format
 cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 
