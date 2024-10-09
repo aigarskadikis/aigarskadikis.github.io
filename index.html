@@ -240,6 +240,8 @@ Backup /etc<pre><code>tar --create --verbose --use-compress-program='gzip --best
 Backup /etc with maximum compression<pre><code>tar --create --verbose --use-compress-program='xz' --file=/tmp/etc.tar.xz /etc</code></pre>
 Show printable charactars<pre><code>cat file.html | tr -d '\n' | tr -cd '[:print:]'</code></pre>
 Show printable characters on windows<pre><code>cat file.html | tr -cd '[:print:]'</code></pre>
+Sum together 5th column<pre><code>ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum}'</code></pre>
+Show how much data generate in a specific date<pre><code>ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum / (1024^3) " GB"}'</code></pre>
 Backup etc to home directory in deadable format<pre><code>cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
 List biggest partitions<pre><code>ls --sort=size -lh | grep '#' | tac</code></pre>
 Send all UDP 162 traffic into a human readable log<pre><code>tcpdump -l -i any udp dst port 162 -x -vv 1>&2 >/tmp/udp162.log</code></pre>

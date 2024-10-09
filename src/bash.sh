@@ -169,6 +169,12 @@ cat file.html | tr -d '\n' | tr -cd '[:print:]'
 # show printable characters on windows
 cat file.html | tr -cd '[:print:]'
 
+# sum together 5th column
+ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum}'
+
+# show how much data generate in a specific date
+ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum / (1024^3) " GB"}'
+
 # backup etc to home directory in deadable format
 cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 
