@@ -18,6 +18,14 @@ AND hosts.status=0
 AND items.flags=1
 AND items.lifetime IN ('0','0d','0h','0m','0s');
 
+--duplicate IP addresses. Hosts with same IP addres. Zabbix 7.0
+SELECT interface.ip,GROUP_CONCAT(hosts.host),COUNT(*) FROM interface, hosts
+WHERE hosts.hostid=interface.hostid
+AND hosts.status=0
+AND hosts.flags=0
+GROUP BY 1
+HAVING COUNT(*) > 1;
+
 --most of items at host level
 SELECT hosts.host, COUNT(*) FROM items
 JOIN hosts ON (hosts.hostid=items.hostid)
