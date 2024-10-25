@@ -30,6 +30,17 @@ GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;
 
+--show refresh rate. Zabbix 5.0
+SELECT users.alias, profiles.value_int AS refreshIntensity, dashboard.name AS dashboardName, widget.name AS widgetName
+FROM profiles,users,widget,dashboard
+WHERE users.userid=profiles.userid
+AND profiles.idx2=widget.widgetid
+AND dashboard.dashboardid=widget.dashboardid
+AND idx='web.dashbrd.widget.rf_rate';
+
+--reset refresh rate
+UPDATE profiles SET value_int=900 WHERE idx='web.dashbrd.widget.rf_rate';
+
 --duplicate IP addresses. Hosts with same IP addres. Zabbix 7.0
 SELECT interface.ip,GROUP_CONCAT(hosts.host),COUNT(*) FROM interface, hosts
 WHERE hosts.hostid=interface.hostid
