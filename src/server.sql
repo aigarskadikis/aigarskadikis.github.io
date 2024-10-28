@@ -30,6 +30,10 @@ GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;
 
+--PostgreSQL copy data from one table to another. Zabbix 7.0
+INSERT INTO trends SELECT * FROM trends_old ON CONFLICT (clock, itemid) DO NOTHING;
+INSERT INTO trends_uint SELECT * FROM trends_uint_old ON CONFLICT (clock, itemid) DO NOTHING;
+
 --show refresh rate. Zabbix 5.0
 SELECT users.alias, profiles.value_int AS refreshIntensity, dashboard.name AS dashboardName, widget.name AS widgetName
 FROM profiles,users,widget,dashboard
