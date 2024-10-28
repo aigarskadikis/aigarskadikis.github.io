@@ -845,6 +845,8 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="udp"><label for="udp">udp</label><div class="tab">
 Print all UPD traffic for eth0<pre><code>tcpdump -i eth0 -nn udp</code></pre>
+Print all UDP traffic. Second column is EngineID<pre><code>tshark -i any -Y '(udp.srcport == 161)' -T fields -e ip.src -e snmp.msgAuthoritativeEngineID -e snmp.msgAuthoritativeEngineTime -e snmp.msgAuthoritativeEngineBoots -e frame.time</code></pre>
+Query one particular engineID<pre><code>tshark -i any -Y '(udp.srcport == 161) && (snmp.msgAuthoritativeEngineID == 80:00:3a:8c:04)' -T fields -e ip.src -e snmp.msgAuthoritativeEngineID -e snmp.msgAuthoritativeEngineTime -e snmp.msgAuthoritativeEngineBoots -e frame.time</code></pre>
 <p>Download this section: <a href="src/udp.sh">https://aigarskadikis.github.io/src/udp.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/udp.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/udp.sh</a></p>
 </div>
