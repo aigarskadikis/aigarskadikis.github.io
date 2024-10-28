@@ -240,6 +240,7 @@ Backup /etc<pre><code>tar --create --verbose --use-compress-program='gzip --best
 Backup /etc with maximum compression<pre><code>tar --create --verbose --use-compress-program='xz' --file=/tmp/etc.tar.xz /etc</code></pre>
 Show printable charactars<pre><code>cat file.html | tr -d '\n' | tr -cd '[:print:]'</code></pre>
 Show printable characters on windows<pre><code>cat file.html | tr -cd '[:print:]'</code></pre>
+"sid" in the web server log is half (the end of) of the "sessionid" in the database. Zabbix 6.0, NGINX<pre><code>tail -9999f /var/log/nginx/access.log | grep -Eo "sid.*dashboardid=\S+"</code></pre>
 Sum together 5th column<pre><code>ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum}'</code></pre>
 Show how much data generate in a specific date<pre><code>ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum / (1024^3) " GB"}'</code></pre>
 Backup etc to home directory in deadable format<pre><code>cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
@@ -1174,6 +1175,11 @@ AND items.flags IN (0,4)
 AND items.type=18
 GROUP BY 1
 ORDER BY 2 DESC
+LIMIT 20;</code></pre>
+Online users. Zabbix 6.0<pre><code>SELECT users.name, lastaccess, sessionid
+FROM sessions,users
+WHERE users.userid=sessions.userid
+ORDER BY lastaccess DESC
 LIMIT 20;</code></pre>
 PostgreSQL copy data from one table to another. Zabbix 7.0<pre><code>INSERT INTO trends SELECT * FROM trends_old ON CONFLICT (clock, itemid) DO NOTHING;
 INSERT INTO trends_uint SELECT * FROM trends_uint_old ON CONFLICT (clock, itemid) DO NOTHING;</code></pre>

@@ -169,6 +169,9 @@ cat file.html | tr -d '\n' | tr -cd '[:print:]'
 # show printable characters on windows
 cat file.html | tr -cd '[:print:]'
 
+# "sid" in the web server log is half (the end of) of the "sessionid" in the database. Zabbix 6.0, NGINX
+tail -9999f /var/log/nginx/access.log | grep -Eo "sid.*dashboardid=\S+"
+
 # sum together 5th column
 ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum}'
 
