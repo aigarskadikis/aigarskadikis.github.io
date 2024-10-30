@@ -26,8 +26,8 @@ It's doing the same as the build in preprocessing step "Discard unchanged":<br /
 The solution does NOT do "Discard unchanged with heartbeat"!<br />
 
 <h2>Target</h2>
-The table "history_str" are used to store short text strings up to 256 characters, Like name of operating system, an IP address, serial number, product number, username.<br />
-Table "histroy_text" are used to store text op to 64kb, which is 65 000 characters.<br />
+The table "history_str" are used to store short text strings up to 256 characters, Like name of an IP address, failed transaction, username, backup of /etc/hosts file, daily/hourly backup of any configuration file.<br />
+Table "histroy_text" are used to store text op to 64kb, which is 65536 characters.<br />
 
 <h2>Pros</h2>
 <ul>
@@ -37,7 +37,8 @@ Table "histroy_text" are used to store text op to 64kb, which is 65 000 characte
 
 <h2>Cons</h2>
 <ul>
-<li>Better to not use a trigger function "count" on these items. For data which needs to use "count" function choose to store it inside "history_log" table which does not use this cleanup.</li>
+<li>Not good if trigger function "count" is linked on this data. In case of problem, it will be impossible to explain why trigger generated a problem. For data which needs to use "count" function, a workaround can be to store it inside "history_log" table which does not use this cleanup method.</li>
+<li>Most likelly these tables will not use partitioning. It's risk to fulfill them.</li>
 </ul>
 
 <h2>Warning</h2>
@@ -252,15 +253,19 @@ Set it executable:<pre><code>sudo chmod +x /usr/local/bin/psql_discard_unchanged
 
 
 <h2>Q & A</h2>
-Q: Does it give extra load on database<br />
+Q: Does it give extra load on database?<br />
 A: Absolutelly<br />
 <br />
 
-Q: Will it free up disk space.<br />
+Q: Will it free up disk space?<br />
 A: In MySQL situation "no". In case of PostgreSQL, it will save 12kb.<br />
 <br />
 
-Q: What is point of this.<br />
+Q: Why not store these values in inventory?<br />
+A: If you care about latest snapshot only, then use inverory, it's the best to store a single value without any retention.<br />
+<br />
+
+Q: What is point of this?<br />
 A: Treat a backup like a gold.<br />
 <br />
 
