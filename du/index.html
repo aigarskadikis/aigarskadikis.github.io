@@ -29,10 +29,15 @@ The solution does NOT do "Discard unchanged with heartbeat"!<br />
 The table "history_str" are used to store short text strings up to 256 characters, Like name of operating system, an IP address, serial number, product number, username.<br />
 Table "histroy_text" are used to store text op to 64kb, which is 65 000 characters.<br />
 
-<h2>Benefits</h2>
+<h2>Pros</h2>
 <ul>
 <li>Easier to browse latest data and understand when exactly metric changed.</li>
 <li>Backup is more clean.</li>
+</ul>
+
+<h2>Cons</h2>
+<ul>
+<li>Better to not use a trigger function "count" on these items. For data which needs to use "count" function choose to store it inside "history_log" table which does not use this cleanup.</li>
 </ul>
 
 <h2>Warning</h2>
@@ -252,7 +257,11 @@ A: Absolutelly<br />
 <br />
 
 Q: Will it free up disk space.<br />
-A: In MySQL situation "no". The whole purpose of script is to shrink the size of backup and treat a backup like a gold.<br />
+A: In MySQL situation "no". In case of PostgreSQL, it will save 12kb.<br />
+<br />
+
+Q: What is point of this.<br />
+A: Treat a backup like a gold.<br />
 <br />
 
 
