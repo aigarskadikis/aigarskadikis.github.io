@@ -1,6 +1,9 @@
 --list all chunks. pg 14.5, ts 2.8.1
 SELECT show_chunks('history');
 
+--list version
+SELECT extversion FROM pg_extension WHERE extname='timescaledb'\gx
+
 --compress manually one chunk. pg 14.5, ts 2.8.1
 SELECT compress_chunk('_timescaledb_internal._hyper_1_489_chunk');
 

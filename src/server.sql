@@ -30,6 +30,12 @@ GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;
 
+--open problems by origin
+SELECT COUNT(*), source, object FROM problem GROUP BY 2,3 ORDER BY 1 DESC;
+
+--open problems by objectid
+SELECT COUNT(*), source, object, objectid FROM problem GROUP BY 2,3,4 ORDER BY 1 DESC LIMIT 20;
+
 --online users. Zabbix 6.0
 SELECT users.name, lastaccess, sessionid
 FROM sessions,users

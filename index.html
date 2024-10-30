@@ -1178,6 +1178,8 @@ AND items.type=18
 GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;</code></pre>
+Open problems by origin<pre><code>SELECT COUNT(*), source, object FROM problem GROUP BY 2,3 ORDER BY 1 DESC;</code></pre>
+Open problems by objectid<pre><code>SELECT COUNT(*), source, object, objectid FROM problem GROUP BY 2,3,4 ORDER BY 1 DESC LIMIT 20;</code></pre>
 Online users. Zabbix 6.0<pre><code>SELECT users.name, lastaccess, sessionid
 FROM sessions,users
 WHERE users.userid=sessions.userid
@@ -2912,6 +2914,7 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="ts"><label for="ts">ts.sql</label><div class="tab">
 List all chunks. Pg 14.5, ts 2.8.1<pre><code>SELECT show_chunks('history');</code></pre>
+List version<pre><code>SELECT extversion FROM pg_extension WHERE extname='timescaledb'\gx</code></pre>
 Compress manually one chunk. Pg 14.5, ts 2.8.1<pre><code>SELECT compress_chunk('_timescaledb_internal._hyper_1_489_chunk');</code></pre>
 Explorer how many is compressed and uncompressed. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
 To see if hypertable is compressed. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
