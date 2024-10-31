@@ -30,6 +30,14 @@ GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;
 
+--which item consumes the space the most
+SELECT SUM(LENGTH(value)),hosts.host,items.key_ FROM (
+SELECT * FROM history_text LIMIT 1000
+) t1
+JOIN items ON t1.itemid=items.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+GROUP BY 2,3 ORDER BY 1 DESC LIMIT 9;
+
 --open problems by origin
 SELECT COUNT(*), source, object FROM problem GROUP BY 2,3 ORDER BY 1 DESC;
 
