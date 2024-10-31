@@ -38,6 +38,13 @@ JOIN items ON t1.itemid=items.itemid
 JOIN hosts ON hosts.hostid=items.hostid
 GROUP BY 2,3 ORDER BY 1 DESC LIMIT 9;
 
+--print URL to visit which host consumes a lot of data. MySQL. Zabbix 5.0, 6.0, 7.0
+SELECT SUM(LENGTH(value)) AS Size,
+CONCAT('history.php?itemids%5B0%5D=',t1.itemid,'&action=showlatest') AS 'URL' FROM (
+SELECT * FROM history_text LIMIT 1000
+) t1
+GROUP BY 2 ORDER BY 1 DESC LIMIT 9;
+
 --open problems by origin
 SELECT COUNT(*), source, object FROM problem GROUP BY 2,3 ORDER BY 1 DESC;
 
