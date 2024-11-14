@@ -30,6 +30,23 @@ GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;
 
+--notification stats. Zabbix 6.0
+SELECT actions.name AS actionName, users.username AS sendTo, media_type.name AS mediaName,
+CASE alerts.status
+WHEN 0 THEN 'NOT_SENT'
+WHEN 1 THEN 'SENT'
+WHEN 2 THEN 'FAILED'
+WHEN 3 THEN 'NEW'
+END AS "alertStatus",
+COUNT(*) AS count
+FROM alerts
+JOIN actions ON (actions.actionid=alerts.actionid)
+JOIN media_type ON (media_type.mediatypeid=alerts.mediatypeid)
+LEFT JOIN users ON (users.userid=alerts.userid)
+WHERE clock > UNIX_TIMESTAMP(NOW()-INTERVAL 7 DAY)
+GROUP BY 1,2,3,4
+ORDER BY 5 ASC;
+
 --which item consumes the space the most
 SELECT SUM(LENGTH(value)),hosts.host,items.key_ FROM (
 SELECT * FROM history_text LIMIT 1000
