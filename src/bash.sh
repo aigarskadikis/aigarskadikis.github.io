@@ -22,6 +22,9 @@ tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(
 # test port
 nc -zv ip 10050
 
+# check what exactly perform write
+iotop --kilobytes --delay=3 --iter=5
+
 # history syncer running
 watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"
 
