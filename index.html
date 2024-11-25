@@ -1180,6 +1180,10 @@ AND items.type=18
 GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;</code></pre>
+Active and inactive sessions. Zabbix 6.0<pre><code>SELECT users.username, CASE sessions.status
+WHEN 0 THEN 'active'
+WHEN 1 THEN 'not active'
+END AS "status", COUNT(*) FROM sessions, users WHERE sessions.userid=users.userid GROUP BY 1,2 ORDER BY 3 DESC;</code></pre>
 Notification stats. Zabbix 6.0<pre><code>SELECT actions.name AS actionName, users.username AS sendTo, media_type.name AS mediaName,
 CASE alerts.status
 WHEN 0 THEN 'NOT_SENT'
