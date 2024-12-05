@@ -19,6 +19,9 @@ tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(
 # convert to readable date including PID
 tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(......\)/\2-\3-\4 \5:\6:\7 PID:\1/'
 
+# memory situation in megabytes
+ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb ",hr) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' | cut -d "" -f2 | cut -d "-" -f1
+
 # test port
 nc -zv ip 10050
 

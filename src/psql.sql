@@ -10,6 +10,9 @@ SELECT * FROM pg_stat_activity WHERE state != 'idle';
 --what is minor version of Zabbix
 SELECT * FROM dbversion;
 
+--remove old sessions in PostgreSQL. Zabbix 7.0
+DELETE FROM sessions WHERE lastaccess < EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours');
+
 --crear PostgreSQL queries
 SELECT pg_cancel_backend(pid) FROM pg_stat_activity WHERE state = 'active' and pid <> pg_backend_pid();
 
