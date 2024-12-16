@@ -38,6 +38,15 @@ watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"
 strace -s 2048 -f -v -o /tmp/sar.log sar 1 1
 cat /tmp/sar.log | grep '/proc/stat'
 
+# volume configuration
+lvm lvs -o+lv_layout,stripes > /tmp/volume.conf.txt
+
+# CPU information
+lscpu > /tmp/lscpu.txt
+
+# 2 snapshots of busyest CPU processes
+top -b -o +%CPU -n 2 2>&1 1> /tmp/top.cpu.txt
+
 # install iperf3, iostat fio
 dnf install sysstat fio iperf3
 
