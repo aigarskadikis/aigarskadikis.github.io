@@ -10,6 +10,15 @@ pg_dump \
 --exclude-table-data '*.history*' \
 --exclude-table-data '*.trends*'
 
+# restore historical data in background
+psql zabbix -c "\COPY trends_old FROM PROGRAM 'lz4cat /tmp/z64.trends_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY trends_uint_old FROM PROGRAM 'lz4cat /tmp/z64.trends_uint_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY history_old FROM PROGRAM 'lz4cat /tmp/z64.history_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY history_uint_old FROM PROGRAM 'lz4cat /tmp/z64.history_uint_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY history_str_old FROM PROGRAM 'lz4cat /tmp/z64.history_str_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY history_text_old FROM PROGRAM 'lz4cat /tmp/z64.history_text_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY history_log_old FROM PROGRAM 'lz4cat /tmp/z64.history_log_old.tsv.lz4' DELIMITER E'\t' CSV"
+
 # restore
 pg_restore \
 --dbname=DATABASE \

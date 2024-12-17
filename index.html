@@ -738,6 +738,13 @@ Extract configuration dump from old server<pre><code>pg_dump \
 --verbose \
 --exclude-table-data '*.history*' \
 --exclude-table-data '*.trends*'</code></pre>
+Restore historical data in background<pre><code>psql zabbix -c "\COPY trends_old FROM PROGRAM 'lz4cat /tmp/z64.trends_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY trends_uint_old FROM PROGRAM 'lz4cat /tmp/z64.trends_uint_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY history_old FROM PROGRAM 'lz4cat /tmp/z64.history_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY history_uint_old FROM PROGRAM 'lz4cat /tmp/z64.history_uint_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY history_str_old FROM PROGRAM 'lz4cat /tmp/z64.history_str_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY history_text_old FROM PROGRAM 'lz4cat /tmp/z64.history_text_old.tsv.lz4' DELIMITER E'\t' CSV"
+psql zabbix -c "\COPY history_log_old FROM PROGRAM 'lz4cat /tmp/z64.history_log_old.tsv.lz4' DELIMITER E'\t' CSV"</code></pre>
 Restore<pre><code>pg_restore \
 --dbname=DATABASE \
 --host=HOST \
