@@ -28,6 +28,9 @@ cat frontend.config.and.logs.tar.xz_* > together.tar.xz
 # test port
 nc -zv ip 10050
 
+# avoid asking for service restarts on Ubuntu 22/24
+echo "\$nrconf{restart} = 'a';" | sudo tee /etc/needrestart/conf.d/no-prompt.conf
+
 # check what exactly perform write
 iotop --kilobytes --delay=3 --iter=5
 

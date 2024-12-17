@@ -159,6 +159,7 @@ Convert to readable date including PID<pre><code>tail -99f /var/log/zabbix/zabbi
 Memory situation in megabytes<pre><code>ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb ",hr) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' | cut -d "" -f2 | cut -d "-" -f1</code></pre>
 Merge back<pre><code>cat frontend.config.and.logs.tar.xz_* > together.tar.xz</code></pre>
 Test port<pre><code>nc -zv ip 10050</code></pre>
+Avoid asking for service restarts on Ubuntu 22/24<pre><code>echo "\$nrconf{restart} = 'a';" | sudo tee /etc/needrestart/conf.d/no-prompt.conf</code></pre>
 Check what exactly perform write<pre><code>iotop --kilobytes --delay=3 --iter=5</code></pre>
 History syncer running<pre><code>watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"</code></pre>
 See the origin of data collection<pre><code>strace -s 2048 -f -v -o /tmp/sar.log sar 1 1
