@@ -2968,6 +2968,15 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="ts"><label for="ts">ts.sql</label><div class="tab">
 List all chunks. Pg 14.5, ts 2.8.1<pre><code>SELECT show_chunks('history');</code></pre>
 List version<pre><code>SELECT extversion FROM pg_extension WHERE extname='timescaledb'\gx</code></pre>
+Size of chunks and dates<pre><code>SELECT hypertable_name,
+to_timestamp(range_start_integer) AS range_start,
+to_timestamp(range_end_integer) AS range_end,
+chunk_name,
+(range_end_integer-range_start_integer) AS size
+FROM timescaledb_information.chunks
+WHERE hypertable_name IN ('history','history_uint','history_str','history_log','history_text','trends_uint','trends')
+AND range_start_integer > EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours')
+ORDER BY 1,2;</code></pre>
 Compress manually one chunk. Pg 14.5, ts 2.8.1<pre><code>SELECT compress_chunk('_timescaledb_internal._hyper_1_489_chunk');</code></pre>
 Explorer how many is compressed and uncompressed. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
 To see if hypertable is compressed. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>

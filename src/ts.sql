@@ -4,6 +4,17 @@ SELECT show_chunks('history');
 --list version
 SELECT extversion FROM pg_extension WHERE extname='timescaledb'\gx
 
+--size of chunks and dates
+SELECT hypertable_name,
+to_timestamp(range_start_integer) AS range_start,
+to_timestamp(range_end_integer) AS range_end,
+chunk_name,
+(range_end_integer-range_start_integer) AS size
+FROM timescaledb_information.chunks
+WHERE hypertable_name IN ('history','history_uint','history_str','history_log','history_text','trends_uint','trends')
+AND range_start_integer > EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours')
+ORDER BY 1,2;
+
 --compress manually one chunk. pg 14.5, ts 2.8.1
 SELECT compress_chunk('_timescaledb_internal._hyper_1_489_chunk');
 
