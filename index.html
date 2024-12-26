@@ -504,6 +504,12 @@ Most busy item for preprocessing worker<pre><code>grep zabbix_server.log | grep 
 <p>Download this section: <a href="src/grep.sh">https://aigarskadikis.github.io/src/grep.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/grep.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/grep.sh</a></p>
 </div>
+<input type="radio" name="tabs" id="jmx"><label for="jmx">jmx</label><div class="tab">
+Check that the JMX agent requires SSL for RMI registry<pre><code>curl -vvv -k https://127.0.0.1:9990
+openssl s_client -showcerts -connect 127.0.0.1:9990</code></pre>
+<p>Download this section: <a href="src/jmx.sh">https://aigarskadikis.github.io/src/jmx.sh</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/jmx.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/jmx.sh</a></p>
+</div>
 <input type="radio" name="tabs" id="my"><label for="my">my</label><div class="tab">
 List of MySQL tables/partitions by size<pre><code>du -ab /var/lib/mysql > /tmp/size.of.tables.txt
 du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt</code></pre>
