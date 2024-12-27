@@ -30,6 +30,26 @@ GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;
 
+--triggerid generates problems in time order
+SELECT clock, ns, eventid, name,
+CASE value
+WHEN 0 THEN 'resolved'
+WHEN 1 THEN 'starts'
+END AS "problem"
+FROM events
+WHERE objectid=27375 AND clock BETWEEN 0 AND 1734517730
+ORDER BY clock DESC, ns DESC;
+
+--triggerid generates problems in time order, sort by eventid
+SELECT clock, ns, eventid, name,
+CASE value
+WHEN 0 THEN 'resolved'
+WHEN 1 THEN 'starts'
+END AS "problem"
+FROM events
+WHERE objectid=27375 AND clock BETWEEN 0 AND 1734517730
+ORDER BY eventid DESC;
+
 --active and inactive sessions. Zabbix 6.0
 SELECT users.username, CASE sessions.status
 WHEN 0 THEN 'active'
