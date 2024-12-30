@@ -25,8 +25,26 @@ ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb
 # merge back
 cat frontend.config.and.logs.tar.xz_* > together.tar.xz
 
+# yt-dlp best audio and video 
+yt-dlp -f "bv[ext!=webm]+ba/b[ext!=webm]" --download-archive archive.log
+
+# delete line with sed
+sed -i '/^Hostname=Zabbix proxy$/d' /etc/zabbix/zabbix_proxy.conf
+
+# list files inside package rpm
+rpm -ql package_name
+
+# convert short IPv6 format to long
+python3 -c "import ipaddress; print(ipaddress.IPv6Address('2001:db8::1').exploded)"
+
 # test port
 nc -zv ip 10050
+
+# crop video from 1920x1200 to 1920x1080p
+ffmpeg -i input.mkv -vf "crop=1920:1080:0:60" -c:v libx264 -crf 18 -preset veryfast -c:a copy output.mkv
+
+# screen with logging enabled
+screen -L -Logfile /tmp/screen.log
 
 # avoid asking for service restarts on Ubuntu 22/24
 echo "\$nrconf{restart} = 'a';" | sudo tee /etc/needrestart/conf.d/no-prompt.conf
