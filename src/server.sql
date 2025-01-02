@@ -30,6 +30,29 @@ GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;
 
+--lld rules
+SELECT COUNT(*), origin.host AS Template, another.name AS LLD,
+CONCAT('host_discovery.php?form=update&itemid=',items.templateid,'&context=template') AS URL
+FROM items
+JOIN hosts ON hosts.hostid=items.hostid
+JOIN items another ON another.itemid=items.templateid
+JOIN hosts origin ON origin.hostid=another.hostid
+WHERE hosts.status=0 AND items.status=0
+AND hosts.flags IN (0,4)
+AND items.flags=1
+GROUP BY 2,3,4
+ORDER BY 1 ASC;
+
+--aggressive hosts
+SELECT COUNT(*), items.key_, items.delay, GROUP_CONCAT(hosts.host) FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0 AND hosts.flags IN (0,4)
+AND items.status=0 AND items.flags=1
+AND items.delay not like '%d'
+AND items.delay not like '%h'
+GROUP BY 2,3
+ORDER BY 1;
+
 --triggerid generates problems in time order
 SELECT clock, ns, eventid, name,
 CASE value
