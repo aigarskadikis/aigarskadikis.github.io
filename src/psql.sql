@@ -4,6 +4,16 @@ NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_typ
 FROM pg_stat_activity
 WHERE (NOW() - pg_stat_activity.query_start) > interval '3 seconds';
 
+--reset owner
+ALTER TABLE history OWNER TO zabbix;
+ALTER TABLE history_uint OWNER TO zabbix;
+ALTER TABLE history_str OWNER TO zabbix;
+ALTER TABLE history_log OWNER TO zabbix;
+ALTER TABLE history_text OWNER TO zabbix;
+ALTER TABLE trends OWNER TO zabbix;
+ALTER TABLE trends_uint OWNER TO zabbix;
+ALTER TABLE history_bin OWNER TO zabbix;
+
 --monitor process. postgres. PostgreSQL
 SELECT * FROM pg_stat_activity WHERE state != 'idle';
 
