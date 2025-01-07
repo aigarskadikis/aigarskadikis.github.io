@@ -26,6 +26,9 @@ Raspberry Pi 4 4GB, 8GB model<br />
 Download:<br />
 <a href="https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2024-11-19/2024-11-19-raspios-bookworm-arm64-lite.img.xz">https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2024-11-19/2024-11-19-raspios-bookworm-arm64-lite.img.xz</a><br />
 
+Push image:<pre><code>xzcat 2024-11-19-raspios-bookworm-arm64-lite.img.xz | sudo dd bs=4M of=/dev/sdb status=progress; sync;</code></pre>
+
+
 <h2>Pros</h2>
 <ul>
 <li>SD card is never corrupted, Raspberry Pi lives forever</li>
