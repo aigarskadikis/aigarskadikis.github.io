@@ -486,6 +486,14 @@ Work with Zabbix source<pre><code>dnf -y install git automake gcc</code></pre>
 <p>Download this section: <a href="src/el8.sh">https://aigarskadikis.github.io/src/el8.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/el8.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/el8.sh</a></p>
 </div>
+<input type="radio" name="tabs" id="excel"><label for="excel">excel</label><div class="tab">
+Convert test string to LLD macro<pre><code>="{#"&UPPER(A2)&"}"</code></pre>
+Substitute<pre><code>=SUBSTITUTE(A2, "entPhysical", "")</code></pre>
+Extract "ENTITY-MIB" from "ENTITY-MIB::entPhysicalDescr"<pre><code>=LEFT(A2,FIND("::",A2)-1)</code></pre>
+Extract "entPhysicalDescr" from "ENTITY-MIB::entPhysicalDescr"<pre><code>=RIGHT(A2,LEN(A2)-FIND("::",A2)-1)</code></pre>
+<p>Download this section: <a href="src/excel.sh">https://aigarskadikis.github.io/src/excel.sh</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/excel.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/excel.sh</a></p>
+</div>
 <input type="radio" name="tabs" id="get"><label for="get">get</label><div class="tab">
 MySQL monitoring through Zabbix agent 2<pre><code>zabbix_get -s 127.0.0.1 -k 'mysql.get_status_variables["tcp://127.0.0.1:3306","zbx_monitor","zabbix"]'</code></pre>
 PostgreSQL monitoring through Zabbix agent 2<pre><code>zabbix_get -s 127.0.0.1 -k 'pgsql.dbstat["tcp://127.0.0.1:5432","zbx_monitor","zabbix"]'</code></pre>
