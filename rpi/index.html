@@ -172,9 +172,11 @@ Group=root
 sudo systemctl daemon-reload && \
 sudo systemctl stop zabbix-proxy zabbix-agent && \
 sudo rm -rf /var/log/zabbix/* /tmp/zabbix* && \
+sudo apt clean && \
 sudo systemctl enable zabbix-proxy zabbix-agent && \
 sudo systemctl stop wpa_supplicant.service && \
 sudo apt-get remove --purge bluez pi-bluetooth wpasupplicant -y && \
+sudo apt remove --purge alsa-utils alsa-topology-conf alsa-ucm-conf libasound2 libasound2-data libv4l-0 libv4l2rds0 libv4lconvert0 libflac12 libvorbis0a libogg0 libavahi-common-data libavahi-common3 libavahi-core7 libavif15 libdav1d6 libaom3 libheif1 libwebp7 libx265-199 libcamera-ipa libcamera0.3 v4l-utils mkvtoolnix -y && \
 sudo apt autoremove -y && \
 echo "
 blacklist btbcm
@@ -182,6 +184,9 @@ blacklist hci_uart
 blacklist bluetooth
 " | sudo tee /etc/modprobe.d/blacklist-bluetooth.conf && \
 sudo update-initramfs -u
+
+
+sudo apt autoremove --purge
 
 
  && \
