@@ -72,9 +72,6 @@ Allow agent running under root (this will allow even installing packages with "a
 Allow agent active checks to be cached in memory (can be usefull if using Wi-Fi connection to internet):<pre><code>sudo sed -i 's|^.*BufferSize=.*|BufferSize=65535|' /etc/zabbix/zabbix_agentd.conf</code></pre>
 
 
-
-
-
 make agent conf directory on fat partition:<pre><code>sudo mkdir -p /boot/firmware/zabbix_agentd.d</code></pre>
 write extra settings:<pre><code>echo "
 AllowKey=system.run[*]
@@ -123,13 +120,13 @@ Enable overlayer FS, open "performance options":<pre><code>sudo raspi-config</co
 
 Alternative setup method:<pre><code>
 
-
-echo "Include=/boot/firmware/zabbix_proxy.d/*.conf" | sudo tee /etc/zabbix/zabbix_proxy.conf
-
-sudo rm /etc/zabbix/zabbix_proxy.d -rf
-
-sudo mkdir -p /boot/firmware/zabbix_proxy.d
-
+wget "https://repo.zabbix.com/zabbix/7.0/raspbian/pool/main/z/zabbix-release/zabbix-release_latest_7.0+debian12_all.deb" && \
+sudo dpkg -i zabbix-release_latest_7.0+debian12_all.deb && \
+sudo apt update && \
+sudo apt install zabbix-proxy-sqlite3 zabbix-get zabbix-sender zabbix-js zabbix-agent vim -y && \
+echo "Include=/boot/firmware/zabbix_proxy.d/*.conf" | sudo tee /etc/zabbix/zabbix_proxy.conf && \
+sudo rm /etc/zabbix/zabbix_proxy.d -rf && \
+sudo mkdir -p /boot/firmware/zabbix_proxy.d && \
 echo "
 AllowRoot=1
 CacheSize=512M
@@ -145,15 +142,10 @@ ProxyBufferMode=disk
 Server=zabbixServer
 SocketDir=/run/zabbix
 StatsAllowedIP=127.0.0.1
-" | sudo tee /boot/firmware/zabbix_proxy.d/zabbix_proxy.conf
-
-
-echo "Include=/boot/firmware/zabbix_agentd.d/*.conf" | sudo tee /etc/zabbix/zabbix_agentd.conf
-
-sudo rm /etc/zabbix/zabbix_agentd.d -rf
-
-sudo mkdir -p /boot/firmware/zabbix_agentd.d
-
+" | sudo tee /boot/firmware/zabbix_proxy.d/zabbix_proxy.conf && \
+echo "Include=/boot/firmware/zabbix_agentd.d/*.conf" | sudo tee /etc/zabbix/zabbix_agentd.conf && \
+sudo rm /etc/zabbix/zabbix_agentd.d -rf && \
+sudo mkdir -p /boot/firmware/zabbix_agentd.d && \
 echo "
 AllowKey=system.run[*]
 AllowRoot=1
@@ -164,17 +156,42 @@ LogRemoteCommands=1
 PidFile=/run/zabbix/zabbix_agentd.pid
 Server=127.0.0.1
 ServerActive=127.0.0.1
-StartAgents=3
-" | sudo tee /boot/firmware/zabbix_agentd.d/zabbix_agentd.conf
+" | sudo tee /boot/firmware/zabbix_agentd.d/zabbix_agentd.conf && \
+sudo mkdir -p /etc/systemd/system/zabbix-agent.service.d && \
+echo "
+[Service]
+User=root
+Group=root
+" | sudo tee /etc/systemd/system/zabbix-agent.service.d/override.conf && \
+sudo mkdir -p /etc/systemd/system/zabbix-proxy.service.d && \
+echo "
+[Service]
+User=root
+Group=root
+" | sudo tee /etc/systemd/system/zabbix-proxy.service.d/override.conf && \
+sudo systemctl daemon-reload && \
+sudo systemctl stop zabbix-proxy zabbix-agent && \
+sudo rm -rf /var/log/zabbix/* /tmp/zabbix* && \
+sudo systemctl enable zabbix-proxy zabbix-agent && \
+sudo systemctl stop wpa_supplicant.service && \
+sudo apt-get remove --purge bluez pi-bluetooth wpasupplicant -y && \
+sudo apt autoremove -y && \
+echo "
+blacklist btbcm
+blacklist hci_uart
+blacklist bluetooth
+" | sudo tee /etc/modprobe.d/blacklist-bluetooth.conf && \
+sudo update-initramfs -u
 
-sudo systemctl stop zabbix-proxy zabbix-agent && sudo rm -rf /var/log/zabbix/* /tmp/zabbix*
 
+ && \
+sudo raspi-config
 
 </code></pre>
 
 
 
-Remove bluetooth related packages:<pre><code>sudo apt-get remove --purge bluez pi-bluetooth</code></pre>
+Remove bluetooth related packages:<pre><code>sudo apt-get remove --purge bluez pi-bluetooth wpasupplicant</code></pre>
 Blacklist bluetooth module:<pre><code>
 lsmod | grep -E "btbcm|hci_uart|bluetooth|Used"
 echo "
