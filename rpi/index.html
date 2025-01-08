@@ -17,21 +17,20 @@ pre{
 <h1>Zabbix proxy 7.0 on Raspberry Pi 4</h1>
 
 <h2>What is this?</h2>
-Instruction to setup Zabbix Proxy on raspberry Pi which will live forever.<br />
+Instruction to setup Zabbix Proxy on raspberry Pi.<br />
 
 <h2>Pros</h2>
 <ul>
-<li>No writes are done to SD card</li>
+<li>Setup OS layer where no writes are done to SD card. Prolong life of SD card</li>
 <li>Disk will run of a speed of LPDDR4</li>
-<li>Can use Pi to test an installation of different software. Revert back to it's original state with one system reboot</li>
-<li>Finally some use for RPi 4GB, 8GB model</li>
+<li>Can use Pi to test an installation of different software. Revert back to it's original state with a single system reboot</li>
 </ul>
 
 <h2>Cons</h2>
 <ul>
 <li>Timeconsuming to update/patch OS. Every time need to patch the whole system, this will cost at least 2 restarts</li>
 <li>OS will not remember installed packages</li>
-<li>Old logs will be missing in case of restart</li>
+<li>Old logs will be missing in case of a system restart</li>
 </ul>
 
 <h2>Prerequsites</h2>
@@ -64,10 +63,11 @@ echo "Include=/boot/firmware/zabbix_proxy.d/*.conf" | sudo tee /etc/zabbix/zabbi
 echo "Remove zabbix_proxy.d directory to not bother" && \
 sudo rm /etc/zabbix/zabbix_proxy.d -rf && \
 
-echo "Create zabbix_proxy.conf in the fat32 partition" && \
+echo "Create zabbix_proxy.conf in the fat32 partition. usefull for SD cloning and Windows administrators" && \
 sudo mkdir -p /boot/firmware/zabbix_proxy.d && \
 
-echo "Install proxy configuration file" && \
+echo "Install proxy configuration file. For all options consult:" && \
+echo "https://git.zabbix.com/projects/ZBX/repos/zabbix/browse/conf/zabbix_proxy.conf?at=refs%2Fheads%2Frelease%2F7.0" && \
 echo "
 AllowRoot=1
 CacheSize=512M
@@ -91,7 +91,8 @@ echo "Include=/boot/firmware/zabbix_agentd.d/*.conf" | sudo tee /etc/zabbix/zabb
 sudo rm /etc/zabbix/zabbix_agentd.d -rf && \
 sudo mkdir -p /boot/firmware/zabbix_agentd.d && \
 
-echo "Install agent configuration file" && \
+echo "Install agent configuration file. For all options consult:" && \
+echo "https://git.zabbix.com/projects/ZBX/repos/zabbix/browse/conf/zabbix_agentd.conf?at=release%2F7.0" && \
 echo "
 AllowKey=system.run[*]
 AllowRoot=1
