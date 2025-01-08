@@ -151,6 +151,7 @@ cat "$A"|grep "$B"||systemctl restart zabbix-proxy && echo -n "$B">"$A"
 ' | sudo tee /usr/local/bin/proxy.d.sh && \
 sudo touch /boot/firmware/.proxy && \
 sudo chmod +x /usr/local/bin/proxy.d.sh && \
+echo "18 * * * * root /usr/local/bin/proxy.d.sh" | sudo tee /etc/cron.d/trigger_zabbix_proxy_restart && \
 
 echo "Install script to restart Zabbix agent if conf changed" && \
 echo '
@@ -161,6 +162,7 @@ cat "$A"|grep "$B"||systemctl restart zabbix-agent && echo -n "$B">"$A"
 ' | sudo tee /usr/local/bin/agentd.d.sh  && \
 sudo touch /boot/firmware/.agentd && \
 sudo chmod +x /usr/local/bin/agentd.d.sh && \
+echo "28 * * * * root /usr/local/bin/agentd.d.sh" | sudo tee /etc/cron.d/trigger_zabbix_agentd_restart && \
 
 echo "Disable wifi and bluetooth" && \
 sudo grep "dtoverlay=disable-wifi" /boot/firmware/config.txt || echo "dtoverlay=disable-wifi" | sudo tee --append /boot/firmware/config.txt
@@ -180,6 +182,7 @@ See existence of overlayroot:
 <pre><code>df -h</code></pre>
 
 check speed:<pre><code>sudo dd if=/dev/random of=file bs=1M count=3076 status=progress;sync;
+sudo dd if=/dev/zero of=file bs=1M count=3076 status=progress;sync;
 df -h
 rm file</code></pre>
 
