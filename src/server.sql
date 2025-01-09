@@ -30,6 +30,9 @@ GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 20;
 
+--migrate template/host level macros from one host to another. Zabbix 6.4
+UPDATE hostmacro SET hostid=34094 WHERE hostid=34098;
+
 --lld rules
 SELECT COUNT(*), origin.host AS Template, another.name AS LLD,
 CONCAT('host_discovery.php?form=update&itemid=',items.templateid,'&context=template') AS URL
