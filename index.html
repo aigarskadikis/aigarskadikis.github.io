@@ -792,6 +792,127 @@ Snmpsim<pre><code>docker run -v /usr/share/snmpsim/data:/usr/local/snmpsim/data 
 <p>Download this section: <a href="src/pod.sh">https://aigarskadikis.github.io/src/pod.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pod.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pod.sh</a></p>
 </div>
+<input type="radio" name="tabs" id="postgres"><label for="postgres">postgres</label><div class="tab">
+Discard (rename) current data tables from the application layer. Set back an empty table<pre><code>DB=zabbix
+OLD=_old
+MIGRATE=_migrate
+echo "
+history
+history_uint
+history_str
+history_log
+history_text
+trends
+trends_uint
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+psql $DB --command="
+ALTER TABLE $TABLE RENAME TO $TABLE$OLD;
+CREATE TABLE $TABLE (LIKE $TABLE$OLD INCLUDING ALL);
+ALTER TABLE $TABLE OWNER TO zabbix;
+CREATE TABLE $TABLE$MIGRATE (LIKE $TABLE$OLD INCLUDING ALL);
+ALTER TABLE $TABLE$MIGRATE OWNER TO zabbix;
+"
+} done</code></pre>
+Download historical data<pre><code>DB=zabbix
+date
+echo "
+history_old
+history_uint_old
+history_str_old
+history_log_old
+history_text_old
+trends_old
+trends_uint_old
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+date
+echo $TABLE
+PGUSER=postgres \
+psql --dbname=$DB \
+--command="COPY (SELECT * FROM $TABLE) TO stdout DELIMITER E'\t' CSV" |\
+lz4 > /tmp/$DB.$TABLE.tsv.lz4
+} done
+date
+ls -lh /tmp/$DB.*
+cd</code></pre>
+Validate if some data is stored<pre><code>DB=zabbix
+echo "
+history_old
+history_uint_old
+history_str_old
+history_log_old
+history_text_old
+trends_old
+trends_uint_old
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+echo $TABLE
+ls -lh /tmp/$DB.$TABLE.tsv.lz4
+lz4cat /tmp/$DB.$TABLE.tsv.lz4 | head -1
+} done
+cd</code></pre>
+Download current<pre><code>DB=zabbix
+date
+echo "
+history
+history_uint
+history_str
+history_log
+history_text
+trends
+trends_uint
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+date
+echo $TABLE
+PGUSER=postgres \
+psql --dbname=$DB \
+--command="COPY (SELECT * FROM $TABLE) TO stdout DELIMITER E'\t' CSV" |\
+lz4 > /tmp/$DB.$TABLE.tsv.lz4
+} done
+ls -lh /tmp/$DB.*
+date
+cd</code></pre>
+Restore all graphs in background<pre><code>DB=zabbix
+date
+OLD=_old
+MIGRATE=_migrate
+echo "
+trends
+trends_uint
+history
+history_uint
+history_str
+history_log
+history_text
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+date
+echo "big upload per ${TABLE}${OLD}"
+psql $DB --command="\COPY ${TABLE}${OLD} FROM PROGRAM 'lz4cat /tmp/${DB}.${TABLE}${OLD}.tsv.lz4' DELIMITER E'\t' CSV"
+date
+echo "upload data per ${TABLE}${MIGRATE} during migration"
+psql $DB --command="\COPY ${TABLE}${MIGRATE} FROM PROGRAM 'lz4cat /tmp/${DB}.${TABLE}.tsv.lz4' DELIMITER E'\t' CSV"
+date
+echo "merging all data together inside ${TABLE}${OLD}"
+psql $DB --command="INSERT INTO ${TABLE}${OLD} SELECT * FROM ${TABLE}${MIGRATE} ON CONFLICT DO NOTHING;"
+} done
+date
+cd</code></pre>
+<p>Download this section: <a href="src/postgres.sh">https://aigarskadikis.github.io/src/postgres.sh</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/postgres.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/postgres.sh</a></p>
+</div>
 <input type="radio" name="tabs" id="sed"><label for="sed">sed</label><div class="tab">
 Reinstall values which have been already customized<pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
 sed -i 's|^ValueCacheSize=.*|ValueCacheSize=768M|' /etc/zabbix/zabbix_server.conf && grep ^ValueCacheSize /etc/zabbix/zabbix_server.conf
