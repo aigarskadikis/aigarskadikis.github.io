@@ -1,0 +1,221 @@
+<html><head>
+	<style>
+pre{
+    padding:.3em 2em .3em .5em;
+    margin:0 0 1em;
+    background-color:#FFF7F0;
+    border-radius:3px;
+	white-space: pre-wrap;
+    overflow-x: auto;
+  word-wrap: break-word;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Zabbix proxy 7.0 on Raspberry Pi 4</h1>
+
+<h2>What is this?</h2>
+This method allow to configure the Pi to not do any writes to SD card which therotically should let the Pi live forever (never corrupt micro sd card).<br />
+
+<h2>Prerequsites</h2>
+Raspberry Pi 4 4GB, 8GB model<br />
+
+<h2>Download Raspberry Pi OS Lite image</h2>
+Download:<br />
+<a href="https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2024-11-19/2024-11-19-raspios-bookworm-arm64-lite.img.xz">https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2024-11-19/2024-11-19-raspios-bookworm-arm64-lite.img.xz</a><br />
+
+Push image:<pre><code>xzcat 2024-11-19-raspios-bookworm-arm64-lite.img.xz | sudo dd bs=4M of=/dev/sdb status=progress; sync;</code></pre>
+
+
+<h2>Pros</h2>
+<ul>
+<li>SD card is never corrupted, Raspberry Pi lives forever</li>
+<li>Disk will run of a speed of LPDDR4 (outbeats disk speed for Raspberry Pi 5 with M2)</li>
+<li>Can use Rpi to test an installation of different software. Revert back to it's original state with one system reboot</li>
+<li>Finally some use for RPi 4GB, 8GB model</li>
+</ul>
+
+<h2>Cons</h2>
+<ul>
+<li>Timeconsuming to update/patch OS. every time need to patch the whole system, this will cost at least 2 restarts</li>
+<li>OS will not remember installed packages</li>
+</ul>
+
+Push image to SD card:
+<pre><code>sudo dd if=2024-11-19-raspios-bookworm-arm64-lite.img of=/dev/sdb bs=1M status=progress; sync;</code></pre>
+
+Set hostname:<pre><code>sudo raspi-config</code></pre>
+Ensure it's Debian GNU/Linux 12 (bookworm):<pre><code>cat /etc/*release*</code></pre>
+Download Zabbix 7.0 LTS repository:<pre><code>wget https://repo.zabbix.com/zabbix/7.0/raspbian/pool/main/z/zabbix-release/zabbix-release_latest_7.0+debian12_all.deb</code></pre>
+Install Zabbix repostiory:<pre><code>sudo dpkg -i zabbix-release_latest_7.0+debian12_all.deb</code></pre>
+Update system repositories:<pre><code>sudo apt update</code></pre>
+Install Zabbix proxy, Zabbix agent:<pre><code>sudo apt install zabbix-proxy-sqlite3 zabbix-get zabbix-sender zabbix-js zabbix-agent vim -y</code></pre>
+Disable services while configuring them:<pre><code>sudo systemctl disable --now zabbix-agent zabbix-proxy</code></pre>
+
+<h2>zabbix_proxy.conf</h2>
+Do not allow logs to fullfill the RAM. Logs size will not exceed 100 MB:<pre><code>sudo sed -i 's|^LogFileSize=.*|LogFileSize=100|' /etc/zabbix/zabbix_proxy.conf</code></pre>
+Delete static identity of proxy:<pre><code>sudo sed -i '/^Hostname=Zabbix proxy$/d' /etc/zabbix/zabbix_proxy.conf</code></pre>
+Tell proxy where central Zabbix server located:<pre><code>sudo sed -i 's|^Server=.*|Server=zabbixServer|' /etc/zabbix/zabbix_proxy.conf</code></pre>
+Enable remote command logging:<pre><code>sudo sed -i 's|^.*LogRemoteCommands=.*|LogRemoteCommands=1|' /etc/zabbix/zabbix_proxy.conf</code></pre>
+Enable remote commands (can use proxy to restart local zabbix agent):<pre><code>sudo sed -i 's|^.*EnableRemoteCommands=.*|EnableRemoteCommands=1|' /etc/zabbix/zabbix_proxy.conf</code></pre>
+Configure where the DB file must be placed:<pre><code>sudo sed -i 's|^DBName=.*|DBName=/tmp/zabbix_proxy.sqlite3|' /etc/zabbix/zabbix_proxy.conf</code></pre>
+Allow agent running under root (this will allow even installing packages with "apt install":<pre><code>sudo sed -i 's|^.*AllowRoot=.*|AllowRoot=1|' /etc/zabbix/zabbix_proxy.conf</code></pre>
+
+
+<h2>zabbix_agentd.conf</h2>
+Do not let logs to fill the RAM:<pre><code>sudo sed -i 's|^LogFileSize=.*|LogFileSize=100|' /etc/zabbix/zabbix_agentd.conf </code></pre>
+Delete static identity:<pre><code>sudo sed -i '/^Hostname=Zabbix server$/d' /etc/zabbix/zabbix_agentd.conf</code></pre>
+Log remote commands:<pre><code>sudo sed -i 's|^.*LogRemoteCommands=.*|LogRemoteCommands=1|' /etc/zabbix/zabbix_agentd.conf</code></pre>
+Allow agent running under root (this will allow even installing packages with "apt install":<pre><code>sudo sed -i 's|^.*AllowRoot=.*|AllowRoot=1|' /etc/zabbix/zabbix_agentd.conf</code></pre>
+Allow agent active checks to be cached in memory (can be usefull if using Wi-Fi connection to internet):<pre><code>sudo sed -i 's|^.*BufferSize=.*|BufferSize=65535|' /etc/zabbix/zabbix_agentd.conf</code></pre>
+
+
+make agent conf directory on fat partition:<pre><code>sudo mkdir -p /boot/firmware/zabbix_agentd.d</code></pre>
+write extra settings:<pre><code>echo "
+AllowKey=system.run[*]
+Include=/boot/firmware/zabbix_agentd.d/*.conf
+" | sudo tee --append /etc/zabbix/zabbix_agentd.conf</code></pre>
+
+make proxy conf directory on fat partition:<pre><code>sudo mkdir -p /boot/firmware/zabbix_proxy.d</code></pre>
+write extra settings:<pre><code>echo "
+Include=/boot/firmware/zabbix_proxy.d/*.conf
+" | sudo tee --append /etc/zabbix/zabbix_proxy.conf</code></pre>
+
+
+summarize proxy conf:<pre><code>sudo grep -E ^[^#] /etc/zabbix/zabbix_proxy.conf | sort</code></pre>
+summarize agent conf:<pre><code>sudo grep -E ^[^#] /etc/zabbix/zabbix_agentd.conf | sort</code></pre>
+
+Allow agent1 under root:<pre><code>sudo mkdir -p /etc/systemd/system/zabbix-agent.service.d
+echo "
+[Service]
+User=root
+Group=root
+" | sudo tee /etc/systemd/system/zabbix-agent.service.d/override.conf</code></pre>
+
+allow proxy to run under root:<pre><code>sudo mkdir -p /etc/systemd/system/zabbix-proxy.service.d
+echo "
+[Service]
+User=root
+Group=root
+" | sudo tee /etc/systemd/system/zabbix-proxy.service.d/override.conf</code></pre>
+reload systemd definitions:<pre><code>sudo systemctl daemon-reload</code></pre>
+
+Start proxy:<pre><code>sudo systemctl start zabbix-proxy && tail -9f /var/log/zabbix/zabbix_proxy.log</code></pre>
+Start local agent:<pre><code>sudo systemctl start zabbix-agent && tail -9f /var/log/zabbix/zabbix_agentd.log</code></pre>
+
+
+Enable services at startup:<pre><code>sudo systemctl enable --now zabbix-proxy zabbix-agent</code></pre>
+stop right now:<pre><code>sudo systemctl stop zabbix-proxy zabbix-agent</code></pre>
+Update system:<pre><code>sudo apt update && sudo apt upgrade -y</code></pre>
+Remove logs:<pre><code>sudo rm -rf /var/log/zabbix/* /tmp/zabbix*</code></pre>
+
+Enable overlayer FS, open "performance options":<pre><code>sudo raspi-config</code></pre>
+:<pre><code>rm zabbix-release_latest_7.0+debian12_all.deb</code></pre>
+
+
+
+
+
+Alternative setup method:<pre><code>
+
+wget "https://repo.zabbix.com/zabbix/7.0/raspbian/pool/main/z/zabbix-release/zabbix-release_latest_7.0+debian12_all.deb" && \
+sudo dpkg -i zabbix-release_latest_7.0+debian12_all.deb && \
+sudo apt update && \
+sudo apt install zabbix-proxy-sqlite3 zabbix-get zabbix-sender zabbix-js zabbix-agent vim -y && \
+echo "Include=/boot/firmware/zabbix_proxy.d/*.conf" | sudo tee /etc/zabbix/zabbix_proxy.conf && \
+sudo rm /etc/zabbix/zabbix_proxy.d -rf && \
+sudo mkdir -p /boot/firmware/zabbix_proxy.d && \
+echo "
+AllowRoot=1
+CacheSize=512M
+DBName=/tmp/zabbix_proxy.sqlite3
+EnableRemoteCommands=1
+Fping6Location=/usr/bin/fping6
+FpingLocation=/usr/bin/fping
+LogFileSize=100
+LogFile=/var/log/zabbix/zabbix_proxy.log
+LogRemoteCommands=1
+PidFile=/run/zabbix/zabbix_proxy.pid
+ProxyBufferMode=disk
+Server=zabbixServer
+SocketDir=/run/zabbix
+StatsAllowedIP=127.0.0.1
+" | sudo tee /boot/firmware/zabbix_proxy.d/zabbix_proxy.conf && \
+echo "Include=/boot/firmware/zabbix_agentd.d/*.conf" | sudo tee /etc/zabbix/zabbix_agentd.conf && \
+sudo rm /etc/zabbix/zabbix_agentd.d -rf && \
+sudo mkdir -p /boot/firmware/zabbix_agentd.d && \
+echo "
+AllowKey=system.run[*]
+AllowRoot=1
+BufferSize=65535
+LogFileSize=100
+LogFile=/var/log/zabbix/zabbix_agentd.log
+LogRemoteCommands=1
+PidFile=/run/zabbix/zabbix_agentd.pid
+Server=127.0.0.1
+ServerActive=127.0.0.1
+" | sudo tee /boot/firmware/zabbix_agentd.d/zabbix_agentd.conf && \
+sudo mkdir -p /etc/systemd/system/zabbix-agent.service.d && \
+echo "
+[Service]
+User=root
+Group=root
+" | sudo tee /etc/systemd/system/zabbix-agent.service.d/override.conf && \
+sudo mkdir -p /etc/systemd/system/zabbix-proxy.service.d && \
+echo "
+[Service]
+User=root
+Group=root
+" | sudo tee /etc/systemd/system/zabbix-proxy.service.d/override.conf && \
+sudo systemctl daemon-reload && \
+sudo systemctl stop zabbix-proxy zabbix-agent && \
+sudo rm -rf /var/log/zabbix/* /tmp/zabbix* && \
+sudo apt clean && \
+sudo systemctl enable zabbix-proxy zabbix-agent && \
+sudo systemctl stop wpa_supplicant.service && \
+sudo apt-get remove --purge bluez pi-bluetooth wpasupplicant -y && \
+sudo apt remove --purge alsa-utils alsa-topology-conf alsa-ucm-conf libasound2 libasound2-data libv4l-0 libv4l2rds0 libv4lconvert0 libflac12 libvorbis0a libogg0 libavahi-common-data libavahi-common3 libavahi-core7 libavif15 libdav1d6 libaom3 libheif1 libwebp7 libx265-199 libcamera-ipa libcamera0.3 v4l-utils mkvtoolnix -y && \
+sudo apt autoremove -y && \
+echo "
+blacklist btbcm
+blacklist hci_uart
+blacklist bluetooth
+" | sudo tee /etc/modprobe.d/blacklist-bluetooth.conf && \
+sudo update-initramfs -u
+
+
+sudo apt autoremove --purge
+
+
+ && \
+sudo raspi-config
+
+</code></pre>
+
+
+
+Remove bluetooth related packages:<pre><code>sudo apt-get remove --purge bluez pi-bluetooth wpasupplicant</code></pre>
+Blacklist bluetooth module:<pre><code>
+lsmod | grep -E "btbcm|hci_uart|bluetooth|Used"
+echo "
+blacklist btbcm
+blacklist hci_uart
+blacklist bluetooth
+" | sudo tee /etc/modprobe.d/blacklist-bluetooth.conf</code></pre>
+regenerate the initramfs to apply changes:
+<pre><code>sudo update-initramfs -u</code></pre>
+
+
+Remove wifi support:<pre><code>sudo systemctl stop wpa_supplicant.service
+sudo apt remove --purge wpasupplicant</code></pre>
+
+</code></pre>
+
+allow oldschool vi navigation</code></pre>echo "syntax enable" > ~/.vimrc
+echo "set mouse-=a" >> ~/.vimrc</code></pre>
+
+</body></html>
+	
+	
