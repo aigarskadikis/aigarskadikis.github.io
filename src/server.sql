@@ -10,6 +10,15 @@ sessions.userid = users.userid
 AND sessions.lastaccess > sessions.lastaccess-(3600*24)
 GROUP BY 1;
 
+--most profesional way how to erase records from MySQL/MariaDB
+CREATE TEMPORARY TABLE tmp_eventids
+SELECT eventid
+FROM problem p
+WHERE NOT EXISTS (SELECT NULL FROM events e WHERE e.eventid = p.eventid);
+DELETE FROM problem
+WHERE eventid IN (SELECT eventid FROM tmp_eventids);
+DROP TEMPORARY TABLE tmp_eventids;
+
 --detect when Keep lost resources period is not installed in danger. Zabbix 5.2
 SELECT hosts.host,items.name FROM items, hosts
 WHERE hosts.hostid=items.hostid
