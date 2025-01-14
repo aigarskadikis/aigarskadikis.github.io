@@ -19,6 +19,17 @@ DELETE FROM problem
 WHERE eventid IN (SELECT eventid FROM tmp_eventids);
 DROP TEMPORARY TABLE tmp_eventids;
 
+--which userid is disabling triggers. Zabbix 7.0
+SELECT DISTINCT auditlog.recordsetid, hosts.host, auditlog.clock, auditlog.userid, triggers.triggerid, auditlog.details
+FROM auditlog, triggers, functions, hosts, items
+WHERE auditlog.resourcetype = 13
+AND auditlog.action = 1
+AND triggers.triggerid = auditlog.resourceid
+AND functions.triggerid = triggers.triggerid
+AND items.itemid = functions.itemid
+AND hosts.hostid = items.hostid
+ORDER BY auditlog.clock DESC LIMIT 2;
+
 --detect when Keep lost resources period is not installed in danger. Zabbix 5.2
 SELECT hosts.host,items.name FROM items, hosts
 WHERE hosts.hostid=items.hostid
