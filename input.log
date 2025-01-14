@@ -1,0 +1,25 @@
+530733:20250112:190711.072 skipped 820 duplicates
+530733:20250112:190711.113 [Z3008] query failed due to primary key constraint: [0] PGRES_FATAL_ERROR:ERROR: duplicate key value violates unique constraint "910_520_history_pkey"
+DETAIL: Key (itemid, clock, ns)=(46463, 1736708423, 143207762) already exists.
+
+530733:20250112:190711.146 skipped 475 duplicates
+530733:20250112:190711.183 [Z3008] query failed due to primary key constraint: [0] PGRES_FATAL_ERROR:ERROR: duplicate key value violates unique constraint "910_520_history_pkey"
+DETAIL: Key (itemid, clock, ns)=(49343, 1736708423, 396258681) already exists.
+
+530733:20250112:190711.416 skipped 858 duplicates
+530733:20250112:190711.463 [Z3008] query failed due to primary key constraint: [0] PGRES_FATAL_ERROR:ERROR: duplicate key value violates unique constraint "910_520_history_pkey"
+DETAIL: Key (itemid, clock, ns)=(46464, 1736708424, 499694430) already exists.
+
+530733:20250112:190711.502 skipped 369 duplicates
+530733:20250112:190711.523 [Z3008] query failed due to primary key constraint: [0] PGRES_FATAL_ERROR:ERROR: duplicate key value violates unique constraint "910_520_history_pkey"
+DETAIL: Key (itemid, clock, ns)=(48924, 1736708424, 546444920) already exists.
+
+530733:20250112:190711.555 skipped 478 duplicates
+530733:20250112:190711.589 [Z3008] query failed due to primary key constraint: [0] PGRES_FATAL_ERROR:ERROR: duplicate key value violates unique constraint "910_520_history_pkey"
+DETAIL: Key (itemid, clock, ns)=(112884, 1736708424, 565371254) already exists.
+
+530733:20250112:190711.647 skipped 26 duplicates
+530733:20250112:190722.777 syncing history data... 0.701388%
+530733:20250112:190722.783 item "AAG_OLCASCO_PRD:db.odbc.select[databasconnections,,"Driver={$MSSQL.DRIVER};Server={$MSSQL.SERVER};Port={$MSSQL.PORT};TrustServerCertificate=yes"]" became supported
+530733:20250112:190826.073 cannot connect to service manager service: Cannot connect to service "service": [111] Connection refused.
+530971:20250112:190837.384 Starting Zabbix Server. Zabbix 6.4.20 (revision 114e4f42c15).
