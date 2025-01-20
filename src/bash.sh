@@ -13,6 +13,9 @@ echo $LINE
 # poller busy
 watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
 
+# received traffic which originated only from remote host
+tcpdump -e -i any -c 1000 -nn -tt -q -l 'ip and inbound and tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
+
 # convert to readable date
 tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(..\)/\2-\3-\4 \5:\6:\7/'
 
