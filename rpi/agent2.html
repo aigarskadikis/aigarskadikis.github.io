@@ -114,6 +114,42 @@ User=root
 Group=root
 " | sudo tee /etc/systemd/system/zabbix-agent.service.d/override.conf && \
 
+
+
+
+sudo mkdir -p /boot/firmware/zabbix_agent2.d && \
+
+echo "Install agent 2 configuration file. For all options consult:" && \
+echo "https://git.zabbix.com/projects/ZBX/repos/zabbix/browse/conf/zabbix_agent2.conf?at=release%2F7.0" && \
+echo "
+AllowKey=system.run[*]
+BufferSize=65535
+LogFileSize=100
+LogFile=/var/log/zabbix/zabbix_agent2.log
+LogRemoteCommands=1
+PidFile=/run/zabbix/zabbix_agent2.pid
+PluginSocket=/run/zabbix/agent.plugin.sock
+ControlSocket=/run/zabbix/agent.sock
+ListenPort=12050
+Server=127.0.0.1
+ServerActive=127.0.0.1
+" | sudo tee /boot/firmware/zabbix_agent2.d/zabbix_agent2.conf && \
+
+echo "Create a directory to redefine systemd definition for agent 2" && \
+sudo mkdir -p /etc/systemd/system/zabbix-agent2.service.d && \
+
+echo "Set Zabbix agent ro run under user root" && \
+echo "
+[Service]
+User=root
+Group=root
+" | sudo tee /etc/systemd/system/zabbix-agent2.service.d/override.conf && \
+
+
+
+
+
+
 echo "Create a directory to redefine systemd definition for proxy" && \
 sudo mkdir -p /etc/systemd/system/zabbix-proxy.service.d && \
 
@@ -168,6 +204,10 @@ echo "Disable wifi and bluetooth" && \
 sudo grep "dtoverlay=disable-wifi" /boot/firmware/config.txt || echo "dtoverlay=disable-wifi" | sudo tee --append /boot/firmware/config.txt
 sudo grep "dtoverlay=disable-bt" /boot/firmware/config.txt || echo "dtoverlay=disable-bt" | sudo tee --append /boot/firmware/config.txt
 </code></pre>
+
+
+Move agent 2 plugins:<pre><code>sudo mv /etc/zabbix/zabbix_agent2.d/plugins.d /boot/firmware/zabbix_agent2.d
+rm -rf /etc/zabbix/zabbix_agent2.d</code></pre>
 
 Set hostname and enable overlay filesystem:
 <pre><code>sudo raspi-config</code></pre>
