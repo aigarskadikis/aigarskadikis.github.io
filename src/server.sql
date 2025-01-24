@@ -10,6 +10,16 @@ sessions.userid = users.userid
 AND sessions.lastaccess > sessions.lastaccess-(3600*24)
 GROUP BY 1;
 
+--How many autoregistration hits per device in 1h/1d? How many records are in total per day? PostgreSQL Zabbix 7.0
+SELECT COUNT(*), autoreg_host.host FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > EXTRACT(EPOCH FROM NOW() - INTERVAL '1 hours') GROUP BY 2 ORDER BY 1 DESC LIMIT 20;
+SELECT COUNT(*), autoreg_host.host FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours') GROUP BY 2 ORDER BY 1 DESC LIMIT 20;
+SELECT COUNT(*) FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours');
+
+--How many autoregistration hits per device in 1h/1d? How many records are in total per day? MySQL Zabbix 7.0
+SELECT COUNT(*), autoreg_host.host FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR) GROUP BY 2 ORDER BY 1 DESC LIMIT 20;
+SELECT COUNT(*), autoreg_host.host FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR) GROUP BY 2 ORDER BY 1 DESC LIMIT 20;
+SELECT COUNT(*) FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR);
+
 --most profesional way how to erase records from MySQL/MariaDB
 CREATE TEMPORARY TABLE tmp_eventids
 SELECT eventid

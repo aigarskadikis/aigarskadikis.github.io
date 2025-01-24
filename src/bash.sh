@@ -25,6 +25,10 @@ tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(
 # memory situation in megabytes
 ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb ",hr) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' | cut -d "" -f2 | cut -d "-" -f1
 
+# interface unavailable
+grep :20250124:01 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c
+grep :20250124:03 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c
+
 # merge back
 cat frontend.config.and.logs.tar.xz_* > together.tar.xz
 
