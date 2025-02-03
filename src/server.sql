@@ -29,6 +29,20 @@ DELETE FROM problem
 WHERE eventid IN (SELECT eventid FROM tmp_eventids);
 DROP TEMPORARY TABLE tmp_eventids;
 
+--tell the data table
+SELECT items.name,
+CASE items.value_type
+WHEN 0 THEN 'history'
+WHEN 1 THEN 'history_str'
+WHEN 2 THEN 'history_log'
+WHEN 3 THEN 'history_uint'
+WHEN 4 THEN 'history_text'
+WHEN 5 THEN 'history_bin'
+END AS tableName, items.itemid
+FROM hosts, items
+WHERE hosts.hostid=items.hostid
+AND hosts.host='Zabbix server';
+
 --which userid is disabling triggers. Zabbix 7.0
 SELECT DISTINCT auditlog.recordsetid, hosts.host, auditlog.clock, auditlog.userid, triggers.triggerid, auditlog.details
 FROM auditlog, triggers, functions, hosts, items

@@ -1346,8 +1346,8 @@ How many autoregistration hits per device in 1h/1d? How many records are in tota
 SELECT COUNT(*), autoreg_host.host FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours') GROUP BY 2 ORDER BY 1 DESC LIMIT 20;
 SELECT COUNT(*) FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours');</code></pre>
 How many autoregistration hits per device in 1h/1d? How many records are in total per day? MySQL Zabbix 7.0<pre><code>SELECT COUNT(*), autoreg_host.host FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR) GROUP BY 2 ORDER BY 1 DESC LIMIT 20;
-SELECT COUNT(*), autoreg_host.host FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR) GROUP BY 2 ORDER BY 1 DESC LIMIT 20;
-SELECT COUNT(*) FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR);</code></pre>
+SELECT COUNT(*), autoreg_host.host FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 24 HOUR) GROUP BY 2 ORDER BY 1 DESC LIMIT 20;
+SELECT COUNT(*) FROM autoreg_host, events WHERE events.objectid=autoreg_host.autoreg_hostid AND events.clock > UNIX_TIMESTAMP(NOW()-INTERVAL 24 HOUR);</code></pre>
 Most profesional way how to erase records from MySQL/MariaDB<pre><code>CREATE TEMPORARY TABLE tmp_eventids
 SELECT eventid
 FROM problem p
@@ -1355,6 +1355,18 @@ WHERE NOT EXISTS (SELECT NULL FROM events e WHERE e.eventid = p.eventid);
 DELETE FROM problem
 WHERE eventid IN (SELECT eventid FROM tmp_eventids);
 DROP TEMPORARY TABLE tmp_eventids;</code></pre>
+Tell the data table<pre><code>SELECT items.name,
+CASE items.value_type
+WHEN 0 THEN 'history'
+WHEN 1 THEN 'history_str'
+WHEN 2 THEN 'history_log'
+WHEN 3 THEN 'history_uint'
+WHEN 4 THEN 'history_text'
+WHEN 5 THEN 'history_bin'
+END AS tableName, items.itemid
+FROM hosts, items
+WHERE hosts.hostid=items.hostid
+AND hosts.host='Zabbix server';</code></pre>
 Which userid is disabling triggers. Zabbix 7.0<pre><code>SELECT DISTINCT auditlog.recordsetid, hosts.host, auditlog.clock, auditlog.userid, triggers.triggerid, auditlog.details
 FROM auditlog, triggers, functions, hosts, items
 WHERE auditlog.resourcetype = 13
