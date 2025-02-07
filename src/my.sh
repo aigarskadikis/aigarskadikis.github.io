@@ -23,7 +23,7 @@ du -lah /var/lib/mysql/zabbix | grep "$(date --date='2 days ago' '+p%Y_%m_%d')"
 du -lah /var/lib/mysql/zabbix | grep "$(date --date='2 days ago' '+p%Y%m%d0000')"
 
 # extract legacy SNMP agent items in use
-mysql --host=127.0.0.1 --user=root --password='zabbix' --database=zabbix --execute="
+mysql -sN --batch --host=127.0.0.1 --user=root --password='zabbix' --database=zabbix --execute="
 SELECT DISTINCT templates.name, items.flags, items.name, items.snmp_oid FROM hosts templates, hosts_templates, items
 WHERE templates.hostid=items.hostid AND templates.hostid=hosts_templates.templateid AND hosts_templates.hostid IN (
 SELECT hostid FROM hosts WHERE status=0
