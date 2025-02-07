@@ -1,0 +1,105 @@
+<html><head>
+	<style>
+pre{
+    padding:.3em 2em .3em .5em;
+    margin:0 0 1em;
+    background-color:#FFF7F0;
+    border-radius:3px;
+	white-space: pre-wrap;
+    overflow-x: auto;
+  word-wrap: break-word;
+}
+</style>
+
+<title>SQL reporting, fetch data points from trends, Zabbix</title>
+
+</head>
+<body>
+
+<h1>SQL reporting, fetch data points from trends, Zabbix</h1>
+
+
+<h2>Query possibilities (units)</h2>
+<pre><code>SELECT DISTINCT units, CASE value_type
+WHEN 0 THEN 'history'
+WHEN 1 THEN 'history_str'
+WHEN 2 THEN 'history_log'
+WHEN 3 THEN 'history_uint'
+WHEN 4 THEN 'history_text'
+WHEN 5 THEN 'history_bin'
+END AS tableName,
+COUNT(*)
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0 AND hosts.flags IN (0,4) AND items.status=0 AND items.flags IN (0,4)
+GROUP BY 1,2
+ORDER BY 3;</code></pre>
+
+<h2>Query integers with 'B' unit</h2>
+<pre><code>SELECT hosts.host AS host, items.name AS name, trends_uint.clock, trends_uint.value_min, trends_uint.value_avg, trends_uint.value_max
+FROM trends_uint
+JOIN items ON (items.itemid=trends_uint.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+AND hosts.hostid IN (
+SELECT hostid FROM hosts_groups WHERE groupid IN (
+SELECT groupid FROM hstgrp WHERE name='Linux servers'
+)
+)
+WHERE items.units='B'
+LIMIT 100;</code></pre>
+
+<h2>Query decimal numbers with '%' unit</h2>
+<pre><code>SELECT hosts.host AS host, items.name AS name, trends.clock, trends.value_min, trends.value_avg, trends.value_max
+FROM trends
+JOIN items ON (items.itemid=trends.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+AND hosts.hostid IN (
+SELECT hostid FROM hosts_groups WHERE groupid IN (
+SELECT groupid FROM hstgrp WHERE name='Linux servers'
+)
+)
+WHERE items.units='%'
+LIMIT 100;</code></pre>
+
+<h2>To put in exteranl TSV (Tab Separated File). MySQL</h2>
+
+<pre><code>mysql -sN --batch --host=127.0.0.1 --user=root --password='zabbix' --database=zabbix --execute="
+SELECT hosts.host AS host, items.name AS name, trends_uint.clock, trends_uint.value_min, trends_uint.value_avg, trends_uint.value_max
+FROM trends_uint
+JOIN items ON (items.itemid=trends_uint.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+AND hosts.hostid IN (
+SELECT hostid FROM hosts_groups WHERE groupid IN (
+SELECT groupid FROM hstgrp WHERE name='Linux servers'
+)
+)
+WHERE items.units='B'
+LIMIT 100;
+" > /tmp/bytes.tsv</code></pre>
+
+
+<h2>To put in exteranl TSV (Tab Separated File). PostgreSQL</h2>
+<pre><code>echo "
+SELECT trends.clock, hosts.host AS host, items.name AS name, trends.value_min, trends.value_avg, trends.value_max
+FROM trends
+JOIN items ON (items.itemid=trends.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+AND hosts.hostid IN (
+SELECT hostid FROM hosts_groups WHERE groupid IN (
+SELECT groupid FROM hstgrp WHERE name='Linux servers'
+)
+)
+WHERE items.units='%'
+LIMIT 5000;
+" | PGUSER=zabbix PGPASSWORD=zabbix PGPORT=7416 PGHOST=pg16 psql -t -A -F"TabSep" z70 | sed "s%TabSep%\t%g" > /tmp/pct.tsv</code></pre>
+
+Extract year:<pre><code>=YEAR(DATE(1970,1,1) + A1 / 86400)</code></pre>
+Extract month:<pre><code>=MONTH(DATE(1970,1,1) + A1 / 86400)</code></pre>
+Extract day:<pre><code>=DAY(DATE(1970,1,1) + A1 / 86400)</code></pre>
+Extract day:<pre><code>=HOUR(DATE(1970,1,1) + A1 / 86400)</code></pre>
+
+
+
+</body></html>
+	
+	
