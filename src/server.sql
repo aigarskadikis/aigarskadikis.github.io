@@ -43,6 +43,48 @@ FROM hosts, items
 WHERE hosts.hostid=items.hostid
 AND hosts.host='Zabbix server';
 
+--find different units to target and in which table the data is stored use
+SELECT DISTINCT units, CASE value_type
+WHEN 0 THEN 'history'
+WHEN 1 THEN 'history_str'
+WHEN 2 THEN 'history_log'
+WHEN 3 THEN 'history_uint'
+WHEN 4 THEN 'history_text'
+WHEN 5 THEN 'history_bin'
+END AS tableName,
+COUNT(*)
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0 AND hosts.flags IN (0,4) AND items.status=0 AND items.flags IN (0,4)
+GROUP BY 1,2
+ORDER BY 3;
+
+--extract all items which are measured in bytes
+SELECT hosts.host AS host, items.name AS name, trends_uint.clock, trends_uint.value_min, trends_uint.value_avg, trends_uint.value_max
+FROM trends_uint
+JOIN items ON (items.itemid=trends_uint.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+AND hosts.hostid IN (
+SELECT hostid FROM hosts_groups WHERE groupid IN (
+SELECT groupid FROM hstgrp WHERE name='Linux servers'
+)
+)
+WHERE items.units='B'
+LIMIT 100;
+
+--Data which are measured in '%'
+SELECT hosts.host AS host, items.name AS name, trends.clock, trends.value_min, trends.value_avg, trends.value_max
+FROM trends
+JOIN items ON (items.itemid=trends.itemid)
+JOIN hosts ON (hosts.hostid=items.hostid)
+AND hosts.hostid IN (
+SELECT hostid FROM hosts_groups WHERE groupid IN (
+SELECT groupid FROM hstgrp WHERE name='Linux servers'
+)
+)
+WHERE items.units='%'
+LIMIT 100;
+
 --which userid is disabling triggers. Zabbix 7.0
 SELECT DISTINCT auditlog.recordsetid, hosts.host, auditlog.clock, auditlog.userid, triggers.triggerid, auditlog.details
 FROM auditlog, triggers, functions, hosts, items
