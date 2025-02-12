@@ -1,0 +1,51 @@
+<html><head>
+	<style>
+pre{
+    padding:.3em 2em .3em .5em;
+    margin:0 0 1em;
+    background-color:#FFF7F0;
+    border-radius:3px;
+	white-space: pre-wrap;
+    overflow-x: auto;
+  word-wrap: break-word;
+}
+tr td:nth-child(1), tr th:nth-child(1) {min-width:1%;width:2%; word-wrap:break-word;}
+</style>
+
+<title>DB SELECTs for Zabbix 7.0</title>
+
+</head>
+<body>
+
+<table>
+<tr><th></th><th>MySQL</th><th>PostgreSQL</th></tr>
+
+<tr><td>wasted space per history_text</td>
+
+<td><pre><code>SELECT SUM(CHAR_LENGTH(value)) AS Size,
+CONCAT('history.php?itemids%5B0%5D=', t1.itemid, '&action=showlatest') AS latestData,
+CONCAT('zabbix.php?name=', items.name, '&action=latest.view&hostids%5B%5D=', hosts.hostid) AS conf
+FROM (SELECT * FROM history_log LIMIT 9999) t1
+WHERE t1.itemid=items.itemid AND hosts.hostid=items.hostid 
+GROUP BY 2, 3
+ORDER BY 1 DESC
+LIMIT 9;</code></pre></td>
+
+<td><pre><code>SELECT SUM(LENGTH(value::TEXT)) AS Size,
+'history.php?itemids%5B0%5D=' || t1.itemid || '&action=showlatest' AS latestData,
+'zabbix.php?name=' || items.name || '&action=latest.view&hostids%5B%5D=' || hosts.hostid AS conf
+FROM (SELECT * FROM history_log LIMIT 9999) t1, items, hosts
+WHERE t1.itemid=items.itemid AND hosts.hostid=items.hostid 
+GROUP BY 2,3
+ORDER BY 1 DESC
+LIMIT 9;</code></pre></td></tr>
+
+
+
+</table>
+
+
+
+</body></html>
+	
+	
