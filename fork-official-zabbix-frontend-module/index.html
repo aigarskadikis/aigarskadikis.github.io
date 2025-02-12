@@ -1,0 +1,65 @@
+<html><head>
+	<style>
+pre{
+    padding:.3em 2em .3em .5em;
+    margin:0 0 1em;
+    background-color:#FFF7F0;
+    border-radius:3px;
+	white-space: pre-wrap;
+    overflow-x: auto;
+  word-wrap: break-word;
+}
+</style>
+
+<title>Clone official Zabbix frontend module</title>
+
+</head>
+<body>
+
+<h1>How to clone official Zabbix frontend module</h1>
+
+
+<h2>Benefit</h2>
+<ul>
+<li>You want to make a modifications to PHP layer/widget but not lose changes when doing minor upgrade of frontend files.</li>
+</ul>
+
+
+<h2>Tested/applicable</h2>
+This tutorial has been tested with 7.0.9 frontend and "widgets/svggraph" widget.<br />
+<br />
+
+
+<h2>Logical steps of making a fork</h2>
+
+<ul>
+<li>Update <code>manifest.json</code> Change: id, namespace, actions to do not match already existing</li>
+<li>Update PHP code and change all occurrences of "namespace Widget\<widget class name>\\.+" to your namespace</li>
+<li>Update JavaScript class name if it exists</li>
+
+</ul>
+
+<h2>Create a fork</h2>
+
+
+Enter frontend:<pre><code>cd /usr/share/zabbix</code></pre>
+Prepare folder for the clone:<pre><code>mkdir -p modules/newimprovedgraph</code></pre>
+Choose module to clone:<pre><code>cd widgets/svggraph</code></pre>
+Copy project files:<pre><code>cp -a * ../../modules/newimprovedgraph/</code></pre>
+Navigate to new:<pre><code>cd ../../modules/newimprovedgraph/</code></pre>
+
+Step 1:<pre><code>find . -type f -exec sed -i 's/classABC/classEFG/g' {} +</code></pre>
+
+<h2>Refresh the modules library</h2>
+"Administration" => "General" => "Modules" => click "Scan directory"<br />
+<br />
+
+<h2>Migrate widget settings to fork</h2>
+
+Run command:
+<pre><code>UPDATE widget SET type='something' WHERE type='somethingelse';</code></pre>
+
+
+</body></html>
+	
+	
