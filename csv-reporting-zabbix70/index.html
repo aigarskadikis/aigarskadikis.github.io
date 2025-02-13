@@ -16,7 +16,7 @@ tr td:nth-child(1), tr th:nth-child(1) {min-width:1%;width:2%; word-wrap:break-w
 
 </head>
 <body>
-
+<h1>Zabbix 7.0 LTS DB queries to detect inconsistencies, always improve. Do reporting to CSV</h1>
 <table>
 <tr><th></th><th>MySQL</th><th>PostgreSQL</th></tr>
 
@@ -39,6 +39,76 @@ WHERE t1.itemid=items.itemid AND hosts.hostid=items.hostid
 GROUP BY 2,3
 ORDER BY 1 DESC
 LIMIT 9;</code></pre></td></tr>
+
+
+<tr><td>unreachable ZBX hosts</td>
+
+<td><pre><code>SELECT proxy.name, hosts.host, interface.error,
+CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts proxy ON (hosts.proxyid=proxy.proxyid)
+JOIN interface ON (interface.hostid=hosts.hostid)
+WHERE LENGTH(interface.error) > 0 AND interface.type=1;</code></pre></td>
+
+<td><pre><code>SELECT proxy.name, hosts.host, interface.error,
+'zabbix.php?action=host.edit&hostid=' || hosts.hostid AS goTo
+FROM hosts
+LEFT JOIN hosts AS proxy ON hosts.proxyid = proxy.hostid
+JOIN interface ON interface.hostid = hosts.hostid
+WHERE LENGTH(interface.error) > 0 AND interface.type = 1;</code></pre></td></tr>
+
+
+<tr><td>most unsupported items per host</td>
+<td colspan="2"><pre><code>SELECT
+hosts.host,
+COUNT(*)
+FROM items, item_rtdata, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=0
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid
+GROUP BY 1
+ORDER BY 2 DESC;</code></pre></td>
+</tr>
+
+<tr><td>most dependent items</td>
+<td colspan="2"><pre><code>SELECT hosts.host, COUNT(*) AS amountOfDependentItems
+FROM items,hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0
+AND items.status=0
+AND items.flags IN (0,4)
+AND items.type=18
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 20;</code></pre></td>
+</tr>
+
+<tr><td>most items at host level</td>
+<td colspan="2"><pre><code>SELECT hosts.host, COUNT(*) FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status IN (0,1) AND hosts.flags IN (0,4)
+GROUP BY 1
+ORDER BY 2 DESC;</code></pre></td>
+</tr>
+
+
+<tr><td>list all inventory fields</td>
+<td colspan="2"><pre><code>SELECT h.host,i.type,i.type_full,i.name,i.alias,i.os,i.os_full,i.os_short,
+i.serialno_a,i.serialno_b,i.tag,i.asset_tag,i.macaddress_a,i.macaddress_b,
+i.hardware,i.hardware_full,i.software,i.software_full,i.software_app_a,
+i.software_app_b,i.software_app_c,i.software_app_d,i.software_app_e,i.contact,
+i.location,i.location_lat,i.location_lon,i.notes,i.chassis,i.model,i.hw_arch,
+i.vendor,i.contract_number,i.installer_name,i.deployment_status,i.url_a,i.url_b,
+i.url_c,i.host_networks,i.host_netmask,i.host_router,i.oob_ip,i.oob_netmask,i.oob_router,
+i.date_hw_purchase,i.date_hw_install,i.date_hw_expiry,i.date_hw_decomm,i.site_address_a,
+i.site_address_b,i.site_address_c,i.site_city,i.site_state,i.site_country,i.site_zip,
+i.site_rack,i.site_notes,i.poc_1_name,i.poc_1_email,i.poc_1_phone_a,i.poc_1_phone_b,
+i.poc_1_cell,i.poc_1_screen,i.poc_1_notes,i.poc_2_name,i.poc_2_email,i.poc_2_phone_a,
+i.poc_2_phone_b,i.poc_2_cell,i.poc_2_screen,i.poc_2_notes FROM host_inventory i, hosts h
+WHERE i.hostid=h.hostid AND h.flags=0;</code></pre></td>
+</tr>
 
 
 
