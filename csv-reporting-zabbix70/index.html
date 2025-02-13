@@ -25,7 +25,28 @@ tr td:nth-child(1), tr th:nth-child(1) {min-width:1%;width:2%; word-wrap:break-w
 <td><pre><code>SELECT SUM(CHAR_LENGTH(value)) AS Size,
 CONCAT('history.php?itemids%5B0%5D=', t1.itemid, '&action=showlatest') AS latestData,
 CONCAT('zabbix.php?name=', items.name, '&action=latest.view&hostids%5B%5D=', hosts.hostid) AS conf
-FROM (SELECT * FROM history_log LIMIT 9999) t1
+FROM (SELECT * FROM history_text LIMIT 9999) t1, items, hosts
+WHERE t1.itemid=items.itemid AND hosts.hostid=items.hostid 
+GROUP BY 2, 3
+ORDER BY 1 DESC
+LIMIT 9;</code></pre></td>
+
+<td><pre><code>SELECT SUM(LENGTH(value::TEXT)) AS Size,
+'history.php?itemids%5B0%5D=' || t1.itemid || '&action=showlatest' AS latestData,
+'zabbix.php?name=' || items.name || '&action=latest.view&hostids%5B%5D=' || hosts.hostid AS conf
+FROM (SELECT * FROM history_text LIMIT 9999) t1, items, hosts
+WHERE t1.itemid=items.itemid AND hosts.hostid=items.hostid 
+GROUP BY 2,3
+ORDER BY 1 DESC
+LIMIT 9;</code></pre></td></tr>
+
+
+<tr><td>wasted space per history_log</td>
+
+<td><pre><code>SELECT SUM(CHAR_LENGTH(value)) AS Size,
+CONCAT('history.php?itemids%5B0%5D=', t1.itemid, '&action=showlatest') AS latestData,
+CONCAT('zabbix.php?name=', items.name, '&action=latest.view&hostids%5B%5D=', hosts.hostid) AS conf
+FROM (SELECT * FROM history_log LIMIT 9999) t1, items, hosts
 WHERE t1.itemid=items.itemid AND hosts.hostid=items.hostid 
 GROUP BY 2, 3
 ORDER BY 1 DESC
@@ -43,19 +64,110 @@ LIMIT 9;</code></pre></td></tr>
 
 <tr><td>unreachable ZBX hosts</td>
 
-<td><pre><code>SELECT proxy.name, hosts.host, interface.error,
-CONCAT('zabbix.php?action=host.edit&hostid=',hosts.hostid) AS goTo
+<td><pre><code>SELECT 
+  proxy.name, 
+  hosts.host, 
+  interface.error,
+  CONCAT('zabbix.php?action=host.edit&hostid=', hosts.hostid) AS goTo
 FROM hosts
-LEFT JOIN hosts proxy ON (hosts.proxyid=proxy.proxyid)
-JOIN interface ON (interface.hostid=hosts.hostid)
-WHERE LENGTH(interface.error) > 0 AND interface.type=1;</code></pre></td>
+LEFT JOIN hosts AS proxy ON hosts.proxyid = proxy.proxyid
+JOIN interface ON interface.hostid = hosts.hostid
+WHERE LENGTH(interface.error) > 0 
+  AND interface.type = 1;</code></pre></td>
 
-<td><pre><code>SELECT proxy.name, hosts.host, interface.error,
-'zabbix.php?action=host.edit&hostid=' || hosts.hostid AS goTo
+<td><pre><code>SELECT 
+  proxy.name, 
+  hosts.host, 
+  interface.error,
+  'zabbix.php?action=host.edit&hostid=' || hosts.hostid AS goTo
 FROM hosts
 LEFT JOIN hosts AS proxy ON hosts.proxyid = proxy.hostid
 JOIN interface ON interface.hostid = hosts.hostid
-WHERE LENGTH(interface.error) > 0 AND interface.type = 1;</code></pre></td></tr>
+WHERE LENGTH(interface.error) > 0 
+  AND interface.type = 1;</code></pre></td></tr>
+
+
+<tr><td>unreachable SNMP hosts</td>
+
+<td><pre><code>SELECT 
+  proxy.name, 
+  hosts.host, 
+  interface.error,
+  CONCAT('zabbix.php?action=host.edit&hostid=', hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts AS proxy ON hosts.proxyid = proxy.proxyid
+JOIN interface ON interface.hostid = hosts.hostid
+WHERE LENGTH(interface.error) > 0 
+  AND interface.type = 2;</code></pre></td>
+
+<td><pre><code>SELECT 
+  proxy.name, 
+  hosts.host, 
+  interface.error,
+  'zabbix.php?action=host.edit&hostid=' || hosts.hostid AS goTo
+FROM hosts
+LEFT JOIN hosts AS proxy ON hosts.proxyid = proxy.hostid
+JOIN interface ON interface.hostid = hosts.hostid
+WHERE LENGTH(interface.error) > 0 
+  AND interface.type = 2;</code></pre></td></tr>
+
+
+<tr><td>host list</td>
+
+<td><pre><code>SELECT 
+  proxy.name AS proxy, 
+  hosts.host,
+  CASE hosts.status 
+    WHEN 0 THEN 'active' 
+    WHEN 1 THEN 'disabled' 
+  END AS status,
+  GROUP_CONCAT(DISTINCT templates.host SEPARATOR ', ') AS templates,
+  GROUP_CONCAT(DISTINCT hstgrp.name SEPARATOR ', ') AS hostGroups,
+  GROUP_CONCAT(
+    DISTINCT CASE interface.useip
+      WHEN 0 THEN interface.dns
+      WHEN 1 THEN interface.ip
+    END SEPARATOR ', '
+  ) AS passiveConnect
+FROM hosts
+LEFT JOIN proxy ON proxy.proxyid = hosts.proxyid
+LEFT JOIN hosts_templates ON hosts_templates.hostid = hosts.hostid
+LEFT JOIN hosts AS templates ON templates.hostid = hosts_templates.templateid
+LEFT JOIN hosts_groups ON hosts_groups.hostid = hosts.hostid
+LEFT JOIN hstgrp ON hstgrp.groupid = hosts_groups.groupid
+LEFT JOIN interface ON interface.hostid = hosts.hostid AND interface.main = 1
+WHERE hosts.status IN (0, 1) 
+  AND hosts.flags IN (0, 4)
+GROUP BY 
+  proxy.name, hosts.host, hosts.status;</code></pre></td>
+
+<td><pre><code>SELECT 
+  proxy.name AS proxy, 
+  hosts.host,
+  CASE hosts.status 
+    WHEN 0 THEN 'active' 
+    WHEN 1 THEN 'disabled' 
+  END AS status,
+  STRING_AGG(DISTINCT templates.host, ', ') AS templates,
+  STRING_AGG(DISTINCT hstgrp.name, ', ') AS hostGroups,
+  STRING_AGG(
+    DISTINCT CASE interface.useip
+      WHEN 0 THEN interface.dns
+      WHEN 1 THEN interface.ip
+    END, ', '
+  ) AS passiveConnect
+FROM hosts
+LEFT JOIN proxy ON proxy.proxyid = hosts.proxyid
+LEFT JOIN hosts_templates ON hosts_templates.hostid = hosts.hostid
+LEFT JOIN hosts AS templates ON templates.hostid = hosts_templates.templateid
+LEFT JOIN hosts_groups ON hosts_groups.hostid = hosts.hostid
+LEFT JOIN hstgrp ON hstgrp.groupid = hosts_groups.groupid
+LEFT JOIN interface ON interface.hostid = hosts.hostid AND interface.main = 1
+WHERE hosts.status IN (0, 1) 
+  AND hosts.flags IN (0, 4)
+GROUP BY 
+  proxy.name, hosts.host, hosts.status;</code></pre></td></tr>
+
 
 
 <tr><td>most unsupported items per host</td>
