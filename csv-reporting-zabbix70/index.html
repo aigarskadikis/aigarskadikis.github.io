@@ -199,7 +199,7 @@ FROM hosts, items
 WHERE hosts.hostid=items.hostid
 AND hosts.status=0 AND items.status=0 AND hosts.flags IN (0,4) AND items.flags IN (0,4)
 GROUP BY 1,2
-ORDER BY 2,1 ASC;</code></pre></td>
+ORDER BY 1,2 ASC;</code></pre></td>
 </tr>
 
 
