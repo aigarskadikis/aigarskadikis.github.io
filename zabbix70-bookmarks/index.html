@@ -1,0 +1,35 @@
+<html><head>
+	<style>
+pre{
+    padding:.3em 2em .3em .5em;
+    margin:0 0 1em;
+    background-color:#FFF7F0;
+    border-radius:3px;
+	white-space: pre-wrap;
+    overflow-x: auto;
+  word-wrap: break-word;
+}
+tr td:nth-child(1), tr th:nth-child(1) {min-width:1%;width:2%; word-wrap:break-word;}
+</style>
+
+<title>Built-in reporting, Bookmarks for Zabbix Zabbix 7.0</title>
+
+</head>
+<body>
+<h1>Bookmarks for Zabbix Zabbix 7.0</h1>
+
+Show: Host online status<pre><code>zabbix.php?action=dashboard.print&dashboardid=1015</code></pre>
+
+Show: Problems: Last week: Linux servers<pre><code>zabbix.php?show=2&name=&acknowledgement_status=0&inventory%5B1%5D%5Bfield%5D=type&inventory%5B1%5D%5Bvalue%5D=&evaltype=0&tags%5B1%5D%5Btag%5D=&tags%5B1%5D%5Boperator%5D=0&tags%5B1%5D%5Bvalue%5D=&show_tags=0&show_opdata=0&filter_name=&filter_show_counter=0&filter_custom_time=0&sort=clock&sortorder=DESC&age_state=0&show_symptoms=0&show_suppressed=0&acknowledged_by_me=0&compact_view=0&show_timeline=0&details=0&highlight_row=0&action=problem.view&groupids%5B%5D=2&kiosk=1</code></pre>
+
+Show: All unsupported items<pre><code>zabbix.php?action=item.list&context=host&filter_name=&filter_key=&filter_type=-1&filter_value_type=-1&filter_history=&filter_trends=&filter_delay=&filter_evaltype=0&filter_tags%5B0%5D%5Btag%5D=&filter_tags%5B0%5D%5Boperator%5D=0&filter_tags%5B0%5D%5Bvalue%5D=&filter_state=1&filter_with_triggers=-1&filter_inherited=-1&filter_discovered=-1&filter_set=1</code></pre>
+
+Show: Unsupported LLD rules<pre><code>host_discovery.php?context=host&filter_name=&filter_key=&filter_type=-1&filter_delay=&filter_lifetime_type=-1&filter_enabled_lifetime_type=-1&filter_snmp_oid=&filter_state=1&filter_set=1</code></pre>
+
+Show: Unsupported triggers<pre><code>zabbix.php?action=trigger.list&context=host&filter_name=&filter_state=1&filter_status=-1&filter_value=-1&filter_evaltype=0&filter_tags%5B0%5D%5Btag%5D=&filter_tags%5B0%5D%5Boperator%5D=0&filter_tags%5B0%5D%5Bvalue%5D=&filter_inherited=-1&filter_discovered=-1&filter_dependent=-1&filter_set=1</code></pre>
+
+Show: Missing data<pre><code>zabbix.php?action=queue.details</code></pre>
+
+</body></html>
+	
+	
