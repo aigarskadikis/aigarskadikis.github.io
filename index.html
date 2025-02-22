@@ -162,7 +162,10 @@ Interface unavailable<pre><code>grep :20250124:01 /var/log/zabbix/zabbix_server.
 grep :20250124:03 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c</code></pre>
 Merge back<pre><code>cat frontend.config.and.logs.tar.xz_* > together.tar.xz</code></pre>
 Yt-dlp best audio and video <pre><code>yt-dlp -f "bv[ext!=webm]+ba/b[ext!=webm]" --download-archive archive.log</code></pre>
-Delete line with sed<pre><code>sed -i '/^Hostname=Zabbix proxy$/d' /etc/zabbix/zabbix_proxy.conf</code></pre>
+Delete line with sed<pre><code>sed -i '/^Hostname=Zabbix proxy$/d' /etc/zabbix/zabbix_proxy.conf
+sed -i '/^Hostname=Zabbix server$/d' /etc/zabbix/zabbix_agentd.conf
+sed -i '/^Hostname=Zabbix server$/d' /etc/zabbix/zabbix_agent2.conf</code></pre>
+Use rdesktop with 150 dpi scalling<pre><code>rdesktop -u 'Administrator' -p 'Passw0rd' -g 1920x1080@150 -a 32 -x 1 -b ip.address.of.client -x 0x80</code></pre>
 List files inside package rpm<pre><code>rpm -ql package_name</code></pre>
 Convert short IPv6 format to long<pre><code>python3 -c "import ipaddress; print(ipaddress.IPv6Address('2001:db8::1').exploded)"</code></pre>
 Test port<pre><code>nc -zv ip 10050</code></pre>

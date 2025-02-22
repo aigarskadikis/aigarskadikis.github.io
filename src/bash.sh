@@ -37,6 +37,11 @@ yt-dlp -f "bv[ext!=webm]+ba/b[ext!=webm]" --download-archive archive.log
 
 # delete line with sed
 sed -i '/^Hostname=Zabbix proxy$/d' /etc/zabbix/zabbix_proxy.conf
+sed -i '/^Hostname=Zabbix server$/d' /etc/zabbix/zabbix_agentd.conf
+sed -i '/^Hostname=Zabbix server$/d' /etc/zabbix/zabbix_agent2.conf
+
+# use rdesktop with 150 dpi scalling
+rdesktop -u 'Administrator' -p 'Passw0rd' -g 1920x1080@150 -a 32 -x 1 -b ip.address.of.client -x 0x80
 
 # list files inside package rpm
 rpm -ql package_name
