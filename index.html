@@ -804,6 +804,15 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="pod"><label for="pod">pod</label><div class="tab">
 Snmpsim<pre><code>docker run -v /usr/share/snmpsim/data:/usr/local/snmpsim/data -p 1024:161/udp tandrup/snmpsim</code></pre>
+Postgresql 17 with timescaledb<pre><code>podman pull timescale/timescaledb:2.18.1-pg17
+mkdir -p ${HOME}/postgresql/17
+podman run --name pg17ts2181 -t \
+-e PGDATA=/var/lib/postgresql/data/pgdata \
+-v ${HOME}/postgresql/17:/var/lib/postgresql/data \
+-e POSTGRES_PASSWORD="zabbix" \
+-e POSTGRES_DB="dummy_db" \
+-p 7417:5432 \
+-d timescale/timescaledb:2.18.1-pg17</code></pre>
 <p>Download this section: <a href="src/pod.sh">https://aigarskadikis.github.io/src/pod.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pod.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pod.sh</a></p>
 </div>
