@@ -815,10 +815,14 @@ podman run --name pg17ts2181 -t \
 -p 7417:5432 \
 -d timescale/timescaledb:2.18.1-pg17</code></pre>
 Pod podman unqualified-search. Did not resolve to an alias and no unqualified-search registries are defined in "/etc/containers/registries.conf"<pre><code>echo 'unqualified-search-registries = ["docker.io"]' | sudo tee /etc/containers/registries.conf</code></pre>
-Reinstall version of zabbix monitoring proxy<pre><code>sed -i 's|alpine-7.0.*$|alpine-7.0.9|g' values.yaml
+Reinstall version of zabbix monitoring proxy k8s<pre><code>sed -i 's|alpine-7.0.*$|alpine-7.0.9|g' values.yaml
 helm uninstall my-release && helm install my-release -f values.yaml ./
 kubectl get secret zabbix-service-account -n default -o jsonpath={.data.token} | base64 -d</code></pre>
-Restart pod (by deleting it)<pre><code>kubectl get pods | grep -Eo "zabbix-proxy\S+" | xargs kubectl delete pod</code></pre>
+Restart pod (by deleting it) k8s<pre><code>kubectl get pods | grep -Eo "zabbix-proxy\S+" | xargs kubectl delete pod</code></pre>
+Tail for block to appier k8s<pre><code>kubectl logs -f zabbix-proxy-5d6d97564d-d4sf2 | awk '
+/Prometheus raw data start/ { capture=1; data="" }
+capture { data = data ? data ORS $0 : $0 }
+/Prometheus raw data end/ { print data; capture=0; fflush() }'</code></pre>
 <p>Download this section: <a href="src/pod.sh">https://aigarskadikis.github.io/src/pod.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pod.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pod.sh</a></p>
 </div>
