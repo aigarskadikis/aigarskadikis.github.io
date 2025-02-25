@@ -33,6 +33,17 @@ found == 2
 exit
 }'
 
+# prometheus pattern capture
+cat /var/log/zabbix/zabbix_proxy.log |\
+awk '
+/Prometheus raw data start/ {
+found++
+}
+found == 2
+/Prometheus raw data end/ && found == 2 {
+exit
+}’ | grep –v 'Prometheus raw data' > /tmp/prom.input.txt
+
 # memory situation in megabytes
 ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb ",hr) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' | cut -d "" -f2 | cut -d "-" -f1
 
