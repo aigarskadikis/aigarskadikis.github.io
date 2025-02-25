@@ -160,6 +160,7 @@ Convert to readable date including PID<pre><code>tail -99f /var/log/zabbix/zabbi
 Memory situation in megabytes<pre><code>ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb ",hr) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' | cut -d "" -f2 | cut -d "-" -f1</code></pre>
 Interface unavailable<pre><code>grep :20250124:01 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c
 grep :20250124:03 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c</code></pre>
+Target second appierence of block<pre><code>awk '/Prometheus raw data start/{found++} found==2; /Prometheus raw data end/ && found==2{exit}' /var/log/zabbix/zabbix_proxy.log</code></pre>
 Merge back<pre><code>cat frontend.config.and.logs.tar.xz_* > together.tar.xz</code></pre>
 Yt-dlp best audio and video <pre><code>yt-dlp -f "bv[ext!=webm]+ba/b[ext!=webm]" --download-archive archive.log</code></pre>
 Delete line with sed<pre><code>sed -i '/^Hostname=Zabbix proxy$/d' /etc/zabbix/zabbix_proxy.conf
@@ -813,6 +814,11 @@ podman run --name pg17ts2181 -t \
 -e POSTGRES_DB="dummy_db" \
 -p 7417:5432 \
 -d timescale/timescaledb:2.18.1-pg17</code></pre>
+Pod podman unqualified-search. Did not resolve to an alias and no unqualified-search registries are defined in "/etc/containers/registries.conf"<pre><code>echo 'unqualified-search-registries = ["docker.io"]' | sudo tee /etc/containers/registries.conf</code></pre>
+Reinstall version of zabbix monitoring proxy<pre><code>sed -i 's|alpine-7.0.*$|alpine-7.0.9|g' values.yaml
+helm uninstall my-release && helm install my-release -f values.yaml ./
+kubectl get secret zabbix-service-account -n default -o jsonpath={.data.token} | base64 -d</code></pre>
+Restart pod (by deleting it)<pre><code>kubectl get pods | grep -Eo "zabbix-proxy\S+" | xargs kubectl delete pod</code></pre>
 <p>Download this section: <a href="src/pod.sh">https://aigarskadikis.github.io/src/pod.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pod.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pod.sh</a></p>
 </div>

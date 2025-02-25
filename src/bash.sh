@@ -29,6 +29,9 @@ ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb
 grep :20250124:01 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c
 grep :20250124:03 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c
 
+# target second appierence of block
+awk '/Prometheus raw data start/{found++} found==2; /Prometheus raw data end/ && found==2{exit}' /var/log/zabbix/zabbix_proxy.log
+
 # merge back
 cat frontend.config.and.logs.tar.xz_* > together.tar.xz
 
