@@ -22,6 +22,17 @@ tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(
 # convert to readable date including PID
 tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(......\)/\2-\3-\4 \5:\6:\7 PID:\1/'
 
+# look for 2nd match between "start pattern" and "end pattern"
+cat /var/log/zabbix/zabbix_proxy.log |\
+awk '
+/start pattern/ {
+found++
+}
+found == 2
+/end pattern/ && found == 2 {
+exit
+}'
+
 # memory situation in megabytes
 ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb ",hr) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' | cut -d "" -f2 | cut -d "-" -f1
 
