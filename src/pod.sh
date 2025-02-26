@@ -20,6 +20,9 @@ sed -i 's|alpine-7.0.*$|alpine-7.0.9|g' values.yaml
 helm uninstall my-release && helm install my-release -f values.yaml ./
 kubectl get secret zabbix-service-account -n default -o jsonpath={.data.token} | base64 -d
 
+# enter bash in k8s env
+kubectl exec -it $(kubectl get pods | grep -Eo "zabbix-proxy\S+") -- /bin/bash
+
 # restart pod (by deleting it) k8s
 kubectl get pods | grep -Eo "zabbix-proxy\S+" | xargs kubectl delete pod
 

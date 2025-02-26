@@ -836,6 +836,7 @@ Pod podman unqualified-search. Did not resolve to an alias and no unqualified-se
 Reinstall version of zabbix monitoring proxy k8s<pre><code>sed -i 's|alpine-7.0.*$|alpine-7.0.9|g' values.yaml
 helm uninstall my-release && helm install my-release -f values.yaml ./
 kubectl get secret zabbix-service-account -n default -o jsonpath={.data.token} | base64 -d</code></pre>
+Enter bash in k8s env<pre><code>kubectl exec -it $(kubectl get pods | grep -Eo "zabbix-proxy\S+") -- /bin/bash</code></pre>
 Restart pod (by deleting it) k8s<pre><code>kubectl get pods | grep -Eo "zabbix-proxy\S+" | xargs kubectl delete pod</code></pre>
 Tail for block to appier k8s<pre><code>kubectl logs -f zabbix-proxy-5d6d97564d-d4sf2 | awk '
 /Prometheus raw data start/ { capture=1; data="" }
