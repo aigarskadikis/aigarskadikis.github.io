@@ -42,7 +42,16 @@ found++
 found == 2
 /Prometheus raw data end/ && found == 2 {
 exit
-}’ | grep –v 'Prometheus raw data' > /tmp/prom.input.txt
+}' | grep –v 'Prometheus raw data' > /tmp/prom.input.txt
+
+# oracle connection test
+cd /opt/oracle/instantclient_23_7 && ./sqlplus "system/oracle@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=10.10.6.26)(Port=49161))(CONNECT_DATA=(SID=xe)))"
+
+# postgresql connection test
+PGHOST=10.10.6.23 PGPORT=5432 PGUSER=zbx_monitor PGPASSWORD='passwordGoesHere' psql
+
+# MSSQL connection test. '-C' means Trust Server Certificate
+sqlcmd --server '10.10.4.21' --user-name 'zbx_monitor' --password 'passwordGoesHere' -C
 
 # memory situation in megabytes
 ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb ",hr) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' | cut -d "" -f2 | cut -d "-" -f1
