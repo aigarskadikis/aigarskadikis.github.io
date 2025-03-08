@@ -1,0 +1,50 @@
+{
+  "jsonrpc": "2.0",
+  "method": "script.create",
+  "params": {
+    "name": "automatically close event in a minute",
+    "command": "var params = JSON.parse(value);\r\n\r\nvar request = new HttpRequest();\r\nrequest.addHeader('Content-Type: application/json');\r\nrequest.addHeader('Authorization: Bearer ' + params.token);\r\n\r\nvar allGlobalMacrosBefore = JSON.parse(request.post(params.url,\r\n    '{\"jsonrpc\":\"2.0\",\"method\":\"event.acknowledge\",\"params\":{\"eventids\":\"'+params.eventid+'\",\"action\":1,\"message\":\"'+params.msg+'\"},\"id\":1}'\r\n)).result;\r\n\r\nreturn params.eventid;",
+    "host_access": "2",
+    "usrgrpid": "0",
+    "groupid": "0",
+    "description": "",
+    "confirmation": "",
+    "type": "5",
+    "execute_on": "2",
+    "timeout": "30s",
+    "scope": "1",
+    "port": "",
+    "authtype": "0",
+    "username": "",
+    "password": "",
+    "publickey": "",
+    "privatekey": "",
+    "menu_path": "",
+    "url": "",
+    "new_window": "1",
+    "manualinput": "0",
+    "manualinput_prompt": "",
+    "manualinput_validator": "",
+    "manualinput_validator_type": "0",
+    "manualinput_default_value": "",
+    "parameters": [
+      {
+        "name": "eventid",
+        "value": "{EVENT.ID}"
+      },
+      {
+        "name": "msg",
+        "value": "auto closed by api"
+      },
+      {
+        "name": "url",
+        "value": "{$ZABBIX.URL}/api_jsonrpc.php"
+      },
+      {
+        "name": "token",
+        "value": "{$Z_API_SESSIONID}"
+      }
+    ]
+  },
+  "id": 1
+}
