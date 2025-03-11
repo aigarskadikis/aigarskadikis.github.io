@@ -1456,6 +1456,18 @@ SELECT groupid FROM hstgrp WHERE name='Linux servers'
 )
 WHERE items.units='%'
 LIMIT 100;</code></pre>
+Maximum itemid in database<pre><code>SELECT nextid FROM ids WHERE table_name='items';</code></pre>
+How items look in database<pre><code>SELECT hosts.host, CASE items.value_type
+WHEN 0 THEN 'history,trends'
+WHEN 1 THEN 'history_str'
+WHEN 2 THEN 'history_log'
+WHEN 3 THEN 'history_uint,trends_uint'
+WHEN 4 THEN 'history_text'
+WHEN 5 THEN 'history_bin'
+END AS tableName, items.itemid, items.key_ FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0 and items.status=0 AND hosts.flags IN (0,4) AND hosts.flags IN (0,4)
+ORDER BY 1,2;</code></pre>
 Which userid is disabling triggers. Zabbix 7.0<pre><code>SELECT DISTINCT auditlog.recordsetid, hosts.host, auditlog.clock, auditlog.userid, triggers.triggerid, auditlog.details
 FROM auditlog, triggers, functions, hosts, items
 WHERE auditlog.resourcetype = 13
