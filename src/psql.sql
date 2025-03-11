@@ -14,6 +14,23 @@ ALTER TABLE trends OWNER TO zabbix;
 ALTER TABLE trends_uint OWNER TO zabbix;
 ALTER TABLE history_bin OWNER TO zabbix;
 
+--update eventlog entries
+WITH deleted_rows AS (
+DELETE FROM history_log
+WHERE itemid IN (
+SELECT history_log.itemid
+FROM history_log
+JOIN items ON history_log.itemid = items.itemid
+JOIN hosts ON items.hostid = hosts.hostid
+WHERE items.key_ LIKE 'eventlog%'
+AND items.status = 0 AND items.flags IN (0,4) AND hosts.status = 0 AND hosts.flags IN (0,4)
+)
+RETURNING itemid, timestamp, source, severity, value, logeventid, ns
+)
+INSERT INTO history_log (itemid, clock, timestamp, source, severity, value, logeventid, ns)
+SELECT itemid, timestamp, timestamp, source, severity, value, logeventid, ns
+FROM deleted_rows;
+
 --monitor process. postgres. PostgreSQL
 SELECT * FROM pg_stat_activity WHERE state != 'idle';
 
