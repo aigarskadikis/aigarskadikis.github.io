@@ -100,6 +100,17 @@ GROUP BY 2,3,4,5
 ORDER BY 1 DESC
 LIMIT 20;
 
+--eventlog items per host
+SELECT COUNT(*), items.itemid, history_log.source, history_log.severity, history_log.logeventid, items.key_, hosts.host
+FROM history_log, items, hosts
+WHERE items.itemid=history_log.itemid AND hosts.hostid=items.hostid
+AND items.key_ like 'eventlog%'
+AND items.status=0 AND items.flags IN (0,4)
+AND hosts.status=0 AND hosts.flags IN (0,4)
+GROUP BY 2,3,4,5,6,7
+ORDER BY 1 DESC
+LIMIT 20;
+
 --how items look in database
 SELECT hosts.host, CASE items.value_type
 WHEN 0 THEN 'history,trends'
