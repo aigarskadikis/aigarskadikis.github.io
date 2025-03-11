@@ -88,6 +88,18 @@ LIMIT 100;
 --maximum itemid in database
 SELECT nextid FROM ids WHERE table_name='items';
 
+--eventlog item categories
+SELECT COUNT(*), items.itemid, source, severity, logeventid, key_ FROM history_log, items
+WHERE items.itemid=history_log.itemid
+AND history_log.itemid IN (
+SELECT itemid FROM items WHERE key_ like 'eventlog%' AND status=0 AND flags IN (0,4) AND hostid IN (
+SELECT hostid FROM hosts WHERE status=0 AND flags IN (0,4)
+)
+)
+GROUP BY 2,3,4,5
+ORDER BY 1 DESC
+LIMIT 20;
+
 --how items look in database
 SELECT hosts.host, CASE items.value_type
 WHEN 0 THEN 'history,trends'
