@@ -1360,6 +1360,21 @@ Long running queries. Postgres. PostgreSQL<pre><code>SELECT pid, user, pg_stat_a
 NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event
 FROM pg_stat_activity
 WHERE (NOW() - pg_stat_activity.query_start) > interval '3 seconds';</code></pre>
+PostgreSQL, queries more than 100 seconds, process list<pre><code>SELECT pid, user, pg_stat_activity.query_start,
+NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event
+FROM pg_stat_activity
+WHERE (NOW() - pg_stat_activity.query_start) > interval '100 seconds';</code></pre>
+PostgreSQL, queries more than 300 seconds, process list<pre><code>SELECT pid, user, pg_stat_activity.query_start,
+NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event
+FROM pg_stat_activity
+WHERE (NOW() - pg_stat_activity.query_start) > interval '300 seconds';</code></pre>
+PostgreSQL, vacuum, autovacuum situation<pre><code>SELECT schemaname, relname, n_live_tup, n_dead_tup, last_autovacuum
+FROM pg_stat_all_tables WHERE n_dead_tup > 0
+ORDER BY n_dead_tup DESC;</code></pre>
+PostgreSQL, size of hypertables<pre><code>SELECT table_name, pg_size_pretty(pg_total_relation_size(quote_ident(table_name))), pg_total_relation_size(quote_ident(table_name))
+FROM information_schema.tables
+WHERE table_schema = 'public'
+ORDER BY 3 DESC;</code></pre>
 Reset owner<pre><code>ALTER TABLE history OWNER TO zabbix;
 ALTER TABLE history_uint OWNER TO zabbix;
 ALTER TABLE history_str OWNER TO zabbix;
@@ -1368,6 +1383,21 @@ ALTER TABLE history_text OWNER TO zabbix;
 ALTER TABLE trends OWNER TO zabbix;
 ALTER TABLE trends_uint OWNER TO zabbix;
 ALTER TABLE history_bin OWNER TO zabbix;</code></pre>
+Update eventlog entries<pre><code>WITH deleted_rows AS (
+DELETE FROM history_log
+WHERE itemid IN (
+SELECT history_log.itemid
+FROM history_log
+JOIN items ON history_log.itemid = items.itemid
+JOIN hosts ON items.hostid = hosts.hostid
+WHERE items.key_ LIKE 'eventlog%'
+AND items.status = 0 AND items.flags IN (0,4) AND hosts.status = 0 AND hosts.flags IN (0,4)
+)
+RETURNING itemid, timestamp, source, severity, value, logeventid, ns
+)
+INSERT INTO history_log (itemid, clock, timestamp, source, severity, value, logeventid, ns)
+SELECT itemid, timestamp, timestamp, source, severity, value, logeventid, ns
+FROM deleted_rows;</code></pre>
 Monitor process. Postgres. PostgreSQL<pre><code>SELECT * FROM pg_stat_activity WHERE state != 'idle';</code></pre>
 What is minor version of Zabbix<pre><code>SELECT * FROM dbversion;</code></pre>
 Remove old sessions in PostgreSQL. Zabbix 7.0<pre><code>DELETE FROM sessions WHERE lastaccess < EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours');</code></pre>
@@ -1457,6 +1487,25 @@ SELECT groupid FROM hstgrp WHERE name='Linux servers'
 WHERE items.units='%'
 LIMIT 100;</code></pre>
 Maximum itemid in database<pre><code>SELECT nextid FROM ids WHERE table_name='items';</code></pre>
+Eventlog item categories<pre><code>SELECT COUNT(*), items.itemid, source, severity, logeventid, key_ FROM history_log, items
+WHERE items.itemid=history_log.itemid
+AND history_log.itemid IN (
+SELECT itemid FROM items WHERE key_ like 'eventlog%' AND status=0 AND flags IN (0,4) AND hostid IN (
+SELECT hostid FROM hosts WHERE status=0 AND flags IN (0,4)
+)
+)
+GROUP BY 2,3,4,5
+ORDER BY 1 DESC
+LIMIT 20;</code></pre>
+Eventlog items per host<pre><code>SELECT COUNT(*), items.itemid, history_log.source, history_log.severity, history_log.logeventid, items.key_, hosts.host
+FROM history_log, items, hosts
+WHERE items.itemid=history_log.itemid AND hosts.hostid=items.hostid
+AND items.key_ like 'eventlog%'
+AND items.status=0 AND items.flags IN (0,4)
+AND hosts.status=0 AND hosts.flags IN (0,4)
+GROUP BY 2,3,4,5,6,7
+ORDER BY 1 DESC
+LIMIT 20;</code></pre>
 How items look in database<pre><code>SELECT hosts.host, CASE items.value_type
 WHEN 0 THEN 'history,trends'
 WHEN 1 THEN 'history_str'

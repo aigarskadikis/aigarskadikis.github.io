@@ -4,6 +4,29 @@ NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_typ
 FROM pg_stat_activity
 WHERE (NOW() - pg_stat_activity.query_start) > interval '3 seconds';
 
+--PostgreSQL, queries more than 100 seconds, process list
+SELECT pid, user, pg_stat_activity.query_start,
+NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event
+FROM pg_stat_activity
+WHERE (NOW() - pg_stat_activity.query_start) > interval '100 seconds';
+
+--PostgreSQL, queries more than 300 seconds, process list
+SELECT pid, user, pg_stat_activity.query_start,
+NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event
+FROM pg_stat_activity
+WHERE (NOW() - pg_stat_activity.query_start) > interval '300 seconds';
+
+--PostgreSQL, vacuum, autovacuum situation
+SELECT schemaname, relname, n_live_tup, n_dead_tup, last_autovacuum
+FROM pg_stat_all_tables WHERE n_dead_tup > 0
+ORDER BY n_dead_tup DESC;
+
+--PostgreSQL, size of hypertables
+SELECT table_name, pg_size_pretty(pg_total_relation_size(quote_ident(table_name))), pg_total_relation_size(quote_ident(table_name))
+FROM information_schema.tables
+WHERE table_schema = 'public'
+ORDER BY 3 DESC;
+
 --reset owner
 ALTER TABLE history OWNER TO zabbix;
 ALTER TABLE history_uint OWNER TO zabbix;
