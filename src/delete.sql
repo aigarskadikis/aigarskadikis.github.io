@@ -8,6 +8,9 @@ WHERE events.source=0
 AND events.object=0
 AND events.objectid=987654321;
 
+--delete old sessions. PostgreSQL. Zabbix 6.0
+DELETE FROM sessions WHERE lastaccess < EXTRACT(EPOCH FROM NOW() - INTERVAL '10 days');
+
 --delete discovery, autoregistration and internal events
 DELETE FROM events WHERE source IN (1,2,3) LIMIT 1;
 DELETE FROM events WHERE source IN (1,2,3) LIMIT 10;

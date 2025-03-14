@@ -10,6 +10,9 @@ NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_typ
 FROM pg_stat_activity
 WHERE (NOW() - pg_stat_activity.query_start) > interval '100 seconds';
 
+--PostgreSQL, current state of currently running vacuum
+SELECT * FROM pg_stat_progress_vacuum ;
+
 --PostgreSQL, queries more than 300 seconds, process list
 SELECT pid, user, pg_stat_activity.query_start,
 NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event
