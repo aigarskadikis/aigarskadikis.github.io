@@ -168,6 +168,18 @@ WHERE hosts.status IN (0, 1)
 GROUP BY 
   proxy.name, hosts.host, hosts.status;</code></pre></td></tr>
 
+<tr><td>interface is not used by any passive item</td>
+
+<td><pre><code>SELECT ip, hosts.host, CONCAT('zabbix.php?action=host.edit&hostid=', i.hostid) AS goTo AS goTo FROM interface i, hosts
+WHERE NOT EXISTS (
+    SELECT 1 FROM items it WHERE it.interfaceid = i.interfaceid
+) AND hosts.hostid=i.hostid;</code></pre></td>
+
+<td><pre><code>SELECT ip, hosts.host, 'zabbix.php?action=host.edit&hostid=' || i.hostid AS goTo FROM interface i, hosts
+WHERE NOT EXISTS (
+    SELECT 1 FROM items it WHERE it.interfaceid = i.interfaceid
+) AND hosts.hostid=i.hostid;</code></pre></td></tr>
+
 
 <tr><td>item update frequency per type</td>
 <td colspan="2"><pre><code>SELECT CASE items.type
