@@ -135,6 +135,14 @@ AND items.itemid = functions.itemid
 AND hosts.hostid = items.hostid
 ORDER BY auditlog.clock DESC LIMIT 2;
 
+--still open problems from year 2024. Zabbix 5.0
+SELECT p.eventid,p.objectid,p.clock,p.ns,p.name,p.severity
+FROM problem p WHERE p.source='0' AND p.object='0' AND NOT EXISTS (
+SELECT NULL FROM event_suppress es WHERE es.eventid=p.eventid
+) AND p.r_eventid IS NULL
+AND clock BETWEEN UNIX_TIMESTAMP("2024-01-01 00:00:00") AND UNIX_TIMESTAMP("2025-01-01 00:00:00")
+ORDER BY p.eventid DESC;
+
 --detect when Keep lost resources period is not installed in danger. Zabbix 5.2
 SELECT hosts.host,items.name FROM items, hosts
 WHERE hosts.hostid=items.hostid
