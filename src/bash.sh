@@ -44,6 +44,9 @@ found == 2
 exit
 }' | grep –v 'Prometheus raw data' > /tmp/prom.input.txt
 
+# backup whole etc
+DATE=`date '+%Y.%m.%d.%H.%M'` && cd /etc && mkdir -p ~/backup${DATE}${PWD} && cp -a * ~/backup${DATE}${PWD}^
+
 # oracle connection test
 cd /opt/oracle/instantclient_23_7 && ./sqlplus "system/oracle@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=10.10.6.26)(Port=49161))(CONNECT_DATA=(SID=xe)))"
 
