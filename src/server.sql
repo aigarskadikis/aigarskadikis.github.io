@@ -135,6 +135,13 @@ AND items.itemid = functions.itemid
 AND hosts.hostid = items.hostid
 ORDER BY auditlog.clock DESC LIMIT 2;
 
+--zabbix agent autoregistration hits on central server. Zabbix 7.0
+SELECT events.clock, events.objectid, autoreg_host.autoreg_hostid, autoreg_host.proxyid, autoreg_host.host
+FROM events, autoreg_host
+WHERE events.objectid=autoreg_host.autoreg_hostid
+AND events.source=2 AND events.object=3
+ORDER BY 1 DESC;
+
 --still open problems from year 2024. Zabbix 5.0
 SELECT p.eventid,p.objectid,p.clock,p.ns,p.name,p.severity
 FROM problem p WHERE p.source='0' AND p.object='0' AND NOT EXISTS (

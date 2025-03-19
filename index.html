@@ -1088,6 +1088,7 @@ FROM events
 WHERE events.source=0
 AND events.object=0
 AND events.objectid=987654321;</code></pre>
+Delete old sessions. PostgreSQL. Zabbix 6.0<pre><code>DELETE FROM sessions WHERE lastaccess < EXTRACT(EPOCH FROM NOW() - INTERVAL '10 days');</code></pre>
 Delete discovery, autoregistration and internal events<pre><code>DELETE FROM events WHERE source IN (1,2,3) LIMIT 1;
 DELETE FROM events WHERE source IN (1,2,3) LIMIT 10;
 DELETE FROM events WHERE source IN (1,2,3) LIMIT 100;</code></pre>
@@ -1364,6 +1365,7 @@ PostgreSQL, queries more than 100 seconds, process list<pre><code>SELECT pid, us
 NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event
 FROM pg_stat_activity
 WHERE (NOW() - pg_stat_activity.query_start) > interval '100 seconds';</code></pre>
+PostgreSQL, current state of currently running vacuum<pre><code>SELECT * FROM pg_stat_progress_vacuum ;</code></pre>
 PostgreSQL, queries more than 300 seconds, process list<pre><code>SELECT pid, user, pg_stat_activity.query_start,
 NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event
 FROM pg_stat_activity
@@ -1526,6 +1528,17 @@ AND functions.triggerid = triggers.triggerid
 AND items.itemid = functions.itemid
 AND hosts.hostid = items.hostid
 ORDER BY auditlog.clock DESC LIMIT 2;</code></pre>
+Zabbix agent autoregistration hits on central server. Zabbix 7.0<pre><code>SELECT events.clock, events.objectid, autoreg_host.autoreg_hostid, autoreg_host.proxyid, autoreg_host.host
+FROM events, autoreg_host
+WHERE events.objectid=autoreg_host.autoreg_hostid
+AND events.source=2 AND events.object=3
+ORDER BY 1 DESC;</code></pre>
+Still open problems from year 2024. Zabbix 5.0<pre><code>SELECT p.eventid,p.objectid,p.clock,p.ns,p.name,p.severity
+FROM problem p WHERE p.source='0' AND p.object='0' AND NOT EXISTS (
+SELECT NULL FROM event_suppress es WHERE es.eventid=p.eventid
+) AND p.r_eventid IS NULL
+AND clock BETWEEN UNIX_TIMESTAMP("2024-01-01 00:00:00") AND UNIX_TIMESTAMP("2025-01-01 00:00:00")
+ORDER BY p.eventid DESC;</code></pre>
 Detect when Keep lost resources period is not installed in danger. Zabbix 5.2<pre><code>SELECT hosts.host,items.name FROM items, hosts
 WHERE hosts.hostid=items.hostid
 AND items.status=0
