@@ -10,6 +10,12 @@ echo "$(date +%Y%m%d.%H%M%S) ZBXTRAP 10.10.10.10
 # snmptrapd in foreground
 strace -s 1024 -o /tmp/snmptrapd.strace.log snmptrapd -f -C -Le -Dusm -c /etc/snmp/snmptrapd.conf
 
+# capture traps traffic
+tcpdump -npi any -s 0 -w /tmp/udp162.pcap udp and host 10.133.112.87
+
+# send test trap SNMPv3
+snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe08 10.133.80.228 0 1.2.3
+
 # turn down 'snmpd'. this was installed to solve dependencies
 systemctl stop snmpd && systemctl disable snmpd
 
