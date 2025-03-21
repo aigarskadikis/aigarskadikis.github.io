@@ -142,6 +142,11 @@ WHERE events.objectid=autoreg_host.autoreg_hostid
 AND events.source=2 AND events.object=3
 ORDER BY 1 DESC;
 
+--Zabbix PDF report statistics. Zabbix 7.0
+SELECT r.reportid,r.userid,r.name,r.dashboardid,r.period,r.cycle,r.weekdays,r.start_time, r.active_since,r.active_till,u.timezone,r.state,r.info,r.lastsent,r.status
+FROM report r,users u
+WHERE r.userid=u.userid;
+
 --still open problems from year 2024. Zabbix 5.0
 SELECT p.eventid,p.objectid,p.clock,p.ns,p.name,p.severity
 FROM problem p WHERE p.source='0' AND p.object='0' AND NOT EXISTS (
