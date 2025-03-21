@@ -48,7 +48,116 @@ exit
 DATE=`date '+%Y.%m.%d.%H.%M'` && cd /etc && mkdir -p ~/backup${DATE}${PWD} && cp -a * ~/backup${DATE}${PWD}
 
 # extract creation of tables. remove break line, show printable characters add _new at the end
-cat schema.sql | tr -d '\n' | sed 's|;|;\n|g' | grep -E "^CREATE TABLE (history|trends).*" | sed -E 's|\s+| |g' | sed -E 's|CREATE TABLE (history[^ ]+)|CREATE TABLE \1_new|;s|CREATE TABLE (trends[^ ]+)|CREATE TABLE \1_new|'
+cat schema.sql | \
+tr -d '\n' | \
+sed 's|;|;\n|g' | \
+grep -E "^CREATE TABLE (history|trends).*" | \
+sed -E '
+s|\s+| |g;
+s|CREATE TABLE (history[^ (,]*)|CREATE TABLE \1_new|;
+s|CREATE TABLE (trends[^ (,]*)|CREATE TABLE \1_new|' > /tmp/create_new.sql
+
+# create fork of timescaledb
+cat schema.sql | \
+sed 's|^.UPDATE config.*||' | \
+sed "s|', 'clock', chunk_time_i
+nterval|_new', 'clock', chunk_time_interval|"
+
+# remaster timescaledb create script to work with _new tables
+cat schema.sql | \
+sed 's|^.UPDATE config.*||' | \
+sed "s|', 'clock', chunk_time_interval|_new', 'clock', chunk_time_interval|" > /tmp/enable.for.new.sql
+
+# prepare temporary tables
+DB=sample6023
+OLD=_old
+NEW=_new
+echo "
+history
+history_uint
+history_str
+history_log
+history_text
+trends
+trends_uint
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+psql $DB --command="
+ALTER TABLE $TABLE RENAME TO $TABLE$OLD;
+ALTER TABLE $TABLE$NEW RENAME TO $TABLE;
+ALTER TABLE $TABLE OWNER TO zabbix;
+CREATE TABLE $TABLE$NEW (LIKE $TABLE INCLUDING ALL);
+ALTER TABLE $TABLE$NEW OWNER TO zabbix;
+"
+} done
+
+# Convert the biggest data into hyper tables. This process will take multiple hours/days
+DB=sample6023
+OLD=_old
+NEW=_new
+echo "
+trends
+trends_uint
+history
+history_uint
+history_str
+history_log
+history_text
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+echo "converting $TABLE$OLD into hyper tables started at $(date)"
+psql $DB --command="
+INSERT INTO $TABLE$NEW SELECT * FROM $TABLE$OLD ON CONFLICT DO NOTHING;
+"
+} done
+
+# merga data together
+DB=sample6023
+OLD=_old
+NEW=_new
+TMP=_tmp
+echo "
+trends
+trends_uint
+history
+history_uint
+history_str
+history_log
+history_text
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+echo "merging all data together for $TABLE started at $(date)"
+psql $DB --command="
+ALTER TABLE $TABLE RENAME TO $TABLE$TMP;
+ALTER TABLE $TABLE$NEW RENAME TO $TABLE;
+INSERT INTO $TABLE SELECT * FROM $TABLE$TMP ON CONFLICT DO NOTHING;
+"
+} done
+
+# drop unnecary tables. print sensitive statements
+OLD=_old
+TMP=_tmp
+echo "
+trends
+trends_uint
+history
+history_uint
+history_str
+history_log
+history_text
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+echo "DROP TABLE $TABLE$TMP;"
+echo "DROP TABLE $TABLE$OLD;"
+} done
 
 # oracle connection test
 cd /opt/oracle/instantclient_23_7 && ./sqlplus "system/oracle@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=10.10.6.26)(Port=49161))(CONNECT_DATA=(SID=xe)))"

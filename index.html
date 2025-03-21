@@ -176,7 +176,104 @@ found == 2
 exit
 }' | grep –v 'Prometheus raw data' > /tmp/prom.input.txt</code></pre>
 Backup whole etc<pre><code>DATE=`date '+%Y.%m.%d.%H.%M'` && cd /etc && mkdir -p ~/backup${DATE}${PWD} && cp -a * ~/backup${DATE}${PWD}</code></pre>
-Extract creation of tables. Remove break line, show printable characters add _new at the end<pre><code>cat schema.sql | tr -d '\n' | sed 's|;|;\n|g' | grep -E "^CREATE TABLE (history|trends).*" | sed -E 's|\s+| |g' | sed -E 's|CREATE TABLE (history[^ ]+)|CREATE TABLE \1_new|;s|CREATE TABLE (trends[^ ]+)|CREATE TABLE \1_new|'</code></pre>
+Extract creation of tables. Remove break line, show printable characters add _new at the end<pre><code>cat schema.sql | \
+tr -d '\n' | \
+sed 's|;|;\n|g' | \
+grep -E "^CREATE TABLE (history|trends).*" | \
+sed -E '
+s|\s+| |g;
+s|CREATE TABLE (history[^ (,]*)|CREATE TABLE \1_new|;
+s|CREATE TABLE (trends[^ (,]*)|CREATE TABLE \1_new|' > /tmp/create_new.sql</code></pre>
+Create fork of timescaledb<pre><code>cat schema.sql | \
+sed 's|^.UPDATE config.*||' | \
+sed "s|', 'clock', chunk_time_i
+nterval|_new', 'clock', chunk_time_interval|"</code></pre>
+Remaster timescaledb create script to work with _new tables<pre><code>cat schema.sql | \
+sed 's|^.UPDATE config.*||' | \
+sed "s|', 'clock', chunk_time_interval|_new', 'clock', chunk_time_interval|" > /tmp/enable.for.new.sql</code></pre>
+Prepare temporary tables<pre><code>DB=sample6023
+OLD=_old
+NEW=_new
+echo "
+history
+history_uint
+history_str
+history_log
+history_text
+trends
+trends_uint
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+psql $DB --command="
+ALTER TABLE $TABLE RENAME TO $TABLE$OLD;
+ALTER TABLE $TABLE$NEW RENAME TO $TABLE;
+ALTER TABLE $TABLE OWNER TO zabbix;
+CREATE TABLE $TABLE$NEW (LIKE $TABLE INCLUDING ALL);
+ALTER TABLE $TABLE$NEW OWNER TO zabbix;
+"
+} done</code></pre>
+Convert the biggest data into hyper tables. This process will take multiple hours/days<pre><code>DB=sample6023
+OLD=_old
+NEW=_new
+echo "
+trends
+trends_uint
+history
+history_uint
+history_str
+history_log
+history_text
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+echo "converting $TABLE$OLD into hyper tables started at $(date)"
+psql $DB --command="
+INSERT INTO $TABLE$NEW SELECT * FROM $TABLE$OLD ON CONFLICT DO NOTHING;
+"
+} done</code></pre>
+Merga data together<pre><code>DB=sample6023
+OLD=_old
+NEW=_new
+TMP=_tmp
+echo "
+trends
+trends_uint
+history
+history_uint
+history_str
+history_log
+history_text
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+echo "merging all data together for $TABLE started at $(date)"
+psql $DB --command="
+ALTER TABLE $TABLE RENAME TO $TABLE$TMP;
+ALTER TABLE $TABLE$NEW RENAME TO $TABLE;
+INSERT INTO $TABLE SELECT * FROM $TABLE$TMP ON CONFLICT DO NOTHING;
+"
+} done</code></pre>
+Drop unnecary tables. Print sensitive statements<pre><code>OLD=_old
+TMP=_tmp
+echo "
+trends
+trends_uint
+history
+history_uint
+history_str
+history_log
+history_text
+" | \
+grep -v "^$" | \
+while IFS= read -r TABLE
+do {
+echo "DROP TABLE $TABLE$TMP;"
+echo "DROP TABLE $TABLE$OLD;"
+} done</code></pre>
 Oracle connection test<pre><code>cd /opt/oracle/instantclient_23_7 && ./sqlplus "system/oracle@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=10.10.6.26)(Port=49161))(CONNECT_DATA=(SID=xe)))"</code></pre>
 Postgresql connection test<pre><code>PGHOST=10.10.6.23 PGPORT=5432 PGUSER=zbx_monitor PGPASSWORD='passwordGoesHere' psql</code></pre>
 MSSQL connection test. '-C' means Trust Server Certificate<pre><code>sqlcmd --server '10.10.4.21' --user-name 'zbx_monitor' --password 'passwordGoesHere' -C</code></pre>
@@ -3375,6 +3472,21 @@ WHERE hypertable_name IN ('history','history_uint','history_str','history_log','
 AND range_start_integer > EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours')
 ORDER BY 1,2;</code></pre>
 Compress manually one chunk. Pg 14.5, ts 2.8.1<pre><code>SELECT compress_chunk('_timescaledb_internal._hyper_1_489_chunk');</code></pre>
+Drop tables<pre><code>DROP TABLE trends_tmp;
+DROP TABLE trends_old;
+DROP TABLE trends_uint_tmp;
+DROP TABLE trends_uint_old;
+DROP TABLE history_tmp;
+DROP TABLE history_old;
+DROP TABLE history_uint_tmp;
+DROP TABLE history_uint_old;
+DROP TABLE history_str_tmp;
+DROP TABLE history_str_old;
+DROP TABLE history_log_tmp;
+DROP TABLE history_log_old;
+DROP TABLE history_text_tmp;
+DROP TABLE history_text_old;</code></pre>
+Allow the application layer to to drop old chunks by using housekeeper settings in GUI<pre><code>UPDATE config SET db_extension='timescaledb',hk_history_global=1,hk_trends_global=1;</code></pre>
 Explorer how many is compressed and uncompressed. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
 To see if hypertable is compressed. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>
 Decompress chunk. Pg 14.5, ts 2.8.1<pre><code>SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');</code></pre>

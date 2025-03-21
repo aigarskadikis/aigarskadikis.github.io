@@ -18,6 +18,25 @@ ORDER BY 1,2;
 --compress manually one chunk. pg 14.5, ts 2.8.1
 SELECT compress_chunk('_timescaledb_internal._hyper_1_489_chunk');
 
+--drop tables
+DROP TABLE trends_tmp;
+DROP TABLE trends_old;
+DROP TABLE trends_uint_tmp;
+DROP TABLE trends_uint_old;
+DROP TABLE history_tmp;
+DROP TABLE history_old;
+DROP TABLE history_uint_tmp;
+DROP TABLE history_uint_old;
+DROP TABLE history_str_tmp;
+DROP TABLE history_str_old;
+DROP TABLE history_log_tmp;
+DROP TABLE history_log_old;
+DROP TABLE history_text_tmp;
+DROP TABLE history_text_old;
+
+--Allow the application layer to to drop old chunks by using housekeeper settings in GUI
+UPDATE config SET db_extension='timescaledb',hk_history_global=1,hk_trends_global=1;
+
 --explorer how many is compressed and uncompressed. pg 14.5, ts 2.8.1
 SELECT chunk_schema,chunk_name,compression_status FROM chunk_compression_stats('history');
 
