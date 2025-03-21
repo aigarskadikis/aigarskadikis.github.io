@@ -45,7 +45,10 @@ exit
 }' | grep –v 'Prometheus raw data' > /tmp/prom.input.txt
 
 # backup whole etc
-DATE=`date '+%Y.%m.%d.%H.%M'` && cd /etc && mkdir -p ~/backup${DATE}${PWD} && cp -a * ~/backup${DATE}${PWD}^
+DATE=`date '+%Y.%m.%d.%H.%M'` && cd /etc && mkdir -p ~/backup${DATE}${PWD} && cp -a * ~/backup${DATE}${PWD}
+
+# extract creation of tables. remove break line, show printable characters add _new at the end
+cat schema.sql | tr -d '\n' | sed 's|;|;\n|g' | grep -E "^CREATE TABLE (history|trends).*" | sed -E 's|\s+| |g' | sed -E 's|CREATE TABLE (history[^ ]+)|CREATE TABLE \1_new|;s|CREATE TABLE (trends[^ ]+)|CREATE TABLE \1_new|'
 
 # oracle connection test
 cd /opt/oracle/instantclient_23_7 && ./sqlplus "system/oracle@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=10.10.6.26)(Port=49161))(CONNECT_DATA=(SID=xe)))"

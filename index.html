@@ -175,6 +175,8 @@ found == 2
 /Prometheus raw data end/ && found == 2 {
 exit
 }' | grep –v 'Prometheus raw data' > /tmp/prom.input.txt</code></pre>
+Backup whole etc<pre><code>DATE=`date '+%Y.%m.%d.%H.%M'` && cd /etc && mkdir -p ~/backup${DATE}${PWD} && cp -a * ~/backup${DATE}${PWD}</code></pre>
+Extract creation of tables. Remove break line, show printable characters add _new at the end<pre><code>cat schema.sql | tr -d '\n' | sed 's|;|;\n|g' | grep -E "^CREATE TABLE (history|trends).*" | sed -E 's|\s+| |g' | sed -E 's|CREATE TABLE (history[^ ]+)|CREATE TABLE \1_new|;s|CREATE TABLE (trends[^ ]+)|CREATE TABLE \1_new|'</code></pre>
 Oracle connection test<pre><code>cd /opt/oracle/instantclient_23_7 && ./sqlplus "system/oracle@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=10.10.6.26)(Port=49161))(CONNECT_DATA=(SID=xe)))"</code></pre>
 Postgresql connection test<pre><code>PGHOST=10.10.6.23 PGPORT=5432 PGUSER=zbx_monitor PGPASSWORD='passwordGoesHere' psql</code></pre>
 MSSQL connection test. '-C' means Trust Server Certificate<pre><code>sqlcmd --server '10.10.4.21' --user-name 'zbx_monitor' --password 'passwordGoesHere' -C</code></pre>
@@ -986,6 +988,8 @@ Mimic SNMP traps<pre><code>echo "$(date +%Y%m%d.%H%M%S) ZBXTRAP 10.10.10.10
 3rd line
 4rt line" | tee --append /tmp/zabbix_traps.tmp</code></pre>
 Snmptrapd in foreground<pre><code>strace -s 1024 -o /tmp/snmptrapd.strace.log snmptrapd -f -C -Le -Dusm -c /etc/snmp/snmptrapd.conf</code></pre>
+Capture traps traffic<pre><code>tcpdump -npi any -s 0 -w /tmp/udp162.pcap udp and host 10.133.112.87</code></pre>
+Send test trap SNMPv3<pre><code>snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe08 10.133.80.228 0 1.2.3</code></pre>
 Turn down 'snmpd'. This was installed to solve dependencies<pre><code>systemctl stop snmpd && systemctl disable snmpd</code></pre>
 Turn down 'snmptrapd' to reconfigure service<pre><code>systemctl stop snmptrapd</code></pre>
 Make a backup of old config, install new<pre><code>mv /etc/snmp/snmptrapd.conf /etc/snmp/original.snmptrapd.conf</code></pre>
@@ -1533,6 +1537,9 @@ FROM events, autoreg_host
 WHERE events.objectid=autoreg_host.autoreg_hostid
 AND events.source=2 AND events.object=3
 ORDER BY 1 DESC;</code></pre>
+Zabbix PDF report statistics. Zabbix 7.0<pre><code>SELECT r.reportid,r.userid,r.name,r.dashboardid,r.period,r.cycle,r.weekdays,r.start_time, r.active_since,r.active_till,u.timezone,r.state,r.info,r.lastsent,r.status
+FROM report r,users u
+WHERE r.userid=u.userid;</code></pre>
 Still open problems from year 2024. Zabbix 5.0<pre><code>SELECT p.eventid,p.objectid,p.clock,p.ns,p.name,p.severity
 FROM problem p WHERE p.source='0' AND p.object='0' AND NOT EXISTS (
 SELECT NULL FROM event_suppress es WHERE es.eventid=p.eventid
