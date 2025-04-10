@@ -10,6 +10,15 @@ do {
 echo $LINE
 } done
 
+# debug snmp
+snmpwalk -v'2c' -c'public' -Dsnmp IP OID
+
+# debug snmp transport
+snmpwalk -v'2c' -c'public' -Dtransport IP OID
+
+# debug in hex format
+snmpwalk -v'2c' -c'public' -dd IP OID
+
 # poller busy
 watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
 
