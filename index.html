@@ -1536,6 +1536,38 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="server" checked="checked"><label for="server">server.sql</label><div class="tab">
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
+Unreachable hosts. PostgreSQL, Zabbix 6.0<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.error,
+STRING_AGG(
+DISTINCT CASE interface.useip
+WHEN 0 THEN interface.dns
+WHEN 1 THEN interface.ip
+END, ', '
+) AS passiveConnect
+FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE interface.available=2
+GROUP BY 1,2,3
+ORDER BY 1;</code></pre>
+Unreachable hosts. MySQL, Zabbix 6.0<pre><code>SELECT
+proxy.host AS proxy,
+hosts.host,
+interface.error,
+GROUP_CONCAT(
+DISTINCT CASE interface.useip
+WHEN 0 THEN interface.dns
+WHEN 1 THEN interface.ip
+END SEPARATOR ', '
+) AS passiveConnect
+FROM interface
+JOIN hosts ON (hosts.hostid=interface.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE interface.available=2
+GROUP BY 1,2,3
+ORDER BY 1;</code></pre>
 Sessions in last day. Zabbix 6.0<pre><code>SELECT users.username,COUNT(*) FROM sessions, users WHERE
 sessions.userid = users.userid
 AND sessions.lastaccess > sessions.lastaccess-(3600*24)
