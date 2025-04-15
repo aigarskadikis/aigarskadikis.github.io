@@ -1081,6 +1081,15 @@ Restart and follow log<pre><code>systemctl restart zabbix-server && tail -f /var
 <p>Download this section: <a href="src/sed.sh">https://aigarskadikis.github.io/src/sed.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sed.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sed.sh</a></p>
 </div>
+<input type="radio" name="tabs" id="selinux"><label for="selinux">selinux</label><div class="tab">
+List existing context<pre><code>ls -lZ /etc/zabbix</code></pre>
+Install context<pre><code>sudo chcon system_u:object_r:etc_t:s0 /etc/zabbix/another.conf</code></pre>
+Make it persistent across relabels (like restorecon or policy reloads):<pre><code>sudo semanage fcontext -a -t etc_t "/etc/zabbix/another.conf"
+sudo restorecon -v /etc/zabbix/another.conf</code></pre>
+Replicate context from another file<pre><code>sudo chcon --reference=/etc/zabbix/zabbix_java_gateway.conf /etc/zabbix/another.conf</code></pre>
+<p>Download this section: <a href="src/selinux.sh">https://aigarskadikis.github.io/src/selinux.sh</a><br />
+Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/selinux.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/selinux.sh</a></p>
+</div>
 <input type="radio" name="tabs" id="snmptrap"><label for="snmptrap">snmptrap</label><div class="tab">
 Install dependencies on ubuntu 22<pre><code>apt install snmp snmptrapd libsnmp-perl snmptt snmp-mibs-downloader -y</code></pre>
 Mimic SNMP traps<pre><code>echo "$(date +%Y%m%d.%H%M%S) ZBXTRAP 10.10.10.10
