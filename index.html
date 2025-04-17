@@ -1568,6 +1568,15 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE interface.available=2
 GROUP BY 1,2,3
 ORDER BY 1;</code></pre>
+Items which use trapper port. Zabbix 6.0<pre><code>SELECT proxy.host, hosts.host, CASE items.type
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 7 THEN 'Zabbix agent (active) check'
+END AS type, COUNT(*) FROM items
+JOIN hosts ON items.hostid = hosts.hostid
+LEFT JOIN hosts proxy ON proxy.hostid = hosts.proxy_hostid
+WHERE items.type IN (2,7) AND hosts.status=0 AND items.status=0
+GROUP BY 1,2,3
+ORDER BY 1,2,3;</code></pre>
 Sessions in last day. Zabbix 6.0<pre><code>SELECT users.username,COUNT(*) FROM sessions, users WHERE
 sessions.userid = users.userid
 AND sessions.lastaccess > sessions.lastaccess-(3600*24)

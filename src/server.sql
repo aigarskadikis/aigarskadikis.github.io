@@ -9,12 +9,12 @@ SELECT
 proxy.host AS proxy,
 hosts.host,
 interface.error,
-  STRING_AGG(
-    DISTINCT CASE interface.useip
-      WHEN 0 THEN interface.dns
-      WHEN 1 THEN interface.ip
-    END, ', '
-  ) AS passiveConnect
+STRING_AGG(
+DISTINCT CASE interface.useip
+WHEN 0 THEN interface.dns
+WHEN 1 THEN interface.ip
+END, ', '
+) AS passiveConnect
 FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
@@ -28,17 +28,28 @@ proxy.host AS proxy,
 hosts.host,
 interface.error,
 GROUP_CONCAT(
-    DISTINCT CASE interface.useip
-      WHEN 0 THEN interface.dns
-      WHEN 1 THEN interface.ip
-    END SEPARATOR ', '
-  ) AS passiveConnect
+DISTINCT CASE interface.useip
+WHEN 0 THEN interface.dns
+WHEN 1 THEN interface.ip
+END SEPARATOR ', '
+) AS passiveConnect
 FROM interface
 JOIN hosts ON (hosts.hostid=interface.hostid)
 LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE interface.available=2
 GROUP BY 1,2,3
 ORDER BY 1;
+
+--items which use trapper port. Zabbix 6.0
+SELECT proxy.host, hosts.host, CASE items.type
+WHEN 2 THEN 'Zabbix trapper'
+WHEN 7 THEN 'Zabbix agent (active) check'
+END AS type, COUNT(*) FROM items
+JOIN hosts ON items.hostid = hosts.hostid
+LEFT JOIN hosts proxy ON proxy.hostid = hosts.proxy_hostid
+WHERE items.type IN (2,7) AND hosts.status=0 AND items.status=0
+GROUP BY 1,2,3
+ORDER BY 1,2,3;
 
 --sessions in last day. Zabbix 6.0
 SELECT users.username,COUNT(*) FROM sessions, users WHERE
