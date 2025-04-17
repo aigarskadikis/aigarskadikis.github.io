@@ -4,6 +4,13 @@ SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name='proxy_history' LIMIT 1)
 --skip all cached LLD rules
 DELETE FROM proxy_history WHERE itemid IN (SELECT itemid FROM items WHERE flags=1);
 
+--bombards zabbix trapper and zabbix_sender
+SELECT proxy_history.clock, items.hostid, items.key_, proxy_history.value
+FROM proxy_history, items
+WHERE items.itemid = proxy_history.itemid
+AND items.type = 2
+LIMIT 10;
+
 --delete data which has been sent already
 DELETE FROM proxy_history WHERE id < (SELECT nextid FROM ids WHERE table_name = "proxy_history" LIMIT 1);
 
