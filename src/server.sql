@@ -22,6 +22,17 @@ WHERE interface.available=2
 GROUP BY 1,2,3
 ORDER BY 1;
 
+--linked templates to host ojbects. Zabbix 7.0
+SELECT
+hosts.host,
+ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates
+FROM hosts
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
+WHERE hosts.status IN (0,1)
+AND hosts.flags=0
+GROUP BY 1 ORDER BY 1;
+
 --unreachable hosts. MySQL, Zabbix 6.0
 SELECT
 proxy.host AS proxy,

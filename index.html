@@ -1407,6 +1407,11 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="proxy"><label for="proxy">proxy.sql</label><div class="tab">
 How many values is in the backlog. Does not work on oracle proxy becuase of LIMIT. Zabbix 4.0, 5.0, 6.0<pre><code>SELECT MAX(id)-(SELECT nextid FROM ids WHERE table_name='proxy_history' LIMIT 1) FROM proxy_history;</code></pre>
 Skip all cached LLD rules<pre><code>DELETE FROM proxy_history WHERE itemid IN (SELECT itemid FROM items WHERE flags=1);</code></pre>
+Bombards zabbix trapper and zabbix_sender<pre><code>SELECT proxy_history.clock, items.hostid, items.key_, proxy_history.value
+FROM proxy_history, items
+WHERE items.itemid = proxy_history.itemid
+AND items.type = 2
+LIMIT 10;</code></pre>
 Delete data which has been sent already<pre><code>DELETE FROM proxy_history WHERE id < (SELECT nextid FROM ids WHERE table_name = "proxy_history" LIMIT 1);</code></pre>
 Show LLD JSON data<pre><code>SELECT items.hostid, items.hostid, items.key_, proxy_history.value FROM proxy_history, items WHERE proxy_history.itemid=items.itemid AND items.flags=1 ORDER BY clock ASC;</code></pre>
 Which host are giving the biggest values<pre><code>SELECT h.host,i.key_,max(length(ph.value)) as max_length,count(*)
@@ -1552,6 +1557,15 @@ LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
 WHERE interface.available=2
 GROUP BY 1,2,3
 ORDER BY 1;</code></pre>
+Linked templates to host ojbects. Zabbix 7.0<pre><code>SELECT
+hosts.host,
+ARRAY_TO_STRING(ARRAY_AGG(template.host),', ') AS templates
+FROM hosts
+JOIN hosts_templates ON (hosts_templates.hostid=hosts.hostid)
+LEFT JOIN hosts template ON (hosts_templates.templateid=template.hostid)
+WHERE hosts.status IN (0,1)
+AND hosts.flags=0
+GROUP BY 1 ORDER BY 1;</code></pre>
 Unreachable hosts. MySQL, Zabbix 6.0<pre><code>SELECT
 proxy.host AS proxy,
 hosts.host,
