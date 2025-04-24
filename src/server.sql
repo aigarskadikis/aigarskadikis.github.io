@@ -22,6 +22,18 @@ WHERE interface.available=2
 GROUP BY 1,2,3
 ORDER BY 1;
 
+--failed triggers. Zabbix 7.0
+SELECT t2.objectid, t2.count, triggers.description, hosts.host, proxy.name FROM (
+SELECT objectid, COUNT(*) as count FROM (
+SELECT * FROM events WHERE source=3 AND object=0 LIMIT 99999
+) t1 GROUP BY 1 ORDER BY 2 DESC LIMIT 20
+) t2, functions, triggers, items, hosts, proxy
+WHERE functions.triggerid = t2.objectid
+AND triggers.triggerid = functions.triggerid
+AND functions.itemid = items.itemid
+AND hosts.hostid = items.hostid
+AND proxy.proxyid = hosts.proxyid;
+
 --linked templates to host ojbects. Zabbix 7.0
 SELECT
 hosts.host,
