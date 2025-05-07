@@ -34,6 +34,29 @@ AND functions.itemid = items.itemid
 AND hosts.hostid = items.hostid
 AND proxy.proxyid = hosts.proxyid;
 
+--scan numbers table
+SELECT MAX(num),itemid,clock from trends_uint WHERE clock > 1746416000 GROUP BY 2,3 ORDER BY 1 DESC LIMIT 5;
+SELECT MAX(num),itemid,clock from trends WHERE clock > 1746416000 GROUP BY 2,3 ORDER BY 1 DESC LIMIT 5;
+
+--trapper item in use
+SELECT hosts.host, items.key_, items.value_type, items.itemid
+FROM items, hosts
+WHERE items.hostid = hosts.hostid
+AND hosts.status = 0 AND items.status = 0
+AND items.flags IN (0,4) AND hosts.flags IN (0,4)
+AND items.type = 2
+ORDER BY 1,2,3,4;
+
+--calculated item
+SELECT DISTINCT items.params, items.delay, COUNT(*)
+FROM items, hosts
+WHERE items.hostid = hosts.hostid
+AND hosts.status = 0 AND items.status = 0
+AND items.flags IN (0,4) AND hosts.flags IN (0,4)
+AND items.type = 15
+GROUP BY 1,2
+ORDER BY 2,1;
+
 --linked templates to host ojbects. Zabbix 7.0
 SELECT
 hosts.host,
