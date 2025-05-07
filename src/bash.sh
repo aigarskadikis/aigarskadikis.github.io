@@ -22,6 +22,9 @@ snmpwalk -v'2c' -c'public' -dd IP OID
 # poller busy
 watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
 
+# watch backlog
+watch -n1 'zabbix_server -R diaginfo=historycache | grep -A1 "history cache diagnostic information"'
+
 # received traffic which originated only from remote host
 tcpdump -e -i any -c 1000 -nn -tt -q -l 'ip and inbound and tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
 
