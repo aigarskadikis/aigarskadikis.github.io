@@ -57,6 +57,27 @@ AND items.type = 15
 GROUP BY 1,2
 ORDER BY 2,1;
 
+--acknowledgement which is in past while comparing with event time
+SELECT events.clock, events.eventid, CASE value
+WHEN 0 THEN 'recovery'
+WHEN 1 THEN 'problem'
+END AS triggerState, acknowledges.clock, events.objectid, acknowledges.acknowledgeid
+FROM events, acknowledges
+WHERE acknowledges.eventid=events.eventid
+AND events.source=0 and events.`object`=0
+AND acknowledges.clock < events.clock;
+
+--delete anomally
+DELETE FROM acknowledges WHERE acknowledgeid IN (
+SELECT * FROM (
+SELECT acknowledges.acknowledgeid
+FROM events, acknowledges
+WHERE acknowledges.eventid=events.eventid
+AND events.source=0 and events.`object`=0
+AND acknowledges.clock < events.clock
+) AS t1
+);
+
 --linked templates to host ojbects. Zabbix 7.0
 SELECT
 hosts.host,
