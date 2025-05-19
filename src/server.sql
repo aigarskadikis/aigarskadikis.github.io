@@ -78,6 +78,26 @@ AND acknowledges.clock < events.clock
 ) AS t1
 );
 
+--manually locate orphaned events data. Zabbix 5.0, 6.0, 7.0
+SELECT COUNT(*), events.objectid,
+CASE events.object
+WHEN 0 THEN 'trigger'
+WHEN 4 THEN 'item'
+WHEN 5 THEN 'lld'
+END AS objecto,
+CASE events.source
+WHEN 0 THEN 'trigger'
+WHEN 3 THEN 'internal'
+END AS source
+FROM events, housekeeper
+WHERE events.objectid = housekeeper.field
+AND events.object IN (0,4,5)
+AND events.source IN (0,3)
+AND housekeeper.tablename = 'events'
+GROUP BY 2, 3, 4
+ORDER BY COUNT(*) DESC
+LIMIT 20;
+
 --linked templates to host ojbects. Zabbix 7.0
 SELECT
 hosts.host,
