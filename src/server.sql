@@ -78,6 +78,13 @@ AND acknowledges.clock < events.clock
 ) AS t1
 );
 
+--escalations in progress
+SELECT actions.name, triggers.triggerid, COUNT(*)
+FROM escalations, triggers, actions
+WHERE escalations.triggerid=triggers.triggerid
+AND escalations.actionid=actions.actionid
+GROUP BY 1,2 ORDER BY 3 DESC LIMIT 10;
+
 --manually locate orphaned events data. Zabbix 5.0, 6.0, 7.0
 SELECT COUNT(*), events.objectid,
 CASE events.object
