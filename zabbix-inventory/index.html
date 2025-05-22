@@ -4,156 +4,38 @@ pre{padding:.3em 2em .3em .5em;margin:0 0 1em;background-color:#FFF7F0;border-ra
 
 <h1>Zabbix inventory: Never ending story of improvement</h1>
 
-<h2>What is this?</h2>
-
-It's possible to utilize invetory fields to store the data (json, txt) of "master item". Topics:
-<ul>
-	<li>Develop "a table" in retro spect. Keep original data source handy</li>
-	<li>It's OK to shut down servers/workstations for multiple weeks</li>
-	<li>Minimal load (or no load at all) on workstation/server. Enable collector item to populate master data, disable it in next day. Develop template later</li>
-	<li>Combine Linux/Windows inventory stats together. In order to use Top hosts widget, need unified template.</li>
-	<li>Aggregate two or more textual fields together. Script item can access any inventory field</li>
-	<li>Create a list of gadgets. Turn on workstation, install agent, shut down, put back in box</li>
-	<li>Despite the fact most of raw data collected via active checks. "Execute now" is available for Script item</li>
-</ul>
-
-Inspiration:
-<ul>
-<li>Turning off workstation cause trouble to deliver table</li>
-<li>Comment to combine top hosts widget together</li>
-</ul>
-
-<h2>70 fields in total</h2>
-<ul>
-	<li>9x 65535</li>
-	<li>3x 2048</li>
-	<li>3x 255</li>
-	<li>13x 128 </li>
-	<li>34x 64</li>
-	<li>5x 39</li>
-	<li>1x 32</li>
-	<li>2x 16</li>
-</ul>
 
 
+<h2>Inventory fields</h2>
+<table><thead>
+<tr>
+<th>Name</th>
+<th>Source Linux</th>
+<th>Preprocessing of dependent item</th>
+<th>Source Windows</th>
+<th>Preprocessing of dependent item</th>
+<th>Populates host inventory field</th>
+<th>Access with a macro</th>
+</tr>
 
-<h2>2048 character fields</h2>
-<table><thead><tr><th>Name</th><th>Macro</th></tr></thead><tbody>
-<tr><td>URL A</td><td><pre><code>{INVENTORY.URL.A}</code></pre></td></tr>
-<tr><td>URL B</td><td><pre><code>{INVENTORY.URL.A}</code></pre></td></tr>
-<tr><td>URL C</td><td><pre><code>{INVENTORY.URL.A}</code></pre></td></tr>
+</thead><tbody>
+
+<tr>
+<td>Amount of CPUs</td>
+<td><pre><code>vfs.file.contents[/proc/cpuinfo]</code></pre></td>
+<td>JavaScript:<pre><code>return value.match(/^processor/gm).length;</code></pre></td>
+<td><pre><code>wmi.getall[root\cimv2,SELECT * FROM Win32_Processor]</code></pre></td>
+<td>JavaScript:<pre><code>// locate ThreadCount, but if it not exists, report NumberOfLogicalProcessors
+var input = JSON.parse(value)[0];
+if (input.ThreadCount) {return input.ThreadCount}
+else {return input.NumberOfLogicalProcessors}</code></pre></td>
+<td>Contract number</td>
+<td><pre><code>{INVENTORY.CONTRACT.NUMBER}</code></pre></td>
+</tr>
+
 </tbody></table>
 
 
-<h2>65535 character fields</h2>
-<table><thead><tr><th>Name</th><th>Macro</th></tr></thead><tbody>
-<tr><td>Hardware (Full details)</td><td><pre><code>{INVENTORY.HARDWARE.FULL}</code></pre></td></tr>
-<tr><td>Software (Full details)</td><td><pre><code>{INVENTORY.SOFTWARE.FULL}</code></pre></td></tr>
-<tr><td>Contact</td><td><pre><code>{INVENTORY.CONTACT}</code></pre></td></tr>
-<tr><td>Location</td><td><pre><code>{INVENTORY.LOCATION}</code></pre></td></tr>
-<tr><td>Notes</td><td><pre><code>{INVENTORY.NOTES}</code></pre></td></tr>
-<tr><td>Host networks</td><td><pre><code>{INVENTORY.HOST.NETWORKS}</code></pre></td></tr>
-<tr><td>Site notes</td><td><pre><code>{INVENTORY.SITE.NOTES}</code></pre></td></tr>
-<tr><td>Primary POC notes</td><td><pre><code>{INVENTORY.POC.PRIMARY.NOTES}</code></pre></td></tr>
-<tr><td>Secondary POC notes</td><td><pre><code>{INVENTORY.POC.SECONDARY.NOTES}</code></pre></td></tr>
-</tbody></table>
-
-
-<h2>CPU model</h2>
-Windows (native key):<pre><code>wmi.getall[root\cimv2,SELECT * FROM Win32_Processor]</code></pre>
-Linux (native key):<pre><code>vfs.file.contents[/proc/cpuinfo]</code></pre>
-
-<h2>Total memory</h2>
-Windows (native key):<pre><code>wmi.getall[root\cimv2,SELECT * FROM Win32_PhysicalMemory]</code></pre>
-Linux (native key):<pre><code>vfs.file.contents[/proc/meminfo]</code></pre>
-
-<h2>Size of disk</h2>
-Windows (native key):<pre><code>wmi.getall[root\cimv2,SELECT * FROM Win32_DiskDrive]</code></pre>
-Linux (native key):<pre><code>vfs.file.contents[/proc/partitions]</code></pre>
-
-<h2>Internal IP address</h2>
-Linux (native key):<pre><code>vfs.file.contents[/proc/net/fib_trie]</code></pre>
-Windows (native key):<pre><code>wmi.getall[root\cimv2,SELECT * FROM Win32_NetworkAdapterConfiguration]</code></pre>
-
-<h2>OS</h2>
-Linux (native key):<pre><code>vfs.file.contents[/etc/os-release]</code></pre>
-Windows (native key):<pre><code>wmi.getall[root\cimv2,SELECT * FROM Win32_OperatingSystem]</code></pre>
-
-<h2>GPU</h2>
-Windows (native key):<pre><code>wmi.getall[root\cimv2,SELECT * FROM Win32_VideoController]</code></pre>
-
-
-<h2>Details about fields in database</h2>
-<pre><code>type                   varchar(64)
-type_full              varchar(64)
-name                   varchar(128)
-alias                  varchar(128)
-os                     varchar(128)
-os_full                varchar(255)
-os_short               varchar(128)
-serialno_a             varchar(64)
-serialno_b             varchar(64)
-tag                    varchar(64)
-asset_tag              varchar(64)
-macaddress_a           varchar(64)
-macaddress_b           varchar(64)
-hardware               varchar(255)
-hardware_full          text
-software               varchar(255)
-software_full          text
-software_app_a         varchar(64)
-software_app_b         varchar(64)
-software_app_c         varchar(64)
-software_app_d         varchar(64)
-software_app_e         varchar(64)
-contact                text
-location               text
-location_lat           varchar(16)
-location_lon           varchar(16)
-notes                  text
-chassis                varchar(64)
-model                  varchar(64)
-hw_arch                varchar(32)
-vendor                 varchar(64)
-contract_number        varchar(64)
-installer_name         varchar(64)
-deployment_status      varchar(64)
-url_a                  varchar(2048)
-url_b                  varchar(2048)
-url_c                  varchar(2048)
-host_networks          text
-host_netmask           varchar(39)
-host_router            varchar(39)
-oob_ip                 varchar(39)
-oob_netmask            varchar(39)
-oob_router             varchar(39)
-date_hw_purchase       varchar(64)
-date_hw_install        varchar(64)
-date_hw_expiry         varchar(64)
-date_hw_decomm         varchar(64)
-site_address_a         varchar(128)
-site_address_b         varchar(128)
-site_address_c         varchar(128)
-site_city              varchar(128)
-site_state             varchar(64)
-site_country           varchar(64)
-site_zip               varchar(64)
-site_rack              varchar(128)
-site_notes             text
-poc_1_name             varchar(128)
-poc_1_email            varchar(128)
-poc_1_phone_a          varchar(64)
-poc_1_phone_b          varchar(64)
-poc_1_cell             varchar(64)
-poc_1_screen           varchar(64)
-poc_1_notes            text
-poc_2_name             varchar(128)
-poc_2_email            varchar(128)
-poc_2_phone_a          varchar(64)
-poc_2_phone_b          varchar(64)
-poc_2_cell             varchar(64)
-poc_2_screen           varchar(64)
-poc_2_notes            text</code></pre>
 
 
 
