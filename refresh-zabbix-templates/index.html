@@ -1,0 +1,278 @@
+<html><head>
+	<style>
+pre{
+    padding:.3em 2em .3em .5em;
+    margin:0 0 1em;
+    background-color:#FFF7F0;
+    border-radius:3px;
+	white-space: pre-wrap;
+    overflow-x: auto;
+  word-wrap: break-word;
+}
+tr td:nth-child(1), tr th:nth-child(1) {min-width:1%;width:2%; word-wrap:break-word;}
+</style>
+
+<title>DB SELECTs for Zabbix 7.0</title>
+
+</head>
+<body>
+<h1>Zabbix 7.0 LTS DB queries to detect inconsistencies, always improve. Do reporting to CSV</h1>
+<table>
+<tr><th></th><th>MySQL</th><th>PostgreSQL</th></tr>
+
+<tr><td>wasted space per history_text</td>
+
+<td><pre><code>SELECT SUM(CHAR_LENGTH(value)) AS Size,
+CONCAT('history.php?itemids%5B0%5D=', t1.itemid, '&action=showlatest') AS latestData,
+CONCAT('zabbix.php?name=', items.name, '&action=latest.view&hostids%5B%5D=', hosts.hostid) AS conf
+FROM (SELECT * FROM history_text LIMIT 9999) t1, items, hosts
+WHERE t1.itemid=items.itemid AND hosts.hostid=items.hostid 
+GROUP BY 2, 3
+ORDER BY 1 DESC
+LIMIT 9;</code></pre></td>
+
+<td><pre><code>SELECT SUM(LENGTH(value::TEXT)) AS Size,
+'history.php?itemids%5B0%5D=' || t1.itemid || '&action=showlatest' AS latestData,
+'zabbix.php?name=' || items.name || '&action=latest.view&hostids%5B%5D=' || hosts.hostid AS conf
+FROM (SELECT * FROM history_text LIMIT 9999) t1, items, hosts
+WHERE t1.itemid=items.itemid AND hosts.hostid=items.hostid 
+GROUP BY 2,3
+ORDER BY 1 DESC
+LIMIT 9;</code></pre></td></tr>
+
+
+<tr><td>wasted space per history_log</td>
+
+<td><pre><code>SELECT SUM(CHAR_LENGTH(value)) AS Size,
+CONCAT('history.php?itemids%5B0%5D=', t1.itemid, '&action=showlatest') AS latestData,
+CONCAT('zabbix.php?name=', items.name, '&action=latest.view&hostids%5B%5D=', hosts.hostid) AS conf
+FROM (SELECT * FROM history_log LIMIT 9999) t1, items, hosts
+WHERE t1.itemid=items.itemid AND hosts.hostid=items.hostid 
+GROUP BY 2, 3
+ORDER BY 1 DESC
+LIMIT 9;</code></pre></td>
+
+<td><pre><code>SELECT SUM(LENGTH(value::TEXT)) AS Size,
+'history.php?itemids%5B0%5D=' || t1.itemid || '&action=showlatest' AS latestData,
+'zabbix.php?name=' || items.name || '&action=latest.view&hostids%5B%5D=' || hosts.hostid AS conf
+FROM (SELECT * FROM history_log LIMIT 9999) t1, items, hosts
+WHERE t1.itemid=items.itemid AND hosts.hostid=items.hostid 
+GROUP BY 2,3
+ORDER BY 1 DESC
+LIMIT 9;</code></pre></td></tr>
+
+
+<tr><td>unreachable ZBX hosts</td>
+
+<td><pre><code>SELECT 
+  proxy.name, 
+  hosts.host, 
+  interface.error,
+  CONCAT('zabbix.php?action=host.edit&hostid=', hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts AS proxy ON hosts.proxyid = proxy.proxyid
+JOIN interface ON interface.hostid = hosts.hostid
+WHERE LENGTH(interface.error) > 0 
+  AND interface.type = 1;</code></pre></td>
+
+<td><pre><code>SELECT 
+  proxy.name, 
+  hosts.host, 
+  interface.error,
+  'zabbix.php?action=host.edit&hostid=' || hosts.hostid AS goTo
+FROM hosts
+LEFT JOIN hosts AS proxy ON hosts.proxyid = proxy.hostid
+JOIN interface ON interface.hostid = hosts.hostid
+WHERE LENGTH(interface.error) > 0 
+  AND interface.type = 1;</code></pre></td></tr>
+
+
+<tr><td>unreachable SNMP hosts</td>
+
+<td><pre><code>SELECT 
+  proxy.name, 
+  hosts.host, 
+  interface.error,
+  CONCAT('zabbix.php?action=host.edit&hostid=', hosts.hostid) AS goTo
+FROM hosts
+LEFT JOIN hosts AS proxy ON hosts.proxyid = proxy.proxyid
+JOIN interface ON interface.hostid = hosts.hostid
+WHERE LENGTH(interface.error) > 0 
+  AND interface.type = 2;</code></pre></td>
+
+<td><pre><code>SELECT 
+  proxy.name, 
+  hosts.host, 
+  interface.error,
+  'zabbix.php?action=host.edit&hostid=' || hosts.hostid AS goTo
+FROM hosts
+LEFT JOIN hosts AS proxy ON hosts.proxyid = proxy.hostid
+JOIN interface ON interface.hostid = hosts.hostid
+WHERE LENGTH(interface.error) > 0 
+  AND interface.type = 2;</code></pre></td></tr>
+
+
+<tr><td>host list</td>
+
+<td><pre><code>SELECT 
+  proxy.name AS proxy, 
+  hosts.host,
+  CASE hosts.status 
+    WHEN 0 THEN 'active' 
+    WHEN 1 THEN 'disabled' 
+  END AS status,
+  GROUP_CONCAT(DISTINCT templates.host SEPARATOR ', ') AS templates,
+  GROUP_CONCAT(DISTINCT hstgrp.name SEPARATOR ', ') AS hostGroups,
+  GROUP_CONCAT(
+    DISTINCT CASE interface.useip
+      WHEN 0 THEN interface.dns
+      WHEN 1 THEN interface.ip
+    END SEPARATOR ', '
+  ) AS passiveConnect
+FROM hosts
+LEFT JOIN proxy ON proxy.proxyid = hosts.proxyid
+LEFT JOIN hosts_templates ON hosts_templates.hostid = hosts.hostid
+LEFT JOIN hosts AS templates ON templates.hostid = hosts_templates.templateid
+LEFT JOIN hosts_groups ON hosts_groups.hostid = hosts.hostid
+LEFT JOIN hstgrp ON hstgrp.groupid = hosts_groups.groupid
+LEFT JOIN interface ON interface.hostid = hosts.hostid AND interface.main = 1
+WHERE hosts.status IN (0, 1) 
+  AND hosts.flags IN (0, 4)
+GROUP BY 
+  proxy.name, hosts.host, hosts.status;</code></pre></td>
+
+<td><pre><code>SELECT 
+  proxy.name AS proxy, 
+  hosts.host,
+  CASE hosts.status 
+    WHEN 0 THEN 'active' 
+    WHEN 1 THEN 'disabled' 
+  END AS status,
+  STRING_AGG(DISTINCT templates.host, ', ') AS templates,
+  STRING_AGG(DISTINCT hstgrp.name, ', ') AS hostGroups,
+  STRING_AGG(
+    DISTINCT CASE interface.useip
+      WHEN 0 THEN interface.dns
+      WHEN 1 THEN interface.ip
+    END, ', '
+  ) AS passiveConnect
+FROM hosts
+LEFT JOIN proxy ON proxy.proxyid = hosts.proxyid
+LEFT JOIN hosts_templates ON hosts_templates.hostid = hosts.hostid
+LEFT JOIN hosts AS templates ON templates.hostid = hosts_templates.templateid
+LEFT JOIN hosts_groups ON hosts_groups.hostid = hosts.hostid
+LEFT JOIN hstgrp ON hstgrp.groupid = hosts_groups.groupid
+LEFT JOIN interface ON interface.hostid = hosts.hostid AND interface.main = 1
+WHERE hosts.status IN (0, 1) 
+  AND hosts.flags IN (0, 4)
+GROUP BY 
+  proxy.name, hosts.host, hosts.status;</code></pre></td></tr>
+
+<tr><td>interface is not used by any passive item</td>
+
+<td><pre><code>SELECT ip, hosts.host, CONCAT('zabbix.php?action=host.edit&hostid=', i.hostid) AS goTo AS goTo FROM interface i, hosts
+WHERE NOT EXISTS (
+    SELECT 1 FROM items it WHERE it.interfaceid = i.interfaceid
+) AND hosts.hostid=i.hostid;</code></pre></td>
+
+<td><pre><code>SELECT ip, hosts.host, 'zabbix.php?action=host.edit&hostid=' || i.hostid AS goTo FROM interface i, hosts
+WHERE NOT EXISTS (
+    SELECT 1 FROM items it WHERE it.interfaceid = i.interfaceid
+) AND hosts.hostid=i.hostid;</code></pre></td></tr>
+
+
+<tr><td>item update frequency per type</td>
+<td colspan="2"><pre><code>SELECT CASE items.type
+  WHEN 0 THEN 'Zabbix agent'
+  WHEN 1 THEN 'SNMPv1 agent'
+  WHEN 2 THEN 'Zabbix trapper'
+  WHEN 3 THEN 'Simple check'
+  WHEN 4 THEN 'SNMPv2 agent'
+  WHEN 5 THEN 'Zabbix internal'
+  WHEN 6 THEN 'SNMPv3 agent'
+  WHEN 7 THEN 'Zabbix agent (active) check'
+  WHEN 8 THEN 'Aggregate'
+  WHEN 9 THEN 'HTTP test (web monitoring scenario step)'
+  WHEN 10 THEN 'External check'
+  WHEN 11 THEN 'Database monitor'
+  WHEN 12 THEN 'IPMI agent' 
+  WHEN 13 THEN 'SSH agent' 
+  WHEN 14 THEN 'TELNET agent'
+  WHEN 15 THEN 'Calculated'
+  WHEN 16 THEN 'JMX agent' 
+  WHEN 17 THEN 'SNMP trap'
+  WHEN 18 THEN 'Dependent item'
+  WHEN 19 THEN 'HTTP agent' 
+  WHEN 20 THEN 'SNMP agent' 
+  WHEN 21 THEN 'Script item' END AS type, 
+  items.delay, 
+  COUNT(*)
+FROM hosts, items
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0 AND items.status=0 AND hosts.flags IN (0,4) AND items.flags IN (0,4)
+GROUP BY 1,2
+ORDER BY 1,2 ASC;</code></pre></td>
+</tr>
+
+
+<tr><td>most unsupported items per host</td>
+<td colspan="2"><pre><code>SELECT
+hosts.host,
+COUNT(*)
+FROM items, item_rtdata, hosts
+WHERE item_rtdata.state=1
+AND hosts.status=0
+AND items.status=0
+AND item_rtdata.itemid=items.itemid
+AND hosts.hostid=items.hostid
+GROUP BY 1
+ORDER BY 2 DESC;</code></pre></td>
+</tr>
+
+<tr><td>most dependent items</td>
+<td colspan="2"><pre><code>SELECT hosts.host, COUNT(*) AS amountOfDependentItems
+FROM items,hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.status=0
+AND items.status=0
+AND items.flags IN (0,4)
+AND items.type=18
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 20;</code></pre></td>
+</tr>
+
+<tr><td>most items at host level</td>
+<td colspan="2"><pre><code>SELECT hosts.host, COUNT(*) FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+WHERE hosts.status IN (0,1) AND hosts.flags IN (0,4)
+GROUP BY 1
+ORDER BY 2 DESC;</code></pre></td>
+</tr>
+
+
+<tr><td>list all inventory fields</td>
+<td colspan="2"><pre><code>SELECT h.host,i.type,i.type_full,i.name,i.alias,i.os,i.os_full,i.os_short,
+i.serialno_a,i.serialno_b,i.tag,i.asset_tag,i.macaddress_a,i.macaddress_b,
+i.hardware,i.hardware_full,i.software,i.software_full,i.software_app_a,
+i.software_app_b,i.software_app_c,i.software_app_d,i.software_app_e,i.contact,
+i.location,i.location_lat,i.location_lon,i.notes,i.chassis,i.model,i.hw_arch,
+i.vendor,i.contract_number,i.installer_name,i.deployment_status,i.url_a,i.url_b,
+i.url_c,i.host_networks,i.host_netmask,i.host_router,i.oob_ip,i.oob_netmask,i.oob_router,
+i.date_hw_purchase,i.date_hw_install,i.date_hw_expiry,i.date_hw_decomm,i.site_address_a,
+i.site_address_b,i.site_address_c,i.site_city,i.site_state,i.site_country,i.site_zip,
+i.site_rack,i.site_notes,i.poc_1_name,i.poc_1_email,i.poc_1_phone_a,i.poc_1_phone_b,
+i.poc_1_cell,i.poc_1_screen,i.poc_1_notes,i.poc_2_name,i.poc_2_email,i.poc_2_phone_a,
+i.poc_2_phone_b,i.poc_2_cell,i.poc_2_screen,i.poc_2_notes FROM host_inventory i, hosts h
+WHERE i.hostid=h.hostid AND h.flags=0;</code></pre></td>
+</tr>
+
+
+
+</table>
+
+
+
+</body></html>
+	
+	
