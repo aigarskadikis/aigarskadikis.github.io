@@ -1602,6 +1602,15 @@ AND events.source=0 and events.`object`=0
 AND acknowledges.clock < events.clock
 ) AS t1
 );</code></pre>
+Trend statistics for Octets items<pre><code>SELECT items.name, clock, num, value_min, value_avg, value_max, snmp_oid
+FROM trends_uint, items, hosts
+WHERE trends_uint.itemid = items.itemid
+AND hosts.hostid = items.hostid
+AND hosts.host = 'put.host.name.here'
+AND items.key_ like '%Octets%'
+AND trends_uint.clock > 1742306340
+AND trends_uint.clock < 1742306340 + (3600 * 3)
+ORDER BY items.name,clock;</code></pre>
 Escalations in progress<pre><code>SELECT actions.name, triggers.triggerid, COUNT(*)
 FROM escalations, triggers, actions
 WHERE escalations.triggerid=triggers.triggerid

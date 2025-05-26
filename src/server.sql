@@ -78,6 +78,17 @@ AND acknowledges.clock < events.clock
 ) AS t1
 );
 
+--trend statistics for Octets items
+SELECT items.name, clock, num, value_min, value_avg, value_max, snmp_oid
+FROM trends_uint, items, hosts
+WHERE trends_uint.itemid = items.itemid
+AND hosts.hostid = items.hostid
+AND hosts.host = 'put.host.name.here'
+AND items.key_ like '%Octets%'
+AND trends_uint.clock > 1742306340
+AND trends_uint.clock < 1742306340 + (3600 * 3)
+ORDER BY items.name,clock;
+
 --escalations in progress
 SELECT actions.name, triggers.triggerid, COUNT(*)
 FROM escalations, triggers, actions
