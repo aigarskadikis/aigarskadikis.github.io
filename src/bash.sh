@@ -25,6 +25,15 @@ watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
 # watch backlog
 watch -n1 'zabbix_server -R diaginfo=historycache | grep -A1 "history cache diagnostic information"'
 
+# memory usage for agentd
+ps_mem --total -p $(pidof zabbix_agentd | sed 's| |,|g')
+
+# memory usage for agent2
+ps_mem --total -p $(pidof zabbix_agent2 | sed 's| |,|g')
+
+# memory usage for agentd in MB
+echo "$(($(ps_mem --total -p $(pidof zabbix_agentd | sed 's| |,|g')) / 1024 / 1024))"
+
 # received traffic which originated only from remote host
 tcpdump -e -i any -c 1000 -nn -tt -q -l 'ip and inbound and tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
 
