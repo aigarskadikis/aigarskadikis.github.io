@@ -10,6 +10,9 @@ NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_typ
 FROM pg_stat_activity
 WHERE (NOW() - pg_stat_activity.query_start) > interval '100 seconds';
 
+--cancel frontend PIDs which run longer than 30 seconds
+SELECT pg_cancel_backend(pid) FROM pg_stat_activity WHERE (NOW() - pg_stat_activity.query_start) > interval '30 seconds' AND query like 'SELECT%';
+
 --PostgreSQL, current state of currently running vacuum
 SELECT * FROM pg_stat_progress_vacuum ;
 
