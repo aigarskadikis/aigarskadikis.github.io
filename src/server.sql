@@ -22,6 +22,43 @@ WHERE interface.available=2
 GROUP BY 1,2,3
 ORDER BY 1;
 
+--unreachable JMX hosts. PostgreSQL. Zabbix 7.0
+SELECT proxy.name AS proxy, hosts.host,
+STRING_AGG(
+DISTINCT CASE interface.useip
+WHEN 0 THEN interface.dns
+WHEN 1 THEN interface.ip
+END, ', '
+) AS passiveConnect,
+interface.error
+FROM hosts
+LEFT JOIN proxy ON proxy.proxyid = hosts.proxyid
+LEFT JOIN interface ON interface.hostid = hosts.hostid AND interface.main = 1
+WHERE hosts.status IN (0, 1)
+AND hosts.flags IN (0, 4)
+AND interface.available = 2
+AND hosts.status = 0
+AND interface.type = 4
+GROUP BY 1,2,4;
+
+--unreachable JMX hosts. MySQL. Zabbix 7.0
+SELECT proxy.name AS proxy, hosts.host,
+GROUP_CONCAT(
+DISTINCT CASE interface.useip
+WHEN 0 THEN interface.dns
+WHEN 1 THEN interface.ip
+END SEPARATOR ', '
+) AS passiveConnect, interface.error
+FROM hosts
+LEFT JOIN proxy ON proxy.proxyid = hosts.proxyid
+LEFT JOIN interface ON interface.hostid = hosts.hostid AND interface.main = 1
+WHERE hosts.status IN (0, 1) 
+AND hosts.flags IN (0, 4)
+AND interface.available = 2
+AND hosts.status = 0
+AND interface.type = 4
+GROUP BY 1,2,4;
+
 --failed triggers. Zabbix 7.0
 SELECT t2.objectid, t2.count, triggers.description, hosts.host, proxy.name FROM (
 SELECT objectid, COUNT(*) as count FROM (
