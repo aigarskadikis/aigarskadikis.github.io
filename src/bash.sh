@@ -22,6 +22,12 @@ snmpwalk -v'2c' -c'public' -dd IP OID
 # poller busy
 watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
 
+# slow query
+awk -F'slow query: | sec, "' '{ if (NF == 3) printf "%.6f\t%s...\n", $2, substr($3, 1, 160) }' /var/log/zabbix/zabbix_server.log | sort -nr | head -n 20
+
+# slow housekeeper
+awk -F'in | sec,' '/housekeeper/ && NF >= 2 { split($0, a, ":"); timestamp = a[2] ":" a[3]; printf "%.6f\t%s\n", $2, timestamp }' /var/log/zabbix/zabbix_server.log | sort -nr | head -n 10
+
 # watch backlog
 watch -n1 'zabbix_server -R diaginfo=historycache | grep -A1 "history cache diagnostic information"'
 

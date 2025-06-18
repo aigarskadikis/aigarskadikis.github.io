@@ -157,6 +157,8 @@ Debug snmp<pre><code>snmpwalk -v'2c' -c'public' -Dsnmp IP OID</code></pre>
 Debug snmp transport<pre><code>snmpwalk -v'2c' -c'public' -Dtransport IP OID</code></pre>
 Debug in hex format<pre><code>snmpwalk -v'2c' -c'public' -dd IP OID</code></pre>
 Poller busy<pre><code>watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'</code></pre>
+Slow query<pre><code>awk -F'slow query: | sec, "' '{ if (NF == 3) printf "%.6f\t%s...\n", $2, substr($3, 1, 160) }' /var/log/zabbix/zabbix_server.log | sort -nr | head -n 20</code></pre>
+Slow housekeeper<pre><code>awk -F'in | sec,' '/housekeeper/ && NF >= 2 { split($0, a, ":"); timestamp = a[2] ":" a[3]; printf "%.6f\t%s\n", $2, timestamp }' /var/log/zabbix/zabbix_server.log | sort -nr | head -n 10</code></pre>
 Watch backlog<pre><code>watch -n1 'zabbix_server -R diaginfo=historycache | grep -A1 "history cache diagnostic information"'</code></pre>
 Memory usage for agentd<pre><code>ps_mem --total -p $(pidof zabbix_agentd | sed 's| |,|g')</code></pre>
 Memory usage for agent2<pre><code>ps_mem --total -p $(pidof zabbix_agent2 | sed 's| |,|g')</code></pre>
