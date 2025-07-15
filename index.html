@@ -3645,6 +3645,15 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="ts"><label for="ts">ts.sql</label><div class="tab">
 List all chunks. Pg 14.5, ts 2.8.1<pre><code>SELECT show_chunks('history');</code></pre>
 List version<pre><code>SELECT extversion FROM pg_extension WHERE extname='timescaledb'\gx</code></pre>
+Top 50 chunks and their sizes<pre><code>WITH chunk_sizes AS (
+SELECT chunk_schema || '.' || chunk_name AS chunk, hypertable_schema || '.' || hypertable_name AS hypertable, pg_table_size(quote_ident(chunk_schema) || '.' || quote_ident(chunk_name)) AS size_bytes
+FROM timescaledb_information.chunks
+)
+SELECT chunk, hypertable, pg_size_pretty(size_bytes) AS total_size
+FROM chunk_sizes
+ORDER BY size_bytes DESC
+LIMIT 50;</code></pre>
+Sum must fit into the buffer<pre><code>WITH chunk_sizes AS( SELECT chunk_schema || '.' || chunk_name AS chunk , hypertable_schema || '.' || hypertable_name AS hypertable , pg_table_size(quote_ident(chunk_schema) || '.' || quote_ident(chunk_name)) AS size_bytes FROM timescaledb_information.chunks) , ranked_chunks AS ( SELECT chunk , hypertable , pg_size_pretty(size_bytes) AS total_size , size_bytes , ROW_NUMBER() OVER (PARTITION BY hypertable ORDER BY size_bytes DESC) AS rn FROM chunk_sizes ) , top_chunks AS ( SELECT hypertable , chunk , total_size , size_bytes FROM ranked_chunks WHERE rn = 1 ) , sum_row AS ( SELECT 'TOTAL' AS hypertable , NULL AS chunk , pg_size_pretty(SUM(size_bytes)) AS total_size , SUM(size_bytes) AS size_bytes FROM top_chunks ) SELECT hypertable , chunk , total_size FROM top_chunks UNION ALL SELECT hypertable , chunk , total_size FROM sum_row ;</code></pre>
 Size of chunks and dates<pre><code>SELECT hypertable_name,
 to_timestamp(range_start_integer) AS range_start,
 to_timestamp(range_end_integer) AS range_end,
