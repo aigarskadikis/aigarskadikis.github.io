@@ -299,6 +299,9 @@ sed 's/^[\t ]*//g;s/[\t ]*$//g'
 # endless loop to deliver metric
 while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done
 
+# ask queue
+zabbix_get -s 127.0.0.1 -p 30051 -P plaintext -k '{"request":"status.get","type":"ping","sid":"TOKEN"}'
+
 # statistics per history write cache
 while true; do echo "$(date '+%Y-%m-%d %H:%M:%S') $(zabbix_server -R diaginfo=historycache | grep -A1 "Top.values" | grep "[i]temid")" >> /tmp/top.itemid.log; sleep 1; done
 
