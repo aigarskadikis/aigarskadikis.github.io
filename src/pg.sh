@@ -10,6 +10,22 @@ pg_dump \
 --exclude-table-data '*.history*' \
 --exclude-table-data '*.trends*'
 
+# backup trends
+psql nameOfZabbixDB -c "COPY (SELECT * FROM trends) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.trends.csv.lz4
+psql nameOfZabbixDB -c "COPY (SELECT * FROM trends_uint) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.trends_uint.csv.lz4
+
+# restore trends
+psql nameOfZabbixDB -c "\COPY trends FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.trends.csv.lz4' DELIMITER ',' CSV"
+psql nameOfZabbixDB -c "\COPY trends_uint FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.trends_uint.csv.lz4' DELIMITER ',' CSV"
+
+# backup history
+psql nameOfZabbixDB -c "COPY (SELECT * FROM history) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.history.csv.lz4
+psql nameOfZabbixDB -c "COPY (SELECT * FROM history_uint) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.history_uint.csv.lz4
+
+# restore history
+psql nameOfZabbixDB -c "\COPY history FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history.csv.lz4' DELIMITER ',' CSV"
+psql nameOfZabbixDB -c "\COPY history_uint FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_uint.csv.lz4' DELIMITER ',' CSV"
+
 # restore historical data in background
 psql zabbix -c "\COPY trends_old FROM PROGRAM 'lz4cat /tmp/z64.trends_old.tsv.lz4' DELIMITER E'\t' CSV"
 psql zabbix -c "\COPY trends_uint_old FROM PROGRAM 'lz4cat /tmp/z64.trends_uint_old.tsv.lz4' DELIMITER E'\t' CSV"
