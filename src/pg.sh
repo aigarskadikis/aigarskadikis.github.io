@@ -26,6 +26,16 @@ psql nameOfZabbixDB -c "COPY (SELECT * FROM history_uint) TO stdout DELIMITER ',
 psql nameOfZabbixDB -c "\COPY history FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history.csv.lz4' DELIMITER ',' CSV"
 psql nameOfZabbixDB -c "\COPY history_uint FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_uint.csv.lz4' DELIMITER ',' CSV"
 
+# backup text as tab separated values
+psql nameOfZabbixDB -c "COPY (SELECT * FROM history_str) TO stdout DELIMITER E'\t' CSV" | lz4 > /tmp/nameOfZabbixDB.history_str.tsv.lz4
+psql nameOfZabbixDB -c "COPY (SELECT * FROM history_text) TO stdout DELIMITER E'\t' CSV" | lz4 > /tmp/nameOfZabbixDB.history_text.tsv.lz4
+psql nameOfZabbixDB -c "COPY (SELECT * FROM history_log) TO stdout DELIMITER E'\t' CSV" | lz4 > /tmp/nameOfZabbixDB.history_log.tsv.lz4
+
+# restore text
+PGPORT=7416 PGHOST=193.123.33.206 psql nameOfZabbixDB -c "\COPY history_str FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_str.tsv.lz4' DELIMITER E'\t' CSV"
+PGPORT=7416 PGHOST=193.123.33.206 psql nameOfZabbixDB -c "\COPY history_text FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_text.tsv.lz4' DELIMITER E'\t' CSV"
+PGPORT=7416 PGHOST=193.123.33.206 psql nameOfZabbixDB -c "\COPY history_log FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_log.tsv.lz4' DELIMITER E'\t' CSV"
+
 # restore historical data in background
 psql zabbix -c "\COPY trends_old FROM PROGRAM 'lz4cat /tmp/z64.trends_old.tsv.lz4' DELIMITER E'\t' CSV"
 psql zabbix -c "\COPY trends_uint_old FROM PROGRAM 'lz4cat /tmp/z64.trends_uint_old.tsv.lz4' DELIMITER E'\t' CSV"
