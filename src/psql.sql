@@ -13,6 +13,9 @@ WHERE (NOW() - pg_stat_activity.query_start) > interval '100 seconds';
 --cancel frontend PIDs which run longer than 30 seconds
 SELECT pg_cancel_backend(pid) FROM pg_stat_activity WHERE (NOW() - pg_stat_activity.query_start) > interval '30 seconds' AND query like 'SELECT%';
 
+--validate if chunk size is alligned with the TimescaleDB recommendation
+WITH chunk_sizes AS ( SELECT chunk_schema || '.' || chunk_name AS chunk, hypertable_schema || '.' || hypertable_name AS hypertable, pg_table_size(quote_ident(chunk_schema) || '.' || quote_ident(chunk_name)) AS size_bytes FROM timescaledb_information.chunks ), ranked_chunks AS ( SELECT chunk, hypertable, pg_size_pretty(size_bytes) AS total_size, size_bytes, ROW_NUMBER() OVER (PARTITION BY hypertable ORDER BY size_bytes DESC) AS rn FROM chunk_sizes ), top_chunks AS ( SELECT hypertable, chunk, total_size, size_bytes FROM ranked_chunks WHERE rn = 1 ), sum_row AS ( SELECT 'TOTAL' AS hypertable, NULL AS chunk, pg_size_pretty(SUM(size_bytes)) AS total_size, SUM(size_bytes) AS size_bytes FROM top_chunks ) SELECT hypertable, chunk, total_size FROM top_chunks UNION ALL SELECT hypertable, chunk, total_size FROM sum_row;
+
 --PostgreSQL, current state of currently running vacuum
 SELECT * FROM pg_stat_progress_vacuum ;
 
