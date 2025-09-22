@@ -1433,6 +1433,12 @@ FROM proxy_history, items
 WHERE items.itemid = proxy_history.itemid
 AND items.type = 2
 LIMIT 10;</code></pre>
+Context in sqlite3 proxy database<pre><code>SELECT SUM(LENGTH(t1.value)),items.key_,t1.flags,hosts.host FROM (
+SELECT * FROM proxy_history LIMIT 9999
+) t1
+JOIN items ON items.itemid=t1.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+GROUP BY 2,3,4 ORDER BY 1 DESC LIMIT 10;</code></pre>
 Delete data which has been sent already<pre><code>DELETE FROM proxy_history WHERE id < (SELECT nextid FROM ids WHERE table_name = "proxy_history" LIMIT 1);</code></pre>
 Show LLD JSON data<pre><code>SELECT items.hostid, items.hostid, items.key_, proxy_history.value FROM proxy_history, items WHERE proxy_history.itemid=items.itemid AND items.flags=1 ORDER BY clock ASC;</code></pre>
 Which host are giving the biggest values<pre><code>SELECT h.host,i.key_,max(length(ph.value)) as max_length,count(*)
@@ -1505,6 +1511,7 @@ NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_typ
 FROM pg_stat_activity
 WHERE (NOW() - pg_stat_activity.query_start) > interval '100 seconds';</code></pre>
 Cancel frontend PIDs which run longer than 30 seconds<pre><code>SELECT pg_cancel_backend(pid) FROM pg_stat_activity WHERE (NOW() - pg_stat_activity.query_start) > interval '30 seconds' AND query like 'SELECT%';</code></pre>
+Validate if chunk size is alligned with the TimescaleDB recommendation<pre><code>WITH chunk_sizes AS ( SELECT chunk_schema || '.' || chunk_name AS chunk, hypertable_schema || '.' || hypertable_name AS hypertable, pg_table_size(quote_ident(chunk_schema) || '.' || quote_ident(chunk_name)) AS size_bytes FROM timescaledb_information.chunks ), ranked_chunks AS ( SELECT chunk, hypertable, pg_size_pretty(size_bytes) AS total_size, size_bytes, ROW_NUMBER() OVER (PARTITION BY hypertable ORDER BY size_bytes DESC) AS rn FROM chunk_sizes ), top_chunks AS ( SELECT hypertable, chunk, total_size, size_bytes FROM ranked_chunks WHERE rn = 1 ), sum_row AS ( SELECT 'TOTAL' AS hypertable, NULL AS chunk, pg_size_pretty(SUM(size_bytes)) AS total_size, SUM(size_bytes) AS size_bytes FROM top_chunks ) SELECT hypertable, chunk, total_size FROM top_chunks UNION ALL SELECT hypertable, chunk, total_size FROM sum_row;</code></pre>
 PostgreSQL, current state of currently running vacuum<pre><code>SELECT * FROM pg_stat_progress_vacuum ;</code></pre>
 PostgreSQL, queries more than 300 seconds, process list<pre><code>SELECT pid, user, pg_stat_activity.query_start,
 NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event

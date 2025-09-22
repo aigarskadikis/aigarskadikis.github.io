@@ -11,6 +11,14 @@ WHERE items.itemid = proxy_history.itemid
 AND items.type = 2
 LIMIT 10;
 
+--context in sqlite3 proxy database
+SELECT SUM(LENGTH(t1.value)),items.key_,t1.flags,hosts.host FROM (
+SELECT * FROM proxy_history LIMIT 9999
+) t1
+JOIN items ON items.itemid=t1.itemid
+JOIN hosts ON hosts.hostid=items.hostid
+GROUP BY 2,3,4 ORDER BY 1 DESC LIMIT 10;
+
 --delete data which has been sent already
 DELETE FROM proxy_history WHERE id < (SELECT nextid FROM ids WHERE table_name = "proxy_history" LIMIT 1);
 
