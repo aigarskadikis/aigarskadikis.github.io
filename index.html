@@ -323,6 +323,9 @@ Set iperf3 on listening port<pre><code>iperf3 -s -p 10050</code></pre>
 Send data<pre><code>iperf3 -c address.of.agent.server -p 10050 -t 10</code></pre>
 Disk utilisation<pre><code>iostat -x 1</code></pre>
 Remove leading and trailing space with sed<pre><code>sed 's/^[\t ]*//g;s/[\t ]*$//g'</code></pre>
+Version history of proxy<pre><code>find /var/log/zabbix -name 'zabbix_proxy*.gz' -exec zcat {} \; | grep Starting
+find /var/log/zabbix -regex '.*zabbix_proxy.log.[0-9]+' -exec grep Starting {} \;
+grep Starting /var/log/zabbix/zabbix_proxy.log</code></pre>
 Endless loop to deliver metric<pre><code>while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done</code></pre>
 Ask queue<pre><code>zabbix_get -s 127.0.0.1 -p 30051 -P plaintext -k '{"request":"status.get","type":"ping","sid":"TOKEN"}'</code></pre>
 Statistics per history write cache<pre><code>while true; do echo "$(date '+%Y-%m-%d %H:%M:%S') $(zabbix_server -R diaginfo=historycache | grep -A1 "Top.values" | grep "[i]temid")" >> /tmp/top.itemid.log; sleep 1; done</code></pre>

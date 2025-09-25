@@ -296,6 +296,11 @@ iostat -x 1
 # remove leading and trailing space with sed
 sed 's/^[\t ]*//g;s/[\t ]*$//g'
 
+# version history of proxy
+find /var/log/zabbix -name 'zabbix_proxy*.gz' -exec zcat {} \; | grep Starting
+find /var/log/zabbix -regex '.*zabbix_proxy.log.[0-9]+' -exec grep Starting {} \;
+grep Starting /var/log/zabbix/zabbix_proxy.log
+
 # endless loop to deliver metric
 while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done
 
