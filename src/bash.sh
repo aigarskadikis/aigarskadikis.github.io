@@ -293,8 +293,14 @@ iperf3 -c address.of.agent.server -p 10050 -t 10
 # disk utilisation
 iostat -x 1
 
+# remove txt extension
+for f in *.txt; do mv -- "$f" "${f%.txt}"; done
+
 # remove leading and trailing space with sed
 sed 's/^[\t ]*//g;s/[\t ]*$//g'
+
+# snmptranslate MIB
+snmptranslate -Tz -m ./MIKROTIK-MIB
 
 # version history of proxy
 find /var/log/zabbix -name 'zabbix_proxy*.gz' -exec zcat {} \; | grep Starting

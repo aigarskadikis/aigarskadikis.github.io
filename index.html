@@ -322,7 +322,9 @@ Discovere processes<pre><code>watch -n1 "ps auxww | grep -Eo '[:] discoverer #.*
 Set iperf3 on listening port<pre><code>iperf3 -s -p 10050</code></pre>
 Send data<pre><code>iperf3 -c address.of.agent.server -p 10050 -t 10</code></pre>
 Disk utilisation<pre><code>iostat -x 1</code></pre>
+Remove txt extension<pre><code>for f in *.txt; do mv -- "$f" "${f%.txt}"; done</code></pre>
 Remove leading and trailing space with sed<pre><code>sed 's/^[\t ]*//g;s/[\t ]*$//g'</code></pre>
+Snmptranslate MIB<pre><code>snmptranslate -Tz -m ./MIKROTIK-MIB</code></pre>
 Version history of proxy<pre><code>find /var/log/zabbix -name 'zabbix_proxy*.gz' -exec zcat {} \; | grep Starting
 find /var/log/zabbix -regex '.*zabbix_proxy.log.[0-9]+' -exec grep Starting {} \;
 grep Starting /var/log/zabbix/zabbix_proxy.log</code></pre>
