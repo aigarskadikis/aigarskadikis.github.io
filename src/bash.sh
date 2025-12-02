@@ -293,6 +293,12 @@ iperf3 -c address.of.agent.server -p 10050 -t 10
 # disk utilisation
 iostat -x 1
 
+# ESTAB and all TIME-WAIT connection
+ss --all --numeric  | grep 10050
+
+# ESTAB connection for passive agent
+ss --all --numeric  | grep ESTAB | grep 10050
+
 # remove txt extension
 for f in *.txt; do mv -- "$f" "${f%.txt}"; done
 

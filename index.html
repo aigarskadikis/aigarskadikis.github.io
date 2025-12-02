@@ -322,6 +322,8 @@ Discovere processes<pre><code>watch -n1 "ps auxww | grep -Eo '[:] discoverer #.*
 Set iperf3 on listening port<pre><code>iperf3 -s -p 10050</code></pre>
 Send data<pre><code>iperf3 -c address.of.agent.server -p 10050 -t 10</code></pre>
 Disk utilisation<pre><code>iostat -x 1</code></pre>
+ESTAB and all TIME-WAIT connection<pre><code>ss --all --numeric  | grep 10050</code></pre>
+ESTAB connection for passive agent<pre><code>ss --all --numeric  | grep ESTAB | grep 10050</code></pre>
 Remove txt extension<pre><code>for f in *.txt; do mv -- "$f" "${f%.txt}"; done</code></pre>
 Remove leading and trailing space with sed<pre><code>sed 's/^[\t ]*//g;s/[\t ]*$//g'</code></pre>
 Snmptranslate MIB<pre><code>snmptranslate -Tz -m ./MIKROTIK-MIB</code></pre>
