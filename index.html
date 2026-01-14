@@ -319,6 +319,7 @@ Process list for 120 (24x5) seconds<pre><code>for i in `seq 1 24`; do echo $(dat
 Size of table partitions<pre><code>du -lah /var/lib/mysql | awk '{ print $2,"",$1 }' | grep "#" | sort</code></pre>
 TCP state statistics for 2 minutes<pre><code>for i in `seq 1 120`; do echo $(date) | tee -a /tmp/tcp.state.txt && awk '{print $4}' /proc/net/tcp /proc/net/tcp6 | grep -v st | sort | uniq -c | tee -a /tmp/tcp.state.txt && wc -l /proc/net/tcp | tee -a /tmp/tcp.state.txt && wc -l /proc/net/tcp6 | tee -a /tmp/tcp.state.txt && echo "=======" | tee -a /tmp/tcp.state.txt && sleep 1; done</code></pre>
 Discovere processes<pre><code>watch -n1 "ps auxww | grep -Eo '[:] discoverer #.*'"</code></pre>
+Detailed memory consumtion per primary zabbix_agentd process<pre><code>cat /proc/$(ps auxww|grep zabbix_agent[d].*conf$ | awk '{ print $2 }')/smaps | grep -Eo "^[0-9a-f-]+.*|^Size.*"</code></pre>
 Set iperf3 on listening port<pre><code>iperf3 -s -p 10050</code></pre>
 Send data<pre><code>iperf3 -c address.of.agent.server -p 10050 -t 10</code></pre>
 Disk utilisation<pre><code>iostat -x 1</code></pre>

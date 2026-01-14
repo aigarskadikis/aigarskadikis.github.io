@@ -284,6 +284,9 @@ for i in `seq 1 120`; do echo $(date) | tee -a /tmp/tcp.state.txt && awk '{print
 # discovere processes
 watch -n1 "ps auxww | grep -Eo '[:] discoverer #.*'"
 
+# detailed memory consumtion per primary zabbix_agentd process
+cat /proc/$(ps auxww|grep zabbix_agent[d].*conf$ | awk '{ print $2 }')/smaps | grep -Eo "^[0-9a-f-]+.*|^Size.*"
+
 # set iperf3 on listening port
 iperf3 -s -p 10050
 
