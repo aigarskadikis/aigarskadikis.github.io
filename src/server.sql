@@ -22,6 +22,13 @@ WHERE interface.available=2
 GROUP BY 1,2,3
 ORDER BY 1;
 
+--remaster table housekeeper
+CREATE TABLE housekeeper_tmp LIKE housekeeper;
+INSERT INTO housekeeper_tmp SELECT * FROM housekeeper WHERE tablename = 'events';
+TRUNCATE TABLE housekeeper;
+INSERT INTO housekeeper SELECT * FROM housekeeper_tmp;
+DROP TABLE housekeeper_tmp;
+
 --unreachable JMX hosts. PostgreSQL. Zabbix 7.0
 SELECT proxy.name AS proxy, hosts.host,
 STRING_AGG(
