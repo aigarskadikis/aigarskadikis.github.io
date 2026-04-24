@@ -4,6 +4,15 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 --active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2
 SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
+--amount of items per host
+SELECT COUNT(*), hosts.host FROM hosts,items
+WHERE items.hostid=hosts.hostid
+AND items.status=0
+AND hosts.status=0
+AND items.flags IN (0,1,4)
+AND hosts.flags IN (0,4)
+GROUP BY 2 ORDER BY 1 DESC LIMIT 10;
+
 --unreachable hosts. PostgreSQL, Zabbix 6.0
 SELECT
 proxy.host AS proxy,
