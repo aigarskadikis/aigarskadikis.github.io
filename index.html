@@ -146,6 +146,8 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 </div>
 <input type="radio" name="tabs" id="bash"><label for="bash">bash</label><div class="tab">
 Hog processes, hog<pre><code>ps -eo pcpu,pmem,pid,ppid,user,stat,args | sort -k 1 -r | head -6 | sed 's/$/\n/'</code></pre>
+Pss consumtions with root user<pre><code>zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"</code></pre>
+Pss consumptions with service user zabbix<pre><code>sudo -u zabbix zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"</code></pre>
 Rotate between values<pre><code>echo "
 one
 two

@@ -1,6 +1,12 @@
 # hog processes, hog
 ps -eo pcpu,pmem,pid,ppid,user,stat,args | sort -k 1 -r | head -6 | sed 's/$/\n/'
 
+# pss consumtions with root user
+zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"
+
+# pss consumptions with service user zabbix
+sudo -u zabbix zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"
+
 # rotate between values
 echo "
 one
