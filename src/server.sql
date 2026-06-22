@@ -4,6 +4,38 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 --active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2
 SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
+--actions in use. Zabbix 7.0, 8.0
+SELECT COUNT(*) AS count, actions.name AS actionName, media_type.name AS mediaName,
+CASE alerts.status
+WHEN 0 THEN 'NOT_SENT'
+WHEN 1 THEN 'SENT'
+WHEN 2 THEN 'FAILED'
+WHEN 3 THEN 'NEW'
+END AS "alertStatus"
+FROM alerts
+JOIN actions ON (actions.actionid=alerts.actionid)
+JOIN media_type ON (media_type.mediatypeid=alerts.mediatypeid)
+LEFT JOIN users ON (users.userid=alerts.userid)
+WHERE clock > ((SELECT MAX(lastaccess) FROM sessions) - 3600 * 24)
+GROUP BY 2,3,4
+ORDER BY 1 ASC;
+
+--actions in use per user. Zabbix 7.0, 8.0
+SELECT COUNT(*) AS count, actions.name AS actionName, media_type.name AS mediaName, users.username,
+CASE alerts.status
+WHEN 0 THEN 'NOT_SENT'
+WHEN 1 THEN 'SENT'
+WHEN 2 THEN 'FAILED'
+WHEN 3 THEN 'NEW'
+END AS "alertStatus"
+FROM alerts
+JOIN actions ON (actions.actionid=alerts.actionid)
+JOIN media_type ON (media_type.mediatypeid=alerts.mediatypeid)
+LEFT JOIN users ON (users.userid=alerts.userid)
+WHERE clock > ((SELECT MAX(lastaccess) FROM sessions) - 3600 * 24)
+GROUP BY 2,3,4,5
+ORDER BY 1 ASC;
+
 --amount of items per host
 SELECT COUNT(*), hosts.host FROM hosts,items
 WHERE items.hostid=hosts.hostid
