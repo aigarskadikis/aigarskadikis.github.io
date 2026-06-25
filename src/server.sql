@@ -4,6 +4,19 @@ SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;
 --active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2
 SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;
 
+--to remove not recovered problems you can run this query
+DELETE FROM problem WHERE source = 3 AND r_eventid IS NULL;
+
+--for the orphaned events
+DELETE FROM events
+WHERE eventid IN (
+SELECT e.eventid
+FROM events e
+WHERE e.source = 0 AND e.object = 0 AND NOT EXISTS (
+SELECT 1 FROM triggers t WHERE t.triggerid = e.objectid
+) LIMIT 50000
+);
+
 --actions in use. Zabbix 7.0, 8.0
 SELECT COUNT(*) AS count, actions.name AS actionName, media_type.name AS mediaName,
 CASE alerts.status

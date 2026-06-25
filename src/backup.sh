@@ -8,6 +8,9 @@ mysql \
 SHOW FULL PROCESSLIST;
 " > /tmp/mysql.process.list.$(date +%Y%m%d.%H%M).txt
 
+# backup the whole etc
+cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
+
 # Backup directories which can be related to Zabbix
 cd /usr/share/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
