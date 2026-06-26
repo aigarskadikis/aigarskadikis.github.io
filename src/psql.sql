@@ -4,6 +4,13 @@ NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_typ
 FROM pg_stat_activity
 WHERE (NOW() - pg_stat_activity.query_start) > interval '3 seconds';
 
+--target a time fram FROM_UNIXTIME
+SELECT COUNT(*), objectid, source, object
+FROM events
+WHERE clock >= EXTRACT(EPOCH FROM TIMESTAMP '2026-06-23 13:00:00')
+AND clock <  EXTRACT(EPOCH FROM TIMESTAMP '2026-06-23 14:00:00')
+GROUP BY objectid, source, object;
+
 --PostgreSQL, queries more than 100 seconds, process list
 SELECT pid, user, pg_stat_activity.query_start,
 NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event

@@ -1517,6 +1517,11 @@ Long running queries. Postgres. PostgreSQL<pre><code>SELECT pid, user, pg_stat_a
 NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event
 FROM pg_stat_activity
 WHERE (NOW() - pg_stat_activity.query_start) > interval '3 seconds';</code></pre>
+Target a time fram FROM_UNIXTIME<pre><code>SELECT COUNT(*), objectid, source, object
+FROM events
+WHERE clock >= EXTRACT(EPOCH FROM TIMESTAMP '2026-06-23 13:00:00')
+AND clock <  EXTRACT(EPOCH FROM TIMESTAMP '2026-06-23 14:00:00')
+GROUP BY objectid, source, object;</code></pre>
 PostgreSQL, queries more than 100 seconds, process list<pre><code>SELECT pid, user, pg_stat_activity.query_start,
 NOW() - pg_stat_activity.query_start AS query_time, query, state, wait_event_type, wait_event
 FROM pg_stat_activity
