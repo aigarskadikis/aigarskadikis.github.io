@@ -1596,6 +1596,10 @@ WHERE e.source = 0 AND e.object = 0 AND NOT EXISTS (
 SELECT 1 FROM triggers t WHERE t.triggerid = e.objectid
 ) LIMIT 50000
 );</code></pre>
+Problems history time selector, Zabbix 7.0, 8.0<pre><code>SELECT users.username, users.refresh, profiles.idx, profiles.value_str
+FROM profiles,users
+WHERE users.userid=profiles.userid
+AND profiles.idx='web.monitoring.problem.from';</code></pre>
 Actions in use. Zabbix 7.0, 8.0<pre><code>SELECT COUNT(*) AS count, actions.name AS actionName, media_type.name AS mediaName,
 CASE alerts.status
 WHEN 0 THEN 'NOT_SENT'

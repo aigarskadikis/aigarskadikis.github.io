@@ -17,6 +17,12 @@ SELECT 1 FROM triggers t WHERE t.triggerid = e.objectid
 ) LIMIT 50000
 );
 
+--Problems history time selector, Zabbix 7.0, 8.0
+SELECT users.username, users.refresh, profiles.idx, profiles.value_str
+FROM profiles,users
+WHERE users.userid=profiles.userid
+AND profiles.idx='web.monitoring.problem.from';
+
 --actions in use. Zabbix 7.0, 8.0
 SELECT COUNT(*) AS count, actions.name AS actionName, media_type.name AS mediaName,
 CASE alerts.status
