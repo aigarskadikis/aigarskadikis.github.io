@@ -1,0 +1,187 @@
+#!/bin/bash
+
+clear
+# start from empty space
+> ../index.html
+
+# put header
+echo "<html><head><link rel='stylesheet' type='text/css' href='./src/css.css' />" >> ../index.html
+
+# install css
+# cat css.css >> ../index.html
+
+# start body and all tabs
+echo "</head><body onLoad='initDataArray()'><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src="singleLine.togglerIE.js"><\/script>')}else{document.write('<script src="singleLine.toggler.js"><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>" >> ../index.html
+
+########
+# bash #
+########
+
+# list all files with extension 'sh' and exclude program 'recreate.sh'
+ls -1 | grep -E "\.sh$" |grep -v "recreate" | grep -v "perversion.sh" | while IFS= read -r FILE
+do {
+
+# filename without extension
+NAME=$(echo "$FILE" | sed 's|.sh$||')
+
+echo -e "\n##### $FILE #####"
+
+# this is master block for "TAB"
+echo "<input type=\"radio\" name=\"tabs\" id=\"$NAME\"><label for=\"$NAME\">$NAME</label><div class=\"tab\">" > $NAME.inc
+
+
+awk '
+BEGIN {
+    incode = 0
+}
+
+{
+    if ($0 == "") {
+        if (incode) {
+            print "</code></pre>"
+            incode = 0
+        }
+        next
+    }
+
+    if ($0 ~ /^--/) {
+        line = $0
+        sub(/^-- ?/, "", line)
+
+        line = toupper(substr(line,1,1)) substr(line,2)
+
+        while (match(line, /\. [a-z]/)) {
+            pos = RSTART + 2
+            line = substr(line,1,pos-1) toupper(substr(line,pos,1)) substr(line,pos+1)
+        }
+
+        print line
+        print "<pre><code>"
+        incode = 1
+    }
+    else {
+        print
+    }
+}
+
+END {
+    if (incode)
+        print "</code></pre>"
+}
+' "$FILE" >> "$NAME.inc"
+
+
+echo "<p>Download this section: <a href=\"src/$FILE\">https://aigarskadikis.github.io/src/$FILE</a><br />" >> $NAME.inc
+echo "Fancy syntax highlighter? Read same page on GitHub: <a href=\"https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/$FILE\" target=\"_blank\">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/$FILE</a></p>" >> $NAME.inc
+
+# end of "TAB"
+echo "</div>" >> $NAME.inc
+
+# save some new line characters for '<pre><code></code></pre>'
+cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "H;1h;\${g;s|\n</code></pre>|</code></pre>|g;p}" >> ../index.html
+
+} done
+
+
+
+
+
+#######
+# SQL #
+#######
+
+# list all files with extension 'sh' exclude this program
+ls -1 | grep -E "\.sql$" | grep -v "^[0-9]" | while IFS= read -r FILE
+do {
+
+# extract name without extension
+NAME=$(echo "$FILE" | sed 's|.sql$||')
+
+echo -e "\n##### $FILE #####"
+
+# this is master block for "TAB"
+echo "<input type=\"radio\" name=\"tabs\" id=\"$NAME\"><label for=\"$NAME\">$FILE</label><div class=\"tab\">" > $NAME.inc
+
+awk '
+BEGIN {
+    incode = 0
+}
+
+{
+    if ($0 == "") {
+        if (incode) {
+            print "</code></pre>"
+            incode = 0
+        }
+        next
+    }
+
+    if ($0 ~ /^--/) {
+        line = $0
+        sub(/^-- ?/, "", line)
+
+        line = toupper(substr(line,1,1)) substr(line,2)
+
+        while (match(line, /\. [a-z]/)) {
+            pos = RSTART + 2
+            line = substr(line,1,pos-1) toupper(substr(line,pos,1)) substr(line,pos+1)
+        }
+
+        print line
+        print "<pre><code>"
+        incode = 1
+    }
+    else {
+        print
+    }
+}
+
+END {
+    if (incode)
+        print "</code></pre>"
+}
+' "$FILE" >> "$NAME.inc"
+
+echo "<p>Download this section: <a href=\"src/$FILE\">https://aigarskadikis.github.io/src/$FILE</a><br />" >> $NAME.inc
+echo "Fancy syntax highlighter? Read same page on GitHub: <a href=\"https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/$FILE\" target=\"_blank\">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/$FILE</a></p>" >> $NAME.inc
+
+# end of "TAB"
+echo "</div>" >> $NAME.inc
+
+# save some new line characters for '<pre><code></code></pre>'
+# cat $NAME.inc >> ../index.html
+cat $NAME.inc | sed -n "H;1h;\${g;s|\n<pre><code>\n|<pre><code>|g;p}" | sed -n "H;1h;\${g;s|\n</code></pre>|</code></pre>|g;p}" >> ../index.html
+
+} done
+
+
+
+# put footer
+echo "</div><div id='searchInputArea'><span>SEARCH</span><input type='text' id='searchInput' placeholder='Type at least 1 characters...' onkeyup='onTypeSearchInput(event)' /></div><div id='searchResultDlg'><div id='closeIcon' onclick='onCloseDlg()'>&times;</div><div id='searchResultDlgContent'></div></div><script src='searcher.js'></script></div></body></html>" >> ../index.html
+
+# remove unnecessarry space
+sed -i 's| </code></pre>|</code></pre>|' ../index.html
+
+# remove trailing spaces
+sed -i 's/^[ \t]*//;s/[ \t]*$//' ../index.html
+
+# install extra link to create users using wizard
+sed -i 's|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab">|<input type="radio" name="tabs" id="users"><label for="users">users.sql</label><div class="tab"><p>Create MySQL users using wizard: <a href="./u/index.html">https://aigarskadikis.github.io/u</a></p>|' ../index.html
+
+# install extra link under 'server.sql' to have quries per version
+# sed -i 's|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab">|<input type="radio" name="tabs" id="server"><label for="server">server.sql</label><div class="tab"><p>SQL queries per version: <a href="./v/index.html">https://aigarskadikis.github.io/v</a></p>|' ../index.html
+
+# install default block
+sed -i 's|input type="radio" name="tabs" id="server"|input type="radio" name="tabs" id="server" checked="checked"|' ../index.html
+
+# convert MySQL to PostgreSQL
+# sed "s|UNIX_TIMESTAMP(NOW()-INTERVAL 1 HOUR)|EXTRACT(epoch FROM NOW()-INTERVAL '30 MINUTE')|g"
+
+# remove includes (a source for tabs)
+rm -rf *inc
+
+# test page imediatelly
+# firefox ../index.html
+
+echo
+
