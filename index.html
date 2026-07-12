@@ -1,68 +1,120 @@
 <html><head><link rel='stylesheet' type='text/css' href='./src/css.css' />
 </head><body onLoad='initDataArray()'><div class='tabs'><div class='tog'><label for='toggler'>Use single line mode <input id='singleLineToggle' name='toggler' type='checkbox' /></label><script type='text/javascript'>if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){document.write('<script src=singleLine.togglerIE.js><\/script>')}else{document.write('<script src=singleLine.toggler.js><\/script>')}</script><script>var el=document.getElementById('singleLineToggle');el.addEventListener('change',function(ev){toSingleLine(ev.target.checked)})</script></div>
 <input type="radio" name="tabs" id="backup"><label for="backup">backup</label><div class="tab">
-# process list
-mysql \
-Host=dns.of.ip \<pre><code>User=root \<pre><code>Password='zabbix' \<pre><code>Database=zabbix \<pre><code>Execute="<pre><code>SHOW FULL PROCESSLIST;
+Process list<pre><code>mysql \
+--host=dns.of.ip \
+--user=root \
+--password='zabbix' \
+--database=zabbix \
+--execute="
+SHOW FULL PROCESSLIST;
 " > /tmp/mysql.process.list.$(date +%Y%m%d.%H%M).txt</code></pre>
-# backup the whole etc
-cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
-# Backup directories which can be related to Zabbix
-cd /usr/share/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
+Backup the whole etc<pre><code>cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
+Backup directories which can be related to Zabbix<pre><code>cd /usr/share/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /usr/lib/zabbix && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/cron.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /usr/local/bin && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
 cd /etc/nginx/conf.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
-cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
-# create a backup user
-mysql -e "
+cd /etc/php-fpm.d && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
+Create a backup user<pre><code>mysql -e "
 CREATE USER 'zbx_backup'@'127.0.0.1' IDENTIFIED BY 'zabbix';
 GRANT LOCK TABLES, SELECT ON zabbix.* TO 'zbx_backup'@'127.0.0.1';
 GRANT RELOAD ON *.* TO 'zbx_backup'@'127.0.0.1';
 FLUSH PRIVILEGES;
-"
-# install credentials file for read-only backup
-cat << 'EOF' > /etc/zabbix/zabbix_backup.cnf
+"</code></pre>
+Install credentials file for read-only backup<pre><code>cat << 'EOF' > /etc/zabbix/zabbix_backup.cnf
 [mysqldump]
 host=127.0.0.1
 user=zbx_backup
 password=zabbix
-EOF
-# 30 days configuration backup if MySQL 8
-BACKUP_DIR=/backup
+EOF</code></pre>
+30 days configuration backup if MySQL 8<pre><code>BACKUP_DIR=/backup
 DBNAME=zabbix
 DATE=$(date +%Y%m%d.%H%M)
 mkdir -p "$BACKUP_DIR"
 echo "schema"
 mysqldump \
-Defaults-file=/etc/zabbix/zabbix_backup.cnf \<pre><code>Set-gtid-purged=OFF \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>Create-options \<pre><code>No-data \<pre><code>$DBNAME | gzip --fast > "$BACKUP_DIR/schema.sql.gz" && \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+$DBNAME | gzip --fast > "$BACKUP_DIR/schema.sql.gz" && \
 echo "data" && mysqldump \
-Defaults-file=/etc/zabbix/zabbix_backup.cnf \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>No-tablespaces \<pre><code>Set-gtid-purged=OFF \<pre><code>Ignore-table=$DBNAME.history \<pre><code>Ignore-table=$DBNAME.history_log \<pre><code>Ignore-table=$DBNAME.history_str \<pre><code>Ignore-table=$DBNAME.history_text \<pre><code>Ignore-table=$DBNAME.history_uint \<pre><code>Ignore-table=$DBNAME.trends \<pre><code>Ignore-table=$DBNAME.trends_uint \<pre><code>$DBNAME > "$BACKUP_DIR/data.sql" && \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--no-tablespaces \
+--set-gtid-purged=OFF \
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/data.sql" && \
 echo "compressing data" && gzip --fast "$BACKUP_DIR/data.sql" && \
 echo "quick restore" && mysqldump \
-Defaults-file=/etc/zabbix/zabbix_backup.cnf \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>Ignore-table=$DBNAME.history \<pre><code>Ignore-table=$DBNAME.history_log \<pre><code>Ignore-table=$DBNAME.history_str \<pre><code>Ignore-table=$DBNAME.history_text \<pre><code>Ignore-table=$DBNAME.history_uint \<pre><code>Ignore-table=$DBNAME.trends \<pre><code>Ignore-table=$DBNAME.trends_uint \<pre><code>$DBNAME > "$BACKUP_DIR/quick.restore.sql" && \
+--defaults-file=/etc/zabbix/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/quick.restore.sql" && \
 echo "compressing quick restore" && gzip --fast "$BACKUP_DIR/quick.restore.sql"
 mv "$BACKUP_DIR/schema.sql.gz" "$BACKUP_DIR/schema.$DATE.sql.gz"
 mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz"
 mv "$BACKUP_DIR/quick.restore.sql.gz" "$BACKUP_DIR/quick.restore.$DATE.sql.gz"
 find /backup -type f -mtime +30
 find /backup -type f -mtime +30 -delete</code></pre>
-# mariadb backup
-BACKUP_DIR=/backup
+Mariadb backup<pre><code>BACKUP_DIR=/backup
 KEEP_DAYS=90
 DBNAME=zabbix
 DATE=$(date +%Y%m%d.%H%M)
 mkdir -p "$BACKUP_DIR"
 echo "schema"
 mysqldump \
-Defaults-file=~/zabbix_backup.cnf \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>Create-options \<pre><code>No-data \<pre><code>$DBNAME | gzip --fast > "$BACKUP_DIR/schema.sql.gz" && \
+--defaults-file=~/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+$DBNAME | gzip --fast > "$BACKUP_DIR/schema.sql.gz" && \
 echo "data" && \
 mysqldump \
-Defaults-file=~/zabbix_backup.cnf \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>No-tablespaces \<pre><code>Ignore-table=$DBNAME.history \<pre><code>Ignore-table=$DBNAME.history_log \<pre><code>Ignore-table=$DBNAME.history_str \<pre><code>Ignore-table=$DBNAME.history_text \<pre><code>Ignore-table=$DBNAME.history_uint \<pre><code>Ignore-table=$DBNAME.trends \<pre><code>Ignore-table=$DBNAME.trends_uint \<pre><code>$DBNAME > "$BACKUP_DIR/data.sql" && \
+--defaults-file=~/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--no-tablespaces \
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/data.sql" && \
 echo "compressing data" && gzip --fast "$BACKUP_DIR/data.sql" && \
 echo "snapshot" && mysqldump \
-Defaults-file=~/zabbix_backup.cnf \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>Ignore-table=$DBNAME.history \<pre><code>Ignore-table=$DBNAME.history_log \<pre><code>Ignore-table=$DBNAME.history_str \<pre><code>Ignore-table=$DBNAME.history_text \<pre><code>Ignore-table=$DBNAME.history_uint \<pre><code>Ignore-table=$DBNAME.trends \<pre><code>Ignore-table=$DBNAME.trends_uint \<pre><code>$DBNAME > "$BACKUP_DIR/snapshot.sql" && \
+--defaults-file=~/zabbix_backup.cnf \
+--flush-logs \
+--single-transaction \
+--ignore-table=$DBNAME.history \
+--ignore-table=$DBNAME.history_log \
+--ignore-table=$DBNAME.history_str \
+--ignore-table=$DBNAME.history_text \
+--ignore-table=$DBNAME.history_uint \
+--ignore-table=$DBNAME.trends \
+--ignore-table=$DBNAME.trends_uint \
+$DBNAME > "$BACKUP_DIR/snapshot.sql" && \
 echo "compressing snapshot" && gzip --fast "$BACKUP_DIR/snapshot.sql" && \
 mv "$BACKUP_DIR/schema.sql.gz" "$BACKUP_DIR/schema.$DATE.sql.gz" && \
 mv "$BACKUP_DIR/data.sql.gz" "$BACKUP_DIR/data.$DATE.sql.gz" && \
@@ -72,74 +124,52 @@ echo "deleting files older than $KEEP_DAYS days:"
 find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.gz' -mtime +$KEEP_DAYS
 find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.gz' -mtime +$KEEP_DAYS -delete
 fi</code></pre>
-# rotate backups for 30 days
-find /backup -type f -mtime +30
-find /backup -type f -mtime +30 -delete
-# insert to a temporary table
-zcat trends_uint.sql.gz | sed 's|trends_uint|trends_uint_old|' | mysql zabbix
+Rotate backups for 30 days<pre><code>find /backup -type f -mtime +30
+find /backup -type f -mtime +30 -delete</code></pre>
+Insert to a temporary table<pre><code>zcat trends_uint.sql.gz | sed 's|trends_uint|trends_uint_old|' | mysql zabbix
 zcat history_uint.sql.gz | sed 's|history_uint|history_uint_old|' | mysql zabbix
 zcat trends.sql.gz | sed 's|trends|trends_old|' | mysql zabbix
-zcat history.sql.gz | sed 's|history|history_old|' | mysql zabbix
-# backup to a remote system
-mysqldump \
-Defaults-file=/root/.my.cnf \<pre><code>Single-transaction \<pre><code>No-create-info \<pre><code>zabbix history_text \
-Where="clock BETWEEN 1690257300 AND 1690279380" | \<pre><code>gzip --stdout | ssh root@192.168.88.15 "cat > /dev/shm/history_text.sql.gz"</code></pre>
-# Backup and compress zabbix server config with a purpose to restore it on other machine
-tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo
-# Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine
-tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo
-# Backup and compress partitioning script and configuration files
-tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo
-# compress frontend config and logs and split into 15 MB parts
-tar --create --verbose --use-compress-program='xz' /etc/zabbix /etc/nginx /etc/httpd /etc/apache2 /etc/php-fpm.d /var/log/nginx /var/log/httpd /var/log/apache2 /var/log/php-fpm  | split -b 15MiB - /tmp/frontend.config.and.logs.tar.xz_
-# Backup all frontend modules with 'xz' compression
-tar --create --verbose --use-compress-program='xz -9' /usr/share/zabbix/modules | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | unxz | tar -xv%' && echo
+zcat history.sql.gz | sed 's|history|history_old|' | mysql zabbix</code></pre>
+Backup to a remote system<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--single-transaction \
+--no-create-info \
+zabbix history_text \
+--where="clock BETWEEN 1690257300 AND 1690279380" | \
+gzip --stdout | ssh root@192.168.88.15 "cat > /dev/shm/history_text.sql.gz"</code></pre>
+Backup and compress zabbix server config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_server.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
+Backup and compress Zabbix agent 2 config with a purpose to restore it on other machine<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_agent2.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
+Backup and compress partitioning script and configuration files<pre><code>tar --create --verbose --use-compress-program='gzip -9' /etc/zabbix/zabbix_partitioning.conf /usr/local/bin/zabbix_partitioning.py /etc/cron.d/zabbix_partitioning | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | gunzip | tar -xv%' && echo</code></pre>
+Compress frontend config and logs and split into 15 MB parts<pre><code>tar --create --verbose --use-compress-program='xz' /etc/zabbix /etc/nginx /etc/httpd /etc/apache2 /etc/php-fpm.d /var/log/nginx /var/log/httpd /var/log/apache2 /var/log/php-fpm  | split -b 15MiB - /tmp/frontend.config.and.logs.tar.xz_</code></pre>
+Backup all frontend modules with 'xz' compression<pre><code>tar --create --verbose --use-compress-program='xz -9' /usr/share/zabbix/modules | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | unxz | tar -xv%' && echo</code></pre>
 <p>Download this section: <a href="src/backup.sh">https://aigarskadikis.github.io/src/backup.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/backup.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="bash"><label for="bash">bash</label><div class="tab">
-# hog processes, hog
-ps -eo pcpu,pmem,pid,ppid,user,stat,args | sort -k 1 -r | head -6 | sed 's/$/\n/'
-# pss consumtions with root user
-zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"
-# pss consumptions with service user zabbix
-sudo -u zabbix zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"
-# rotate between values
-echo "
+Hog processes, hog<pre><code>ps -eo pcpu,pmem,pid,ppid,user,stat,args | sort -k 1 -r | head -6 | sed 's/$/\n/'</code></pre>
+Pss consumtions with root user<pre><code>zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"</code></pre>
+Pss consumptions with service user zabbix<pre><code>sudo -u zabbix zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"</code></pre>
+Rotate between values<pre><code>echo "
 one
 two
 " | grep -v "^$" | while IFS= read -r LINE
 do {
 echo $LINE
-} done
-# debug snmp
-snmpwalk -v'2c' -c'public' -Dsnmp IP OID
-# debug snmp transport
-snmpwalk -v'2c' -c'public' -Dtransport IP OID
-# debug in hex format
-snmpwalk -v'2c' -c'public' -dd IP OID
-# poller busy
-watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'
-# slow query
-awk -F'slow query: | sec, "' '{ if (NF == 3) printf "%.6f\t%s...\n", $2, substr($3, 1, 160) }' /var/log/zabbix/zabbix_server.log | sort -nr | head -n 20
-# slow housekeeper
-awk -F'in | sec,' '/housekeeper/ && NF >= 2 { split($0, a, ":"); timestamp = a[2] ":" a[3]; printf "%.6f\t%s\n", $2, timestamp }' /var/log/zabbix/zabbix_server.log | sort -nr | head -n 10
-# watch backlog
-watch -n1 'zabbix_server -R diaginfo=historycache | grep -A1 "history cache diagnostic information"'
-# memory usage for agentd
-ps_mem --total -p $(pidof zabbix_agentd | sed 's| |,|g')
-# memory usage for agent2
-ps_mem --total -p $(pidof zabbix_agent2 | sed 's| |,|g')
-# memory usage for agentd in MB
-echo "$(($(ps_mem --total -p $(pidof zabbix_agentd | sed 's| |,|g')) / 1024 / 1024))"
-# received traffic which originated only from remote host
-tcpdump -e -i any -c 1000 -nn -tt -q -l 'ip and inbound and tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
-# convert to readable date
-tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(..\)/\2-\3-\4 \5:\6:\7/'
-# convert to readable date including PID
-tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(......\)/\2-\3-\4 \5:\6:\7 PID:\1/'
-# look for 2nd match between "start pattern" and "end pattern"
-cat /var/log/zabbix/zabbix_proxy.log |\
+} done</code></pre>
+Debug snmp<pre><code>snmpwalk -v'2c' -c'public' -Dsnmp IP OID</code></pre>
+Debug snmp transport<pre><code>snmpwalk -v'2c' -c'public' -Dtransport IP OID</code></pre>
+Debug in hex format<pre><code>snmpwalk -v'2c' -c'public' -dd IP OID</code></pre>
+Poller busy<pre><code>watch -n1 'ps auxww | grep -Eo "[:] poller #.*"'</code></pre>
+Slow query<pre><code>awk -F'slow query: | sec, "' '{ if (NF == 3) printf "%.6f\t%s...\n", $2, substr($3, 1, 160) }' /var/log/zabbix/zabbix_server.log | sort -nr | head -n 20</code></pre>
+Slow housekeeper<pre><code>awk -F'in | sec,' '/housekeeper/ && NF >= 2 { split($0, a, ":"); timestamp = a[2] ":" a[3]; printf "%.6f\t%s\n", $2, timestamp }' /var/log/zabbix/zabbix_server.log | sort -nr | head -n 10</code></pre>
+Watch backlog<pre><code>watch -n1 'zabbix_server -R diaginfo=historycache | grep -A1 "history cache diagnostic information"'</code></pre>
+Memory usage for agentd<pre><code>ps_mem --total -p $(pidof zabbix_agentd | sed 's| |,|g')</code></pre>
+Memory usage for agent2<pre><code>ps_mem --total -p $(pidof zabbix_agent2 | sed 's| |,|g')</code></pre>
+Memory usage for agentd in MB<pre><code>echo "$(($(ps_mem --total -p $(pidof zabbix_agentd | sed 's| |,|g')) / 1024 / 1024))"</code></pre>
+Received traffic which originated only from remote host<pre><code>tcpdump -e -i any -c 1000 -nn -tt -q -l 'ip and inbound and tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'</code></pre>
+Convert to readable date<pre><code>tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(..\)/\2-\3-\4 \5:\6:\7/'</code></pre>
+Convert to readable date including PID<pre><code>tail -99f /var/log/zabbix/zabbix_proxy.log | sed 's/\([0-9]\+\):\(....\)\(..\)\(..\):\(..\)\(..\)\(......\)/\2-\3-\4 \5:\6:\7 PID:\1/'</code></pre>
+Look for 2nd match between "start pattern" and "end pattern"<pre><code>cat /var/log/zabbix/zabbix_proxy.log |\
 awk '
 /start pattern/ {
 found++
@@ -147,9 +177,8 @@ found++
 found == 2
 /end pattern/ && found == 2 {
 exit
-}'
-# prometheus pattern capture
-cat /var/log/zabbix/zabbix_proxy.log |\
+}'</code></pre>
+Prometheus pattern capture<pre><code>cat /var/log/zabbix/zabbix_proxy.log |\
 awk '
 /Prometheus raw data start/ {
 found++
@@ -157,29 +186,24 @@ found++
 found == 2
 /Prometheus raw data end/ && found == 2 {
 exit
-}' | grep –v 'Prometheus raw data' > /tmp/prom.input.txt
-# backup whole etc
-DATE=`date '+%Y.%m.%d.%H.%M'` && cd /etc && mkdir -p ~/backup${DATE}${PWD} && cp -a * ~/backup${DATE}${PWD}
-# extract creation of tables. remove break line, show printable characters add _new at the end
-cat schema.sql | \
+}' | grep –v 'Prometheus raw data' > /tmp/prom.input.txt</code></pre>
+Backup whole etc<pre><code>DATE=`date '+%Y.%m.%d.%H.%M'` && cd /etc && mkdir -p ~/backup${DATE}${PWD} && cp -a * ~/backup${DATE}${PWD}</code></pre>
+Extract creation of tables. Remove break line, show printable characters add _new at the end<pre><code>cat schema.sql | \
 tr -d '\n' | \
 sed 's|;|;\n|g' | \
 grep -E "^CREATE TABLE (history|trends).*" | \
 sed -E '
 s|\s+| |g;
 s|CREATE TABLE (history[^ (,]*)|CREATE TABLE \1_new|;
-s|CREATE TABLE (trends[^ (,]*)|CREATE TABLE \1_new|' > /tmp/create_new.sql
-# create fork of timescaledb
-cat schema.sql | \
+s|CREATE TABLE (trends[^ (,]*)|CREATE TABLE \1_new|' > /tmp/create_new.sql</code></pre>
+Create fork of timescaledb<pre><code>cat schema.sql | \
 sed 's|^.UPDATE config.*||' | \
 sed "s|', 'clock', chunk_time_i
-nterval|_new', 'clock', chunk_time_interval|"
-# remaster timescaledb create script to work with _new tables
-cat schema.sql | \
+nterval|_new', 'clock', chunk_time_interval|"</code></pre>
+Remaster timescaledb create script to work with _new tables<pre><code>cat schema.sql | \
 sed 's|^.UPDATE config.*||' | \
-sed "s|', 'clock', chunk_time_interval|_new', 'clock', chunk_time_interval|" > /tmp/enable.for.new.sql
-# prepare temporary tables
-DB=sample6023
+sed "s|', 'clock', chunk_time_interval|_new', 'clock', chunk_time_interval|" > /tmp/enable.for.new.sql</code></pre>
+Prepare temporary tables<pre><code>DB=sample6023
 OLD=_old
 NEW=_new
 echo "
@@ -201,9 +225,8 @@ ALTER TABLE $TABLE OWNER TO zabbix;
 CREATE TABLE $TABLE$NEW (LIKE $TABLE INCLUDING ALL);
 ALTER TABLE $TABLE$NEW OWNER TO zabbix;
 "
-} done
-# Convert the biggest data into hyper tables. This process will take multiple hours/days
-DB=sample6023
+} done</code></pre>
+Convert the biggest data into hyper tables. This process will take multiple hours/days<pre><code>DB=sample6023
 OLD=_old
 NEW=_new
 echo "
@@ -222,9 +245,8 @@ echo "converting $TABLE$OLD into hyper tables started at $(date)"
 psql $DB --command="
 INSERT INTO $TABLE$NEW SELECT * FROM $TABLE$OLD ON CONFLICT DO NOTHING;
 "
-} done
-# merga data together
-DB=sample6023
+} done</code></pre>
+Merga data together<pre><code>DB=sample6023
 OLD=_old
 NEW=_new
 TMP=_tmp
@@ -246,9 +268,8 @@ ALTER TABLE $TABLE RENAME TO $TABLE$TMP;
 ALTER TABLE $TABLE$NEW RENAME TO $TABLE;
 INSERT INTO $TABLE SELECT * FROM $TABLE$TMP ON CONFLICT DO NOTHING;
 "
-} done
-# drop unnecary tables. print sensitive statements
-OLD=_old
+} done</code></pre>
+Drop unnecary tables. Print sensitive statements<pre><code>OLD=_old
 TMP=_tmp
 echo "
 trends
@@ -264,117 +285,74 @@ while IFS= read -r TABLE
 do {
 echo "DROP TABLE $TABLE$TMP;"
 echo "DROP TABLE $TABLE$OLD;"
-} done
-# oracle connection test
-cd /opt/oracle/instantclient_23_7 && ./sqlplus "system/oracle@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=10.10.6.26)(Port=49161))(CONNECT_DATA=(SID=xe)))"
-# postgresql connection test
-PGHOST=10.10.6.23 PGPORT=5432 PGUSER=zbx_monitor PGPASSWORD='passwordGoesHere' psql
-# MSSQL connection test. '-C' means Trust Server Certificate
-sqlcmd --server '10.10.4.21' --user-name 'zbx_monitor' --password 'passwordGoesHere' -C
-# memory situation in megabytes
-ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb ",hr) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' | cut -d "" -f2 | cut -d "-" -f1
-# interface unavailable
-grep :20250124:01 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c
-grep :20250124:03 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c
-# target second appierence of block
-awk '/Prometheus raw data start/{found++} found==2; /Prometheus raw data end/ && found==2{exit}' /var/log/zabbix/zabbix_proxy.log
-# merge back
-cat frontend.config.and.logs.tar.xz_* > together.tar.xz
-# yt-dlp best audio and video
-yt-dlp -f "bv[ext!=webm]+ba/b[ext!=webm]" --download-archive archive.log
-# delete line with sed
-sed -i '/^Hostname=Zabbix proxy$/d' /etc/zabbix/zabbix_proxy.conf
+} done</code></pre>
+Oracle connection test<pre><code>cd /opt/oracle/instantclient_23_7 && ./sqlplus "system/oracle@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=10.10.6.26)(Port=49161))(CONNECT_DATA=(SID=xe)))"</code></pre>
+Postgresql connection test<pre><code>PGHOST=10.10.6.23 PGPORT=5432 PGUSER=zbx_monitor PGPASSWORD='passwordGoesHere' psql</code></pre>
+MSSQL connection test. '-C' means Trust Server Certificate<pre><code>sqlcmd --server '10.10.4.21' --user-name 'zbx_monitor' --password 'passwordGoesHere' -C</code></pre>
+Memory situation in megabytes<pre><code>ps -eo rss,pid,user,command --sort -size | awk '{ hr=$1/1024 ; printf("%13.2f Mb ",hr) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' | cut -d "" -f2 | cut -d "-" -f1</code></pre>
+Interface unavailable<pre><code>grep :20250124:01 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c
+grep :20250124:03 /var/log/zabbix/zabbix_server.log | grep -Eo "\S+ interface unavailable" | sort | uniq -c</code></pre>
+Target second appierence of block<pre><code>awk '/Prometheus raw data start/{found++} found==2; /Prometheus raw data end/ && found==2{exit}' /var/log/zabbix/zabbix_proxy.log</code></pre>
+Merge back<pre><code>cat frontend.config.and.logs.tar.xz_* > together.tar.xz</code></pre>
+Yt-dlp best audio and video <pre><code>yt-dlp -f "bv[ext!=webm]+ba/b[ext!=webm]" --download-archive archive.log</code></pre>
+Delete line with sed<pre><code>sed -i '/^Hostname=Zabbix proxy$/d' /etc/zabbix/zabbix_proxy.conf
 sed -i '/^Hostname=Zabbix server$/d' /etc/zabbix/zabbix_agentd.conf
-sed -i '/^Hostname=Zabbix server$/d' /etc/zabbix/zabbix_agent2.conf
-# use rdesktop with 150 dpi scalling
-rdesktop -u 'Administrator' -p 'Passw0rd' -g 1920x1080@150 -a 32 -x 1 -b ip.address.of.client -x 0x80
-# list files inside package rpm
-rpm -ql package_name
-# convert short IPv6 format to long
-python3 -c "import ipaddress; print(ipaddress.IPv6Address('2001:db8::1').exploded)"
-# test port
-nc -zv ip 10050
-# crop video from 1920x1200 to 1920x1080p
-ffmpeg -i input.mkv -vf "crop=1920:1080:0:60" -c:v libx264 -crf 18 -preset veryfast -c:a copy output.mkv
-# screen with logging enabled
-screen -L -Logfile /tmp/screen.log
-# avoid asking for service restarts on Ubuntu 22/24
-echo "\$nrconf{restart} = 'a';" | sudo tee /etc/needrestart/conf.d/no-prompt.conf
-# check what exactly perform write
-iotop --kilobytes --delay=3 --iter=5
-# history syncer running
-watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"
-# see the origin of data collection
-strace -s 2048 -f -v -o /tmp/sar.log sar 1 1
-cat /tmp/sar.log | grep '/proc/stat'
-# volume configuration
-lvm lvs -o+lv_layout,stripes > /tmp/volume.conf.txt
-# CPU information
-lscpu > /tmp/lscpu.txt
-# 2 snapshots of busyest CPU processes
-top -b -o +%CPU -n 2 2>&1 1> /tmp/top.cpu.txt
-# install iperf3, iostat fio
-dnf install sysstat fio iperf3
-# test disk speed
-cd /var/lib/mysql
-fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
-# QD1 4k Random Write - IO performance/IOPS: >= 3000 IOPS
-fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=60 --group_reporting
-# QD32 4k Random Write - "multithread" IO performance/IOPS: >= 10000 IOPS
-fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
-# QD32 2048kb - bandwidth test/Throughput bound: > 250-300 MByte/s
-fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=2048kb --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
-# process list for 120 (24x5) seconds
-for i in `seq 1 24`; do echo $(date) >> /tmp/process.list.txt && ps auxww >> /tmp/process.list.txt && echo "=======" >> /tmp/process.list.txt && sleep 5; done
-# size of table partitions
-du -lah /var/lib/mysql | awk '{ print $2,"",$1 }' | grep "#" | sort
-# TCP state statistics for 2 minutes
-for i in `seq 1 120`; do echo $(date) | tee -a /tmp/tcp.state.txt && awk '{print $4}' /proc/net/tcp /proc/net/tcp6 | grep -v st | sort | uniq -c | tee -a /tmp/tcp.state.txt && wc -l /proc/net/tcp | tee -a /tmp/tcp.state.txt && wc -l /proc/net/tcp6 | tee -a /tmp/tcp.state.txt && echo "=======" | tee -a /tmp/tcp.state.txt && sleep 1; done
-# discovere processes
-watch -n1 "ps auxww | grep -Eo '[:] discoverer #.*'"
-# detailed memory consumtion per primary zabbix_agentd process
-cat /proc/$(ps auxww|grep zabbix_agent[d].*conf$ | awk '{ print $2 }')/smaps | grep -Eo "^[0-9a-f-]+.*|^Size.*"
-# set iperf3 on listening port
-iperf3 -s -p 10050
-# send data
-iperf3 -c address.of.agent.server -p 10050 -t 10
-# disk utilisation
-iostat -x 1
-# ESTAB and all TIME-WAIT connection
-ss --all --numeric  | grep 10050
-# ESTAB connection for passive agent
-ss --all --numeric  | grep ESTAB | grep 10050
-# remove txt extension
-for f in *.txt; do mv -- "$f" "${f%.txt}"; done
-# remove leading and trailing space with sed
-sed 's/^[\t ]*//g;s/[\t ]*$//g'
-# snmptranslate MIB
-snmptranslate -Tz -m ./MIKROTIK-MIB
-# version history of proxy
-find /var/log/zabbix -name 'zabbix_proxy*.gz' -exec zcat {} \; | grep Starting
+sed -i '/^Hostname=Zabbix server$/d' /etc/zabbix/zabbix_agent2.conf</code></pre>
+Use rdesktop with 150 dpi scalling<pre><code>rdesktop -u 'Administrator' -p 'Passw0rd' -g 1920x1080@150 -a 32 -x 1 -b ip.address.of.client -x 0x80</code></pre>
+List files inside package rpm<pre><code>rpm -ql package_name</code></pre>
+Convert short IPv6 format to long<pre><code>python3 -c "import ipaddress; print(ipaddress.IPv6Address('2001:db8::1').exploded)"</code></pre>
+Test port<pre><code>nc -zv ip 10050</code></pre>
+Crop video from 1920x1200 to 1920x1080p<pre><code>ffmpeg -i input.mkv -vf "crop=1920:1080:0:60" -c:v libx264 -crf 18 -preset veryfast -c:a copy output.mkv</code></pre>
+Screen with logging enabled<pre><code>screen -L -Logfile /tmp/screen.log</code></pre>
+Avoid asking for service restarts on Ubuntu 22/24<pre><code>echo "\$nrconf{restart} = 'a';" | sudo tee /etc/needrestart/conf.d/no-prompt.conf</code></pre>
+Check what exactly perform write<pre><code>iotop --kilobytes --delay=3 --iter=5</code></pre>
+History syncer running<pre><code>watch -n1 "ps auxww | grep -Eo '[:] history syncer.*'"</code></pre>
+See the origin of data collection<pre><code>strace -s 2048 -f -v -o /tmp/sar.log sar 1 1
+cat /tmp/sar.log | grep '/proc/stat'</code></pre>
+Volume configuration<pre><code>lvm lvs -o+lv_layout,stripes > /tmp/volume.conf.txt</code></pre>
+CPU information<pre><code>lscpu > /tmp/lscpu.txt</code></pre>
+2 snapshots of busyest CPU processes<pre><code>top -b -o +%CPU -n 2 2>&1 1> /tmp/top.cpu.txt</code></pre>
+Install iperf3, iostat fio<pre><code>dnf install sysstat fio iperf3</code></pre>
+Test disk speed<pre><code>cd /var/lib/mysql
+fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting</code></pre>
+QD1 4k Random Write - IO performance/IOPS: >= 3000 IOPS<pre><code>fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=60 --group_reporting</code></pre>
+QD32 4k Random Write - "multithread" IO performance/IOPS: >= 10000 IOPS<pre><code>fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting</code></pre>
+QD32 2048kb - bandwidth test/Throughput bound: > 250-300 MByte/s<pre><code>fio --name TEST --eta-newline=5s --filename=test.img --rw=randwrite --size=500m --io_size=10g --blocksize=2048kb --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting</code></pre>
+Process list for 120 (24x5) seconds<pre><code>for i in `seq 1 24`; do echo $(date) >> /tmp/process.list.txt && ps auxww >> /tmp/process.list.txt && echo "=======" >> /tmp/process.list.txt && sleep 5; done</code></pre>
+Size of table partitions<pre><code>du -lah /var/lib/mysql | awk '{ print $2,"",$1 }' | grep "#" | sort</code></pre>
+TCP state statistics for 2 minutes<pre><code>for i in `seq 1 120`; do echo $(date) | tee -a /tmp/tcp.state.txt && awk '{print $4}' /proc/net/tcp /proc/net/tcp6 | grep -v st | sort | uniq -c | tee -a /tmp/tcp.state.txt && wc -l /proc/net/tcp | tee -a /tmp/tcp.state.txt && wc -l /proc/net/tcp6 | tee -a /tmp/tcp.state.txt && echo "=======" | tee -a /tmp/tcp.state.txt && sleep 1; done</code></pre>
+Discovere processes<pre><code>watch -n1 "ps auxww | grep -Eo '[:] discoverer #.*'"</code></pre>
+Detailed memory consumtion per primary zabbix_agentd process<pre><code>cat /proc/$(ps auxww|grep zabbix_agent[d].*conf$ | awk '{ print $2 }')/smaps | grep -Eo "^[0-9a-f-]+.*|^Size.*"</code></pre>
+Set iperf3 on listening port<pre><code>iperf3 -s -p 10050</code></pre>
+Send data<pre><code>iperf3 -c address.of.agent.server -p 10050 -t 10</code></pre>
+Disk utilisation<pre><code>iostat -x 1</code></pre>
+ESTAB and all TIME-WAIT connection<pre><code>ss --all --numeric  | grep 10050</code></pre>
+ESTAB connection for passive agent<pre><code>ss --all --numeric  | grep ESTAB | grep 10050</code></pre>
+Remove txt extension<pre><code>for f in *.txt; do mv -- "$f" "${f%.txt}"; done</code></pre>
+Remove leading and trailing space with sed<pre><code>sed 's/^[\t ]*//g;s/[\t ]*$//g'</code></pre>
+Snmptranslate MIB<pre><code>snmptranslate -Tz -m ./MIKROTIK-MIB</code></pre>
+Version history of proxy<pre><code>find /var/log/zabbix -name 'zabbix_proxy*.gz' -exec zcat {} \; | grep Starting
 find /var/log/zabbix -regex '.*zabbix_proxy.log.[0-9]+' -exec grep Starting {} \;
-grep Starting /var/log/zabbix/zabbix_proxy.log
-# endless loop to deliver metric
-while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done
-# ask queue
-zabbix_get -s 127.0.0.1 -p 30051 -P plaintext -k '{"request":"status.get","type":"ping","sid":"TOKEN"}'
-# statistics per history write cache
-while true; do echo "$(date '+%Y-%m-%d %H:%M:%S') $(zabbix_server -R diaginfo=historycache | grep -A1 "Top.values" | grep "[i]temid")" >> /tmp/top.itemid.log; sleep 1; done
-# test disk throughput
-cd /var/lib/mysql
+grep Starting /var/log/zabbix/zabbix_proxy.log</code></pre>
+Endless loop to deliver metric<pre><code>while true; do zabbix_sender -z 127.0.0.1 -s $(hostname) -k agent.ping -o 1; sleep 30; done</code></pre>
+Ask queue<pre><code>zabbix_get -s 127.0.0.1 -p 30051 -P plaintext -k '{"request":"status.get","type":"ping","sid":"TOKEN"}'</code></pre>
+Statistics per history write cache<pre><code>while true; do echo "$(date '+%Y-%m-%d %H:%M:%S') $(zabbix_server -R diaginfo=historycache | grep -A1 "Top.values" | grep "[i]temid")" >> /tmp/top.itemid.log; sleep 1; done</code></pre>
+Test disk throughput<pre><code>cd /var/lib/mysql
 dd if=/dev/urandom of=512M bs=1M count=512 oflag=direct
 rm 512M
 dd if=/dev/urandom of=5GB bs=1M count=5120 oflag=direct
 rm 5GB
 dd if=/dev/urandom of=50GB bs=1M count=51200 oflag=direct
-rm 50GB
-# simulate javascript code without placing file in filesystem
-zabbix_js --script <(echo 'return 1;') --param '' --loglevel 4 --timeout 60
-# feed the output of file into javascript program
-zabbix_js --script <(echo 'return value;') --loglevel 3 --timeout 60 --input <(grep -v "^$\|#" /etc/zabbix/zabbix_agentd.conf | sort)
-# erase dublicate data in table 'history_text'. this does NOT work like discard unchanged
-mysql \
-Database='zabbix' \<pre><code>Silent \<pre><code>Skip-column-names \<pre><code>Batch \<pre><code>Execute="<pre><code>SELECT items.itemid
+rm 50GB</code></pre>
+Simulate javascript code without placing file in filesystem<pre><code>zabbix_js --script <(echo 'return 1;') --param '' --loglevel 4 --timeout 60</code></pre>
+Feed the output of file into javascript program<pre><code>zabbix_js --script <(echo 'return value;') --loglevel 3 --timeout 60 --input <(grep -v "^$\|#" /etc/zabbix/zabbix_agentd.conf | sort)</code></pre>
+Erase dublicate data in table 'history_text'. This does NOT work like discard unchanged<pre><code>mysql \
+--database='zabbix' \
+--silent \
+--skip-column-names \
+--batch \
+--execute="
+SELECT items.itemid
 FROM items, hosts
 WHERE hosts.hostid=items.hostid
 AND hosts.status IN (0,1)
@@ -394,117 +372,83 @@ AND t1.itemid=t2.itemid
 AND t1.itemid=$ITEMID
 " | mysql zabbix
 } done</code></pre>
-# print metrics on screen
-while true; do
+Print metrics on screen<pre><code>while true; do
 echo -n 'total: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[];
 echo -n 'user: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,user];
 echo -n 'system: '&& zabbix_get -s 127.0.0.1 -k system.cpu.util[,system];
 echo -n 'guest: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest];
 echo -n 'guest_nice: ' && zabbix_get -s 127.0.0.1 -k system.cpu.util[,guest_nice];
 echo '------------'
-sleep 1; done;
-# compress /var/lib/mysql by using gzip
-tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql
-# suggestions based on OS
-cat /etc/*release* > /tmp/$(hostname).os.txt
+sleep 1; done;</code></pre>
+Compress /var/lib/mysql by using gzip<pre><code>tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
+Suggestions based on OS<pre><code>cat /etc/*release* > /tmp/$(hostname).os.txt
 df -m > /tmp/$(hostname).disk.txt
 free -m > /tmp/$(hostname).memory.usage.txt
 cat /proc/meminfo > /tmp/$(hostname).meminfo.txt
 cat /proc/cpuinfo > /tmp/$(hostname).cpuinfo.txt
 mysql -e "show variables" > /tmp/$(hostname).mysql.variables.txt
 sysctl -a > /tmp/$(hostname).kernel.settings.txt
-ps -xafuww > /tmp/$(hostname).process.list.tree.txt
-# stats about MySQL data directory
-du -lah /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.human.readable.txt
+ps -xafuww > /tmp/$(hostname).process.list.tree.txt</code></pre>
+Stats about MySQL data directory<pre><code>du -lah /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.human.readable.txt
 du -lab /var/lib/mysql | awk '{ print $2,"",$1 }' | sort > /tmp/mysql.files.size.in.bytes.txt
-du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files.txt
-# follow unreachable poller with 2 digits. print IP address
-tail -999f /var/log/zabbix/zabbix_proxy.log | grep $(ps auxww|grep "[u]nreachable poller #99" | awk '{ print $2 }'): | grep -E "\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\]"
-# screenshot
-google-chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink
-chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink
-# restore
-rm /var/lib/mysql/* -rf
-tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql
-# backup /etc
-tar --create --verbose --use-compress-program='gzip --best' --file=/tmp/etc.tar.gz /etc
-# backup /etc with maximum compression
-tar --create --verbose --use-compress-program='xz' --file=/tmp/etc.tar.xz /etc
-# show printable charactars
-cat file.html | tr -d '\n' | tr -cd '[:print:]'
-# show printable characters on windows
-cat file.html | tr -cd '[:print:]'
-# "sid" in the web server log is half (the end of) of the "sessionid" in the database. Zabbix 6.0, NGINX
-tail -9999f /var/log/nginx/access.log | grep -Eo "sid.*dashboardid=\S+"
-# sum together 5th column
-ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum}'
-# show how much data generate in a specific date
-ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum / (1024^3) " GB"}'
-# backup etc to home directory in deadable format
-cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}
-# list biggest partitions
-ls --sort=size -lh | grep '#' | tac
-# send all UDP 162 traffic into a human readable log
-tcpdump -l -i any udp dst port 162 -x -vv 1>&2 >/tmp/udp162.log
-# transport data. on destination server go to directory where files must be places. set to listen on port 1234
-nc -l 1234 | tar -xvf -
-# transport data. on source server. start sending. replace x.y.z.w with real IP address
-tar cf - . | nc x.y.z.w 1234
-# compress /var/lib/mysql by using lz4
-dnf install lz4
-tar --create --verbose --use-compress-program='lz4' --file=/tmp/var.lib.mysql.tar.lz4 /var/lib/mysql
-# restore
-rm /var/lib/mysql/* -rf
+du -lab /var/lib/mysql | sort -n > /tmp/biggest.mysql.files.txt</code></pre>
+Follow unreachable poller with 2 digits. Print IP address<pre><code>tail -999f /var/log/zabbix/zabbix_proxy.log | grep $(ps auxww|grep "[u]nreachable poller #99" | awk '{ print $2 }'): | grep -E "\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\]"</code></pre>
+Screenshot<pre><code>google-chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink
+chrome --no-sandbox --headless --print-to-pdf=/tmp/zabbix-https.pdf yourfrontendlink</code></pre>
+Restore<pre><code>rm /var/lib/mysql/* -rf
+tar xvf /tmp/var.lib.mysql.tar.gz --directory=/var/lib/mysql</code></pre>
+Backup /etc<pre><code>tar --create --verbose --use-compress-program='gzip --best' --file=/tmp/etc.tar.gz /etc</code></pre>
+Backup /etc with maximum compression<pre><code>tar --create --verbose --use-compress-program='xz' --file=/tmp/etc.tar.xz /etc</code></pre>
+Show printable charactars<pre><code>cat file.html | tr -d '\n' | tr -cd '[:print:]'</code></pre>
+Show printable characters on windows<pre><code>cat file.html | tr -cd '[:print:]'</code></pre>
+"sid" in the web server log is half (the end of) of the "sessionid" in the database. Zabbix 6.0, NGINX<pre><code>tail -9999f /var/log/nginx/access.log | grep -Eo "sid.*dashboardid=\S+"</code></pre>
+Sum together 5th column<pre><code>ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum}'</code></pre>
+Show how much data generate in a specific date<pre><code>ls -lb /var/lib/mysql/zabbix | grep '#p2024_10_08' | awk '{sum += $5} END {print sum / (1024^3) " GB"}'</code></pre>
+Backup etc to home directory in deadable format<pre><code>cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
+List biggest partitions<pre><code>ls --sort=size -lh | grep '#' | tac</code></pre>
+Send all UDP 162 traffic into a human readable log<pre><code>tcpdump -l -i any udp dst port 162 -x -vv 1>&2 >/tmp/udp162.log</code></pre>
+Transport data. On destination server go to directory where files must be places. set to listen on port 1234<pre><code>nc -l 1234 | tar -xvf -</code></pre>
+Transport data. On source server. start sending. replace x.y.z.w with real IP address<pre><code>tar cf - . | nc x.y.z.w 1234</code></pre>
+Compress /var/lib/mysql by using lz4<pre><code>dnf install lz4
+tar --create --verbose --use-compress-program='lz4' --file=/tmp/var.lib.mysql.tar.lz4 /var/lib/mysql</code></pre>
+Restore<pre><code>rm /var/lib/mysql/* -rf
 cd /
-unlz4 /tmp/var.lib.mysql.tar.lz4 | tar xvf -
-# track when trends are completed
-watch -n.2 'mysql -e "show full processlist;" | grep insert'
-# take poller #11, increase log level to 5 and stream live situation of what kind of items are fetched and how fast. Zabbix 6.0, 6.2, 6.4
+unlz4 /tmp/var.lib.mysql.tar.lz4 | tar xvf -</code></pre>
+Track when trends are completed<pre><code>watch -n.2 'mysql -e "show full processlist;" | grep insert'</code></pre>
+Take poller #11, increase log level to 5 and stream live situation of what kind of items are fetched and how fast. Zabbix 6.0, 6.2, 6.4<pre><code>zabbix_proxy -R log_level_increase="poller",11
 zabbix_proxy -R log_level_increase="poller",11
-zabbix_proxy -R log_level_increase="poller",11
-tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #11 " | awk '{ print $2 }')" | grep -E 'interfaceid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'
-# take poller #11, increase log level to 5 and stream live situation of what kind of items are fetched and how fast. Zabbix 5.0
-zabbix_proxy -R log_level_increase="poller",1
+tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #11 " | awk '{ print $2 }')" | grep -E 'interfaceid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'</code></pre>
+Take poller #11, increase log level to 5 and stream live situation of what kind of items are fetched and how fast. Zabbix 5.0<pre><code>zabbix_proxy -R log_level_increase="poller",1
 zabbix_proxy -R log_level_increase="poller",1
 tail -999f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -E 'hostid:\S+ itemid:\S+ type:\S+|zbx_setproctitle.*idle'
-tail -99f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -Eo 'hostid:\S+ itemid:\S+ type:\S+|got.*sec.*idle'
-# active checks failing
-grep -Eo "cannot send list of active checks.*" /var/log/zabbix/zabbix_proxy.log | sort | uniq -c
-# outgoing ports, persistent connection
-ss --tcp --numeric --processes | grep zabbix_server
-# process list with parents
-ps -xafuww > /tmp/process.list.$(hostname).txt
-# top memory processes
-ps -eo time,start_time,pcpu,pmem,user,args --sort pmem > /tmp/top.mem.txt
-# hungry CPU processes
-ps -eo time,start_time,pcpu,pmem,user,args --sort time > /tmp/top.cpu.txt
-# all socket statistics
-ss --all --numeric --processes > /tmp/$(hostname).socket.statistics.txt
-# only listening ports and explanation
-ss --tcp --numeric --listen --processes > /tmp/$(hostname).listening.ports.txt
-# all installed package names
-rpm -qa > /tmp/$(hostname).installed.rpms.txt
-# generate random password by using bash tools
-< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-20};echo;
+tail -99f /var/log/zabbix/zabbix_proxy.log | grep "$(ps auxww | grep ":[ ]poller #1 " | awk '{ print $2 }')" | grep -Eo 'hostid:\S+ itemid:\S+ type:\S+|got.*sec.*idle'</code></pre>
+Active checks failing<pre><code>grep -Eo "cannot send list of active checks.*" /var/log/zabbix/zabbix_proxy.log | sort | uniq -c</code></pre>
+Outgoing ports, persistent connection<pre><code>ss --tcp --numeric --processes | grep zabbix_server</code></pre>
+Process list with parents<pre><code>ps -xafuww > /tmp/process.list.$(hostname).txt</code></pre>
+Top memory processes<pre><code>ps -eo time,start_time,pcpu,pmem,user,args --sort pmem > /tmp/top.mem.txt</code></pre>
+Hungry CPU processes<pre><code>ps -eo time,start_time,pcpu,pmem,user,args --sort time > /tmp/top.cpu.txt</code></pre>
+All socket statistics<pre><code>ss --all --numeric --processes > /tmp/$(hostname).socket.statistics.txt</code></pre>
+Only listening ports and explanation<pre><code>ss --tcp --numeric --listen --processes > /tmp/$(hostname).listening.ports.txt</code></pre>
+All installed package names<pre><code>rpm -qa > /tmp/$(hostname).installed.rpms.txt</code></pre>
+Generate random password by using bash tools<pre><code>< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-20};echo;
 < /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-24};echo;
 < /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-32};echo;
-< /dev/urandom tr -dc 'A-Za-z0-9~!@#$%^&*()-+<>.,/\"' | head -c${1:-20};echo;
-# php official memory setting
-find /etc -name zabbix.conf -exec grep --with-filename memory {} \;
-# a sum per column
-ls -lb | grep "history_str#" | awk '{ print $5 }' | python -c "import sys; print(sum(int(l) for l in sys.stdin))"
-# test item key
-zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'
-su zabbix --shell /bin/bash --command "zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'"
-# backup
-psql z50 -c "COPY (SELECT * FROM trends) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/z50.trends.csv.lz4
-psql z50 -c "COPY (SELECT * FROM trends_uint) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/z50.trends_uint.csv.lz4
-# restore
-psql z50 -c "\COPY trends FROM PROGRAM 'lz4cat /tmp/z50.trends.csv.lz4' DELIMITER ',' CSV"
-psql z50 -c "\COPY trends_uint FROM PROGRAM 'lz4cat /tmp/z50.trends_uint.csv.lz4' DELIMITER ',' CSV"
-# erase dublicate data in table 'history_str'. this does NOT work like discard unchanged
-mysql \
-Database='zabbix' \<pre><code>Silent \<pre><code>Skip-column-names \<pre><code>Batch \<pre><code>Execute="<pre><code>SELECT items.itemid
+< /dev/urandom tr -dc 'A-Za-z0-9~!@#$%^&*()-+<>.,/\"' | head -c${1:-20};echo;</code></pre>
+Php official memory setting<pre><code>find /etc -name zabbix.conf -exec grep --with-filename memory {} \;</code></pre>
+A sum per column<pre><code>ls -lb | grep "history_str#" | awk '{ print $5 }' | python -c "import sys; print(sum(int(l) for l in sys.stdin))"</code></pre>
+Test item key<pre><code>zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'
+su zabbix --shell /bin/bash --command "zabbix_agent2 -t 'web.certificate.get[www.linkedin.com,443,]'"</code></pre>
+Backup<pre><code>psql z50 -c "COPY (SELECT * FROM trends) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/z50.trends.csv.lz4
+psql z50 -c "COPY (SELECT * FROM trends_uint) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/z50.trends_uint.csv.lz4</code></pre>
+Restore<pre><code>psql z50 -c "\COPY trends FROM PROGRAM 'lz4cat /tmp/z50.trends.csv.lz4' DELIMITER ',' CSV"
+psql z50 -c "\COPY trends_uint FROM PROGRAM 'lz4cat /tmp/z50.trends_uint.csv.lz4' DELIMITER ',' CSV"</code></pre>
+Erase dublicate data in table 'history_str'. This does NOT work like discard unchanged<pre><code>mysql \
+--database='zabbix' \
+--silent \
+--skip-column-names \
+--batch \
+--execute="
+SELECT items.itemid
 FROM items, hosts
 WHERE hosts.hostid=items.hostid
 AND hosts.status IN (0,1)
@@ -524,9 +468,13 @@ AND t1.itemid=t2.itemid
 AND t1.itemid=$ITEMID
 " | mysql zabbix
 } done</code></pre>
-# discard unchanged 'history_text' for all item IDs
-mysql \
-Database='zabbix' \<pre><code>Silent \<pre><code>Skip-column-names \<pre><code>Batch \<pre><code>Execute="<pre><code>SELECT items.itemid
+Discard unchanged 'history_text' for all item IDs<pre><code>mysql \
+--database='zabbix' \
+--silent \
+--skip-column-names \
+--batch \
+--execute="
+SELECT items.itemid
 FROM items, hosts
 WHERE hosts.hostid=items.hostid
 AND hosts.status IN (0,1)
@@ -555,9 +503,13 @@ WHERE v2 IS NOT NULL
 )
 " | mysql zabbix
 } done</code></pre>
-# discard unchanged 'history_str' for all item IDs
-mysql \
-Database='zabbix' \<pre><code>Silent \<pre><code>Skip-column-names \<pre><code>Batch \<pre><code>Execute="<pre><code>SELECT items.itemid
+Discard unchanged 'history_str' for all item IDs<pre><code>mysql \
+--database='zabbix' \
+--silent \
+--skip-column-names \
+--batch \
+--execute="
+SELECT items.itemid
 FROM items, hosts
 WHERE hosts.hostid=items.hostid
 AND hosts.status IN (0,1)
@@ -586,16 +538,26 @@ WHERE v2 IS NOT NULL
 )
 " | mysql zabbix
 } done</code></pre>
-# before starting service 'zabbix-proxy' truncate all data tables
-DB=zabbix_proxy
+Before starting service 'zabbix-proxy' truncate all data tables<pre><code>DB=zabbix_proxy
 CREDENTIALS=/root/.my.cnf
 mysql \
-Defaults-file=$CREDENTIALS \<pre><code>Database=$DB \<pre><code>Silent \<pre><code>Skip-column-names \<pre><code>Batch \<pre><code>Execute="SELECT COUNT(*) FROM hosts WHERE status=3;" | \<pre><code>grep -E "^0$" && mysql \
-Defaults-file=$CREDENTIALS \<pre><code>Database=$DB \<pre><code>Silent \<pre><code>Skip-column-names \<pre><code>Batch \<pre><code>Execute="SELECT table_name FROM ids" | while IFS= read -r TABLE<pre><code>do {
+--defaults-file=$CREDENTIALS \
+--database=$DB \
+--silent \
+--skip-column-names \
+--batch \
+--execute="SELECT COUNT(*) FROM hosts WHERE status=3;" | \
+grep -E "^0$" && mysql \
+--defaults-file=$CREDENTIALS \
+--database=$DB \
+--silent \
+--skip-column-names \
+--batch \
+--execute="SELECT table_name FROM ids" | while IFS= read -r TABLE
+do {
 echo mysql --defaults-file=$CREDENTIALS --database=$DB --execute="TRUNCATE TABLE $TABLE"
 } done || echo "this seems like a central zabbix server, because there are template objects in database"</code></pre>
-# history_text discard unchanged (value_type=4)
-echo "polishing history_text (value_type=4)"
+History_text discard unchanged (value_type=4)<pre><code>echo "polishing history_text (value_type=4)"
 PGHOST=pg16 PGPORT=7416 psql z70 --tuples-only --no-align --command="
 SELECT items.itemid
 FROM items, hosts
@@ -623,9 +585,8 @@ where r = 'zero'
 ) x3
 WHERE v2 IS NOT NULL
 )" | PGHOST=pg16 PGPORT=7416 psql z70
-} done
-# history_str discard unchanged
-echo "polishing history_str (value_type=1)"
+} done</code></pre>
+History_str discard unchanged<pre><code>echo "polishing history_str (value_type=1)"
 PGHOST=pg16 PGPORT=7416 psql z70 --tuples-only --no-align --command="
 SELECT items.itemid
 FROM items, hosts
@@ -653,110 +614,76 @@ where r = 'zero'
 ) x3
 WHERE v2 IS NOT NULL
 )" | PGHOST=pg16 PGPORT=7416 psql z70
-} done
-# maintain timescaledb partitions
-PGHOST=pg16 PGPORT=7416 psql z70 -c "
+} done</code></pre>
+Maintain timescaledb partitions<pre><code>PGHOST=pg16 PGPORT=7416 psql z70 -c "
 SELECT drop_chunks(relation=>'history_log', older_than=>extract(epoch from now()::DATE - 5)::integer);
 SELECT drop_chunks(relation=>'history_uint', older_than=>extract(epoch from now()::DATE - 9)::integer);
 SELECT drop_chunks(relation=>'history', older_than=>extract(epoch from now()::DATE - 9)::integer);
 SELECT drop_chunks(relation=>'history_bin', older_than=>extract(epoch from now()::DATE - 3)::integer);
-"
+"</code></pre>
 <p>Download this section: <a href="src/bash.sh">https://aigarskadikis.github.io/src/bash.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/bash.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/bash.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="el8"><label for="el8">el8</label><div class="tab">
-# Zabbix 6.0 LTS repository
-rpm -Uvh https://repo.zabbix.com/zabbix/6.0/rhel/8/x86_64/zabbix-release-6.0-2.el8.noarch.rpm
-# familiar utilities
-dnf -y install strace vim tmux jq zabbix-get zabbix-sender zabbix-js
-# SNMP trap dependencies. snmptrap (net-snmp-utils), snmpwalk (net-snmp-utils), snmptrapd (net-snmp), dependencies for zabbix_trap_receiver.pl (net-snmp-perl)
-dnf -y install net-snmp-utils net-snmp-perl net-snmp
-# Python 3 with YAML and MySQL connector support
-dnf -y install python3 python3-PyMySQL python3-PyYAML
-# Install MySQL server on Oracle Linux 8, RHEL 8, Rocky Linux 8
-dnf -y install mysql-server
-# work with Zabbix source
-dnf -y install git automake gcc
+Zabbix 6.0 LTS repository<pre><code>rpm -Uvh https://repo.zabbix.com/zabbix/6.0/rhel/8/x86_64/zabbix-release-6.0-2.el8.noarch.rpm</code></pre>
+Familiar utilities<pre><code>dnf -y install strace vim tmux jq zabbix-get zabbix-sender zabbix-js</code></pre>
+SNMP trap dependencies. Snmptrap (net-snmp-utils), snmpwalk (net-snmp-utils), snmptrapd (net-snmp), dependencies for zabbix_trap_receiver.pl (net-snmp-perl)<pre><code>dnf -y install net-snmp-utils net-snmp-perl net-snmp</code></pre>
+Python 3 with YAML and MySQL connector support<pre><code>dnf -y install python3 python3-PyMySQL python3-PyYAML</code></pre>
+Install MySQL server on Oracle Linux 8, RHEL 8, Rocky Linux 8<pre><code>dnf -y install mysql-server</code></pre>
+Work with Zabbix source<pre><code>dnf -y install git automake gcc</code></pre>
 <p>Download this section: <a href="src/el8.sh">https://aigarskadikis.github.io/src/el8.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/el8.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/el8.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="excel"><label for="excel">excel</label><div class="tab">
-# convert test string to LLD macro
-="{#"&UPPER(A2)&"}"
-# substitute
-=SUBSTITUTE(A2, "entPhysical", "")
-# extract "ENTITY-MIB" from "ENTITY-MIB::entPhysicalDescr"
-=LEFT(A2,FIND("::",A2)-1)
-# extract "entPhysicalDescr" from "ENTITY-MIB::entPhysicalDescr"
-=RIGHT(A2,LEN(A2)-FIND("::",A2)-1)
+Convert test string to LLD macro<pre><code>="{#"&UPPER(A2)&"}"</code></pre>
+Substitute<pre><code>=SUBSTITUTE(A2, "entPhysical", "")</code></pre>
+Extract "ENTITY-MIB" from "ENTITY-MIB::entPhysicalDescr"<pre><code>=LEFT(A2,FIND("::",A2)-1)</code></pre>
+Extract "entPhysicalDescr" from "ENTITY-MIB::entPhysicalDescr"<pre><code>=RIGHT(A2,LEN(A2)-FIND("::",A2)-1)</code></pre>
 <p>Download this section: <a href="src/excel.sh">https://aigarskadikis.github.io/src/excel.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/excel.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/excel.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="get"><label for="get">get</label><div class="tab">
-# MySQL monitoring through Zabbix agent 2
-zabbix_get -s 127.0.0.1 -k 'mysql.get_status_variables["tcp://127.0.0.1:3306","zbx_monitor","zabbix"]'
-# PostgreSQL monitoring through Zabbix agent 2
-zabbix_get -s 127.0.0.1 -k 'pgsql.dbstat["tcp://127.0.0.1:5432","zbx_monitor","zabbix"]'
-# Oracle 19c monitoring through Zabbix agent 2
-zabbix_get -s 127.0.0.1 -k 'oracle.instance.info["tcp://127.0.0.1:1521","zabbix_mon","zabbix","ORCLPDB1"]'
+MySQL monitoring through Zabbix agent 2<pre><code>zabbix_get -s 127.0.0.1 -k 'mysql.get_status_variables["tcp://127.0.0.1:3306","zbx_monitor","zabbix"]'</code></pre>
+PostgreSQL monitoring through Zabbix agent 2<pre><code>zabbix_get -s 127.0.0.1 -k 'pgsql.dbstat["tcp://127.0.0.1:5432","zbx_monitor","zabbix"]'</code></pre>
+Oracle 19c monitoring through Zabbix agent 2<pre><code>zabbix_get -s 127.0.0.1 -k 'oracle.instance.info["tcp://127.0.0.1:1521","zabbix_mon","zabbix","ORCLPDB1"]'</code></pre>
 <p>Download this section: <a href="src/get.sh">https://aigarskadikis.github.io/src/get.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/get.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/get.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="grep"><label for="grep">grep</label><div class="tab">
-# check if master processes is runnign from server, proxy or agent
-ps auxww | grep "[z]abbix.*conf"
-# how long takes one configuration synchronization cycle. command suitable for "zabbix_server" and "zabbix_proxy"
-ps auxww | grep "[c]onfiguration.*synced"
-# Zabbix server configuration file
-grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort
-# Observe credentials how zabbix-server-mysql connects to database
-grep ^DB /etc/zabbix/zabbix_server.conf
-grep "DB\|Include" /etc/zabbix/zabbix_server.conf | grep -v '#'
-# "trapper" processes of zabbix_server or zabbix_proxy
-ps auxww | grep '[:] trapper'
-# "history syncer" of zabbix_server or zabbix_proxy
-ps auxww | grep '[:] history syncer'
-# All restarts. gracefull restarts
-grep "Starting Zabbix Server\|Zabbix Server stopped" /var/log/zabbix/zabbix_server.log
-zcat /var/log/zabbix/zabbix_server*gz | grep "Starting Zabbix Server\|Zabbix Server stopped"
-# check slow queries
-grep "slow query" /var/log/zabbix/zabbix_server.log
-# differences between backend nodes
-grep -r '=' /etc/zabbix/zabbix_server.d/*
-# how much time take for housekeeper process to complete
-grep housekeeper /var/log/zabbix/zabbix_server.log
-# most busy item for preprocessing worker
-grep zabbix_server.log | grep -Eo "In preprocessor_enqueue_dependent.*" | sort | uniq -c | sort
+Check if master processes is runnign from server, proxy or agent<pre><code>ps auxww | grep "[z]abbix.*conf"</code></pre>
+How long takes one configuration synchronization cycle. Command suitable for "zabbix_server" and "zabbix_proxy"<pre><code>ps auxww | grep "[c]onfiguration.*synced"</code></pre>
+Zabbix server configuration file<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
+Observe credentials how zabbix-server-mysql connects to database<pre><code>grep ^DB /etc/zabbix/zabbix_server.conf
+grep "DB\|Include" /etc/zabbix/zabbix_server.conf | grep -v '#'</code></pre>
+"trapper" processes of zabbix_server or zabbix_proxy<pre><code>ps auxww | grep '[:] trapper'</code></pre>
+"history syncer" of zabbix_server or zabbix_proxy<pre><code>ps auxww | grep '[:] history syncer'</code></pre>
+All restarts. Gracefull restarts<pre><code>grep "Starting Zabbix Server\|Zabbix Server stopped" /var/log/zabbix/zabbix_server.log
+zcat /var/log/zabbix/zabbix_server*gz | grep "Starting Zabbix Server\|Zabbix Server stopped"</code></pre>
+Check slow queries<pre><code>grep "slow query" /var/log/zabbix/zabbix_server.log</code></pre>
+Differences between backend nodes<pre><code>grep -r '=' /etc/zabbix/zabbix_server.d/*</code></pre>
+How much time take for housekeeper process to complete<pre><code>grep housekeeper /var/log/zabbix/zabbix_server.log</code></pre>
+Most busy item for preprocessing worker<pre><code>grep zabbix_server.log | grep -Eo "In preprocessor_enqueue_dependent.*" | sort | uniq -c | sort</code></pre>
 <p>Download this section: <a href="src/grep.sh">https://aigarskadikis.github.io/src/grep.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/grep.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/grep.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="jmx"><label for="jmx">jmx</label><div class="tab">
-# Check that the JMX agent requires SSL for RMI registry
-curl -vvv -k https://127.0.0.1:9990
-openssl s_client -showcerts -connect 127.0.0.1:9990
+Check that the JMX agent requires SSL for RMI registry<pre><code>curl -vvv -k https://127.0.0.1:9990
+openssl s_client -showcerts -connect 127.0.0.1:9990</code></pre>
 <p>Download this section: <a href="src/jmx.sh">https://aigarskadikis.github.io/src/jmx.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/jmx.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/jmx.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="my"><label for="my">my</label><div class="tab">
-# List of MySQL tables/partitions by size
-du -ab /var/lib/mysql > /tmp/size.of.tables.txt
-du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt
-# Backup data directory. Fastest way time-wise
-systemctl stop mysqld
-tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql
-# check "Max open files" for MySQL daemon. this is important if a lot of DB table partition are used
-cat /proc/$(ps auxww | grep "[m]ysqld" | awk '{print $2}')/limits | grep "Max open files"
-# Authorize in MySQL
-mysql --host=127.0.0.1 --database=zabbixDB --user=zbx_srv --password='zabbix' --port=3306
-# Track how DB table partitions grow
-cd /var/lib/mysql/zabbix && watch -n1 'ls -Rltr | tail -10'
-# list of open files per MySQL server. if tables has a lot of partitions it will be a lot of files
-lsof -p $(pidof mysqld) > /tmp/mysqld.list.open.files.txt
-# How much data is generated in 24h
-du -lah /var/lib/mysql/zabbix | grep "$(date --date='2 days ago' '+p%Y_%m_%d')"
-du -lah /var/lib/mysql/zabbix | grep "$(date --date='2 days ago' '+p%Y%m%d0000')"
-# extract legacy SNMP agent items in use
-mysql -sN --batch --host=127.0.0.1 --user=root --password='zabbix' --database=zabbix --execute="
+List of MySQL tables/partitions by size<pre><code>du -ab /var/lib/mysql > /tmp/size.of.tables.txt
+du -ah /var/lib/mysql > /tmp/size.of.tables.human.readable.txt</code></pre>
+Backup data directory. Fastest way time-wise<pre><code>systemctl stop mysqld
+tar --create --verbose --use-compress-program='gzip --fast' --file=/tmp/var.lib.mysql.tar.gz /var/lib/mysql</code></pre>
+Check "Max open files" for MySQL daemon. This is important if a lot of DB table partition are used<pre><code>cat /proc/$(ps auxww | grep "[m]ysqld" | awk '{print $2}')/limits | grep "Max open files"</code></pre>
+Authorize in MySQL<pre><code>mysql --host=127.0.0.1 --database=zabbixDB --user=zbx_srv --password='zabbix' --port=3306</code></pre>
+Track how DB table partitions grow<pre><code>cd /var/lib/mysql/zabbix && watch -n1 'ls -Rltr | tail -10'</code></pre>
+List of open files per MySQL server. If tables has a lot of partitions it will be a lot of files<pre><code>lsof -p $(pidof mysqld) > /tmp/mysqld.list.open.files.txt</code></pre>
+How much data is generated in 24h<pre><code>du -lah /var/lib/mysql/zabbix | grep "$(date --date='2 days ago' '+p%Y_%m_%d')"
+du -lah /var/lib/mysql/zabbix | grep "$(date --date='2 days ago' '+p%Y%m%d0000')"</code></pre>
+Extract legacy SNMP agent items in use<pre><code>mysql -sN --batch --host=127.0.0.1 --user=root --password='zabbix' --database=zabbix --execute="
 SELECT DISTINCT templates.name, items.flags, items.name, items.snmp_oid FROM hosts templates, hosts_templates, items
 WHERE templates.hostid=items.hostid AND templates.hostid=hosts_templates.templateid AND hosts_templates.hostid IN (
 SELECT hostid FROM hosts WHERE status=0
@@ -764,48 +691,94 @@ SELECT hostid FROM hosts WHERE status=0
 AND items.type=20
 AND templates.status=3
 ORDER BY 1,2,3;
-" > /tmp/all.snmp.templates.in.use.with.legacy.snmp.agent.item.tsv
-# Track progress of "OPTIMIZE TABLE" in MySQL
-watch -n1 "ls -Rltr /var/lib/mysql/zabbix | grep '#sql'"
-# schema backup for MySQL 8. useful for scripts
-mysqldump \
-Defaults-file=/root/.my.cnf \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>Set-gtid-purged=OFF \<pre><code>Create-options \<pre><code>No-data \<pre><code>zabbix | gzip --fast > schema.sql.gz</code></pre>
-# create backup with a purpose to set up master to master replication
-mysqldump --source-data --all-databases \
-Set-gtid-purged=OFF \<pre><code>Ignore-table=zabbix.history \<pre><code>Ignore-table=zabbix.history_uint \<pre><code>Ignore-table=zabbix.history_str \<pre><code>Ignore-table=zabbix.history_text \<pre><code>Ignore-table=zabbix.history_log \<pre><code>Ignore-table=zabbix.trends \<pre><code>Ignore-table=zabbix.trends_uint | gzip --fast > /tmp/backup.sql.gz<pre><code>chmod 777 /tmp/backup.sql.gz</code></pre>
-# schema dump for historical tables only. backup schema for 7 historical tables. usefull if need to repair replication as fast as possible
-mysqldump --set-gtid-purged=OFF --no-data zabbix history history_uint history_str history_log history_text trends trends_uint > empty.data.tables.with.partitions.sql
-# data backup with gz compression
-mysqldump \
-Defaults-file=/root/.my.cnf \<pre><code>Set-gtid-purged=OFF \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>No-create-info \<pre><code>Ignore-table=zabbix.history \<pre><code>Ignore-table=zabbix.history_log \<pre><code>Ignore-table=zabbix.history_str \<pre><code>Ignore-table=zabbix.history_text \<pre><code>Ignore-table=zabbix.history_uint \<pre><code>Ignore-table=zabbix.trends \<pre><code>Ignore-table=zabbix.trends_uint \<pre><code>zabbix > data.sql && \
+" > /tmp/all.snmp.templates.in.use.with.legacy.snmp.agent.item.tsv</code></pre>
+Track progress of "OPTIMIZE TABLE" in MySQL<pre><code>watch -n1 "ls -Rltr /var/lib/mysql/zabbix | grep '#sql'"</code></pre>
+Schema backup for MySQL 8. Useful for scripts<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--flush-logs \
+--single-transaction \
+--set-gtid-purged=OFF \
+--create-options \
+--no-data \
+zabbix | gzip --fast > schema.sql.gz</code></pre>
+Create backup with a purpose to set up master to master replication<pre><code>mysqldump --source-data --all-databases \
+--set-gtid-purged=OFF \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint | gzip --fast > /tmp/backup.sql.gz
+chmod 777 /tmp/backup.sql.gz</code></pre>
+Schema dump for historical tables only. Backup schema for 7 historical tables. usefull if need to repair replication as fast as possible<pre><code>mysqldump --set-gtid-purged=OFF --no-data zabbix history history_uint history_str history_log history_text trends trends_uint > empty.data.tables.with.partitions.sql</code></pre>
+Data backup with gz compression<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--no-create-info \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix > data.sql && \
 gzip data.sql</code></pre>
-# data backup with xz compression
-mysqldump \
-Defaults-file=/root/.my.cnf \<pre><code>Set-gtid-purged=OFF \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>No-create-info \<pre><code>Ignore-table=zabbix.history \<pre><code>Ignore-table=zabbix.history_log \<pre><code>Ignore-table=zabbix.history_str \<pre><code>Ignore-table=zabbix.history_text \<pre><code>Ignore-table=zabbix.history_uint \<pre><code>Ignore-table=zabbix.trends \<pre><code>Ignore-table=zabbix.trends_uint \<pre><code>zabbix > data.sql && \
+Data backup with xz compression<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--no-create-info \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix > data.sql && \
 xz data.sql</code></pre>
-# passwordless access for read-only user
-cd && cat << 'EOF' > .my.cnf
+Passwordless access for read-only user<pre><code>cd && cat << 'EOF' > .my.cnf
 [client]
 host=192.168.88.101
 user=zbx_ro
 password=passwd_ro_zbx
-EOF
-# extend open_files_limit for service mysqld. Could not increase number of max_open_files to more than
-mkdir -p /etc/systemd/system/mysqld.service.d && cd /etc/systemd/system/mysqld.service.d && cat << 'EOF' > override.conf
+EOF</code></pre>
+Extend open_files_limit for service mysqld. Could not increase number of max_open_files to more than<pre><code>mkdir -p /etc/systemd/system/mysqld.service.d && cd /etc/systemd/system/mysqld.service.d && cat << 'EOF' > override.conf
 [Service]
 LimitNOFILE=65535
 EOF
 systemctl --system daemon-reload
 mysql_pid=$(ps aux | grep "mysql" | head -n 1 | awk '{print $2}')
-cat /proc/$mysql_pid/limits
-# on-the-fly configuration backup. check if this is not the node holding the Virtaul IP address. Do a backup on slave
-ip a | grep "192.168.88.55" || mysqldump \
-Defaults-file=/root/.my.cnf \<pre><code>Set-gtid-purged=OFF \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>Ignore-table=zabbix.history \<pre><code>Ignore-table=zabbix.history_log \<pre><code>Ignore-table=zabbix.history_str \<pre><code>Ignore-table=zabbix.history_text \<pre><code>Ignore-table=zabbix.history_uint \<pre><code>Ignore-table=zabbix.trends \<pre><code>Ignore-table=zabbix.trends_uint \<pre><code>zabbix | gzip > quick.restore.sql.gz</code></pre>
-# MySQL 8.0 schema backup for MySQL 8. credentials embeded in command
-mysqldump \
-Host=127.0.0.1 \<pre><code>User=root \<pre><code>Password='zabbix' \<pre><code>Set-gtid-purged=OFF \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>Create-options \<pre><code>No-data \<pre><code>zabbix | gzip --fast > schema.sql.gz</code></pre>
-# backup "_old" tables with fastest compression possible
-DB=zabbix
+cat /proc/$mysql_pid/limits</code></pre>
+On-the-fly configuration backup. Check if this is not the node holding the Virtaul IP address. Do a backup on slave<pre><code>ip a | grep "192.168.88.55" || mysqldump \
+--defaults-file=/root/.my.cnf \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix | gzip > quick.restore.sql.gz</code></pre>
+MySQL 8.0 schema backup for MySQL 8. Credentials embeded in command<pre><code>mysqldump \
+--host=127.0.0.1 \
+--user=root \
+--password='zabbix' \
+--set-gtid-purged=OFF \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+zabbix | gzip --fast > schema.sql.gz</code></pre>
+Backup "_old" tables with fastest compression possible<pre><code>DB=zabbix
 DEST=/mnt/zabbixtemp
 mkdir -p "$DEST"
 mysqldump $DB trends_uint_old | lz4 > "$DEST/trends_uint_old.sql.lz4" &
@@ -814,33 +787,45 @@ mysqldump $DB history_uint_old | lz4 > "$DEST/history_uint_old.sql.lz4" &
 mysqldump $DB history_old | lz4 > "$DEST/history_old.sql.lz4" &
 mysqldump $DB history_str_old | lz4 > "$DEST/history_str_old.sql.lz4" &
 mysqldump $DB history_log_old | lz4 > "$DEST/history_log_old.sql.lz4" &
-mysqldump $DB history_text_old | lz4 > "$DEST/history_text_old.sql.lz4" &
-# MariaDB 10.3 schema backup
-mysqldump \
-Defaults-file=/root/.my.cnf \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>Create-options \<pre><code>No-data \<pre><code>zabbix > /root/schema52.sql</code></pre>
-# MariaDB 10.3 data backup without history
-mysqldump \
-Defaults-file=/root/.my.cnf \<pre><code>Flush-logs \<pre><code>Single-transaction \<pre><code>No-create-info \<pre><code>Skip-triggers \<pre><code>Ignore-table=zabbix.history \<pre><code>Ignore-table=zabbix.history_log \<pre><code>Ignore-table=zabbix.history_str \<pre><code>Ignore-table=zabbix.history_text \<pre><code>Ignore-table=zabbix.history_uint \<pre><code>Ignore-table=zabbix.trends \<pre><code>Ignore-table=zabbix.trends_uint \<pre><code>zabbix | gzip --fast > /root/data52.sql.gz</code></pre>
-# backup historical data individualu compress with gzip
-tmux
+mysqldump $DB history_text_old | lz4 > "$DEST/history_text_old.sql.lz4" &</code></pre>
+MariaDB 10.3 schema backup<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--flush-logs \
+--single-transaction \
+--create-options \
+--no-data \
+zabbix > /root/schema52.sql</code></pre>
+MariaDB 10.3 data backup without history<pre><code>mysqldump \
+--defaults-file=/root/.my.cnf \
+--flush-logs \
+--single-transaction \
+--no-create-info \
+--skip-triggers \
+--ignore-table=zabbix.history \
+--ignore-table=zabbix.history_log \
+--ignore-table=zabbix.history_str \
+--ignore-table=zabbix.history_text \
+--ignore-table=zabbix.history_uint \
+--ignore-table=zabbix.trends \
+--ignore-table=zabbix.trends_uint \
+zabbix | gzip --fast > /root/data52.sql.gz</code></pre>
+Backup historical data individualu compress with gzip<pre><code>tmux
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix trends_uint | gzip --fast > /root/trends_uint.sql.gz
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix trends | gzip --fast > /root/trends.sql.gz
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_uint | gzip --fast > /root/history_uint.sql.gz
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history | gzip --fast > /root/history.sql.gz
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_str | gzip --fast > /root/history_str.sql.gz
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_text | gzip --fast > /root/history_text.sql.gz
-mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_log | gzip --fast > /root/history_log.sql.gz
-# backup historical data individualy. compress with lz4
-tmux
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_log | gzip --fast > /root/history_log.sql.gz</code></pre>
+Backup historical data individualy. Compress with lz4<pre><code>tmux
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix trends_uint | lz4 > /root/trends_uint.sql.lz4
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix trends | lz4 > /root/trends.sql.lz4
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_uint | lz4 > /root/history_uint.sql.lz4
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history | lz4 > /root/history.sql.lz4
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_str | lz4 > /root/history_str.sql.lz4
 mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_text | lz4 > /root/history_text.sql.lz4
-mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_log | lz4 > /root/history_log.sql.lz4
-# backup current data tables with fastest compression possible
-DB=zabbix
+mysqldump --defaults-file=/root/.my.cnf --flush-logs --single-transaction --no-create-info --skip-triggers zabbix history_log | lz4 > /root/history_log.sql.lz4</code></pre>
+Backup current data tables with fastest compression possible<pre><code>DB=zabbix
 DEST=/mnt/zabbixtemp
 mkdir -p "$DEST"
 mysqldump $DB trends_uint | lz4 > "$DEST/trends_uint.sql.lz4" &
@@ -849,45 +834,35 @@ mysqldump $DB history_uint | lz4 > "$DEST/history_uint.sql.lz4" &
 mysqldump $DB history | lz4 > "$DEST/history.sql.lz4" &
 mysqldump $DB history_str | lz4 > "$DEST/history_str.sql.lz4" &
 mysqldump $DB history_log | lz4 > "$DEST/history_log.sql.lz4" &
-mysqldump $DB history_text | lz4 > "$DEST/history_text.sql.lz4" &
-# restore from sql.gz
-time zcat /root/trends_uint.sql.gz | sed 's|trends_uint|trends_uint_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+mysqldump $DB history_text | lz4 > "$DEST/history_text.sql.lz4" &</code></pre>
+Restore from sql.gz<pre><code>time zcat /root/trends_uint.sql.gz | sed 's|trends_uint|trends_uint_old|' | mysql --defaults-file=/root/.my.cnf zabbix
 time zcat /root/history_uint.sql.gz | sed 's|history_uint|history_uint_old|' | mysql --defaults-file=/root/.my.cnf zabbix
 time zcat /root/trends.sql.gz | sed 's|trends|trends_old|' | mysql --defaults-file=/root/.my.cnf zabbix
 time zcat /root/history.sql.gz | sed 's|history|history_old|' | mysql --defaults-file=/root/.my.cnf zabbix
 time zcat /root/history_str.sql.gz | sed 's|history_str|history_str_old|' | mysql --defaults-file=/root/.my.cnf zabbix
 time zcat /root/history_text.sql.gz | sed 's|history_text|history_text_old|' | mysql --defaults-file=/root/.my.cnf zabbix
-time zcat /root/history_log.sql.gz | sed 's|history_log|history_log_old|' | mysql --defaults-file=/root/.my.cnf zabbix
-# restore from sql.lz4
-time unlz4 /root/trends_uint.sql.lz4 | sed 's|trends_uint|trends_uint_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time zcat /root/history_log.sql.gz | sed 's|history_log|history_log_old|' | mysql --defaults-file=/root/.my.cnf zabbix</code></pre>
+Restore from sql.lz4<pre><code>time unlz4 /root/trends_uint.sql.lz4 | sed 's|trends_uint|trends_uint_old|' | mysql --defaults-file=/root/.my.cnf zabbix
 time unlz4 /root/history_uint.sql.lz4 | sed 's|history_uint|history_uint_old|' | mysql --defaults-file=/root/.my.cnf zabbix
 time unlz4 /root/trends.sql.lz4 | sed 's|trends|trends_old|' | mysql --defaults-file=/root/.my.cnf zabbix
 time unlz4 /root/history.sql.lz4 | sed 's|history|history_old|' | mysql --defaults-file=/root/.my.cnf zabbix
 time unlz4 /root/history_str.sql.lz4 | sed 's|history_str|history_str_old|' | mysql --defaults-file=/root/.my.cnf zabbix
 time unlz4 /root/history_text.sql.lz4 | sed 's|history_text|history_text_old|' | mysql --defaults-file=/root/.my.cnf zabbix
-time unlz4 /root/history_log.sql.lz4 | sed 's|history_log|history_log_old|' | mysql --defaults-file=/root/.my.cnf zabbix
+time unlz4 /root/history_log.sql.lz4 | sed 's|history_log|history_log_old|' | mysql --defaults-file=/root/.my.cnf zabbix</code></pre>
 <p>Download this section: <a href="src/my.sh">https://aigarskadikis.github.io/src/my.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/my.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="mysqlsh"><label for="mysqlsh">mysqlsh</label><div class="tab">
-# switch to SQL mode
-\sql
-# change global variable in order to allow MySQL work with external directories:
-set global local_infile = 'on';
-# switch to JavaScript mode
-\js
-# set DB name
-DBname="zabbix"
-# set destination directory
+Switch to SQL mode<pre><code>\sql</code></pre>
+Change global variable in order to allow MySQL work with external directories:<pre><code>set global local_infile = 'on';</code></pre>
+Switch to JavaScript mode<pre><code>\js</code></pre>
+Set DB name<pre><code>DBname="zabbix"</code></pre>
+Set destination directory<pre><code>DBdumpath="/tmp"</code></pre>
+Download schema<pre><code>util.dumpSchemas([DBname],DBdumpath+"/zabbix_schema.dump", {ddlOnly: true, threads: 8, showProgress: true});</code></pre>
+Dump all<pre><code>DBname="zabbix"
 DBdumpath="/tmp"
-# download schema
-util.dumpSchemas([DBname],DBdumpath+"/zabbix_schema.dump", {ddlOnly: true, threads: 8, showProgress: true});
-# dump all
-DBname="zabbix"
-DBdumpath="/tmp"
-util.dumpTables(DBname, [], DBdumpath + DBname, {"all": true,"threads": 4,"bytesPerChunk": "256M"});
-# download configuration
-util.dumpSchemas(
+util.dumpTables(DBname, [], DBdumpath + DBname, {"all": true,"threads": 4,"bytesPerChunk": "256M"});</code></pre>
+Download configuration<pre><code>util.dumpSchemas(
 [DBname],
 DBdumpath+"/zabbix_configuration.dump", {
 excludeTables:[
@@ -899,9 +874,8 @@ DBname+".history_str",
 DBname+".trends",
 DBname+".trends_uint"
 ], threads: 8, showProgress: true}
-);
-# download configuration with zstd compression
-util.dumpSchemas(
+);</code></pre>
+Download configuration with zstd compression<pre><code>util.dumpSchemas(
 [DBname],
 DBdumpath+"/zabbix_configuration.dump.zstd", {
 excludeTables:[
@@ -913,9 +887,8 @@ DBname+".history_str",
 DBname+".trends",
 DBname+".trends_uint"
 ], threads: 8, compression: "zstd", showProgress: true}
-);
-# download configuration with gzip compression
-util.dumpSchemas(
+);</code></pre>
+Download configuration with gzip compression<pre><code>util.dumpSchemas(
 [DBname],
 DBdumpath+"/zabbix_configuration.dump.gzip", {
 excludeTables:[
@@ -927,71 +900,67 @@ DBname+".history_str",
 DBname+".trends",
 DBname+".trends_uint"
 ], threads: 8, compression: "gzip", showProgress: true}
-);
+);</code></pre>
 <p>Download this section: <a href="src/mysqlsh.sh">https://aigarskadikis.github.io/src/mysqlsh.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysqlsh.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysqlsh.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="pg"><label for="pg">pg</label><div class="tab">
-# extract configuration dump from old server
-pg_dump \
-Dbname=DATABASE \<pre><code>Host=HOST \<pre><code>Username=USER \<pre><code>File=zabbix.dump \<pre><code>Format=custom \<pre><code>Blobs \<pre><code>Verbose \<pre><code>Exclude-table-data '*.history*' \<pre><code>Exclude-table-data '*.trends*'<pre><code></code></pre>
-# backup trends
-psql nameOfZabbixDB -c "COPY (SELECT * FROM trends) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.trends.csv.lz4
-psql nameOfZabbixDB -c "COPY (SELECT * FROM trends_uint) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.trends_uint.csv.lz4
-# restore trends
-psql nameOfZabbixDB -c "\COPY trends FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.trends.csv.lz4' DELIMITER ',' CSV"
-psql nameOfZabbixDB -c "\COPY trends_uint FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.trends_uint.csv.lz4' DELIMITER ',' CSV"
-# backup history
-psql nameOfZabbixDB -c "COPY (SELECT * FROM history) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.history.csv.lz4
-psql nameOfZabbixDB -c "COPY (SELECT * FROM history_uint) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.history_uint.csv.lz4
-# restore history
-psql nameOfZabbixDB -c "\COPY history FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history.csv.lz4' DELIMITER ',' CSV"
-psql nameOfZabbixDB -c "\COPY history_uint FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_uint.csv.lz4' DELIMITER ',' CSV"
-# backup text as tab separated values
-psql nameOfZabbixDB -c "COPY (SELECT * FROM history_str) TO stdout DELIMITER E'\t' CSV" | lz4 > /tmp/nameOfZabbixDB.history_str.tsv.lz4
+Extract configuration dump from old server<pre><code>pg_dump \
+--dbname=DATABASE \
+--host=HOST \
+--username=USER \
+--file=zabbix.dump \
+--format=custom \
+--blobs \
+--verbose \
+--exclude-table-data '*.history*' \
+--exclude-table-data '*.trends*'</code></pre>
+Backup trends<pre><code>psql nameOfZabbixDB -c "COPY (SELECT * FROM trends) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.trends.csv.lz4
+psql nameOfZabbixDB -c "COPY (SELECT * FROM trends_uint) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.trends_uint.csv.lz4</code></pre>
+Restore trends<pre><code>psql nameOfZabbixDB -c "\COPY trends FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.trends.csv.lz4' DELIMITER ',' CSV"
+psql nameOfZabbixDB -c "\COPY trends_uint FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.trends_uint.csv.lz4' DELIMITER ',' CSV"</code></pre>
+Backup history<pre><code>psql nameOfZabbixDB -c "COPY (SELECT * FROM history) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.history.csv.lz4
+psql nameOfZabbixDB -c "COPY (SELECT * FROM history_uint) TO stdout DELIMITER ',' CSV" | lz4 > /tmp/nameOfZabbixDB.history_uint.csv.lz4</code></pre>
+Restore history<pre><code>psql nameOfZabbixDB -c "\COPY history FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history.csv.lz4' DELIMITER ',' CSV"
+psql nameOfZabbixDB -c "\COPY history_uint FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_uint.csv.lz4' DELIMITER ',' CSV"</code></pre>
+Backup text as tab separated values<pre><code>psql nameOfZabbixDB -c "COPY (SELECT * FROM history_str) TO stdout DELIMITER E'\t' CSV" | lz4 > /tmp/nameOfZabbixDB.history_str.tsv.lz4
 psql nameOfZabbixDB -c "COPY (SELECT * FROM history_text) TO stdout DELIMITER E'\t' CSV" | lz4 > /tmp/nameOfZabbixDB.history_text.tsv.lz4
-psql nameOfZabbixDB -c "COPY (SELECT * FROM history_log) TO stdout DELIMITER E'\t' CSV" | lz4 > /tmp/nameOfZabbixDB.history_log.tsv.lz4
-# restore text
-PGPORT=7416 PGHOST=193.123.33.206 psql nameOfZabbixDB -c "\COPY history_str FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_str.tsv.lz4' DELIMITER E'\t' CSV"
+psql nameOfZabbixDB -c "COPY (SELECT * FROM history_log) TO stdout DELIMITER E'\t' CSV" | lz4 > /tmp/nameOfZabbixDB.history_log.tsv.lz4</code></pre>
+Restore text<pre><code>PGPORT=7416 PGHOST=193.123.33.206 psql nameOfZabbixDB -c "\COPY history_str FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_str.tsv.lz4' DELIMITER E'\t' CSV"
 PGPORT=7416 PGHOST=193.123.33.206 psql nameOfZabbixDB -c "\COPY history_text FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_text.tsv.lz4' DELIMITER E'\t' CSV"
-PGPORT=7416 PGHOST=193.123.33.206 psql nameOfZabbixDB -c "\COPY history_log FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_log.tsv.lz4' DELIMITER E'\t' CSV"
-# restore historical data in background
-psql zabbix -c "\COPY trends_old FROM PROGRAM 'lz4cat /tmp/z64.trends_old.tsv.lz4' DELIMITER E'\t' CSV"
+PGPORT=7416 PGHOST=193.123.33.206 psql nameOfZabbixDB -c "\COPY history_log FROM PROGRAM 'lz4cat /tmp/nameOfZabbixDB.history_log.tsv.lz4' DELIMITER E'\t' CSV"</code></pre>
+Restore historical data in background<pre><code>psql zabbix -c "\COPY trends_old FROM PROGRAM 'lz4cat /tmp/z64.trends_old.tsv.lz4' DELIMITER E'\t' CSV"
 psql zabbix -c "\COPY trends_uint_old FROM PROGRAM 'lz4cat /tmp/z64.trends_uint_old.tsv.lz4' DELIMITER E'\t' CSV"
 psql zabbix -c "\COPY history_old FROM PROGRAM 'lz4cat /tmp/z64.history_old.tsv.lz4' DELIMITER E'\t' CSV"
 psql zabbix -c "\COPY history_uint_old FROM PROGRAM 'lz4cat /tmp/z64.history_uint_old.tsv.lz4' DELIMITER E'\t' CSV"
 psql zabbix -c "\COPY history_str_old FROM PROGRAM 'lz4cat /tmp/z64.history_str_old.tsv.lz4' DELIMITER E'\t' CSV"
 psql zabbix -c "\COPY history_text_old FROM PROGRAM 'lz4cat /tmp/z64.history_text_old.tsv.lz4' DELIMITER E'\t' CSV"
-psql zabbix -c "\COPY history_log_old FROM PROGRAM 'lz4cat /tmp/z64.history_log_old.tsv.lz4' DELIMITER E'\t' CSV"
-# PostgreSQL rename operations
-ALTER TABLE trends_uint RENAME TO trends_uint_tmp; ALTER TABLE trends_uint_old RENAME TO trends_uint; INSERT INTO trends_uint SELECT * FROM trends_uint_tmp ON CONFLICT DO NOTHING;
+psql zabbix -c "\COPY history_log_old FROM PROGRAM 'lz4cat /tmp/z64.history_log_old.tsv.lz4' DELIMITER E'\t' CSV"</code></pre>
+PostgreSQL rename operations<pre><code>ALTER TABLE trends_uint RENAME TO trends_uint_tmp; ALTER TABLE trends_uint_old RENAME TO trends_uint; INSERT INTO trends_uint SELECT * FROM trends_uint_tmp ON CONFLICT DO NOTHING;
 ALTER TABLE trends RENAME TO trends_tmp; ALTER TABLE trends_old RENAME TO trends; INSERT INTO trends SELECT * FROM trends_tmp ON CONFLICT DO NOTHING;
 ALTER TABLE history_uint RENAME TO history_uint_tmp; ALTER TABLE history_uint_old RENAME TO history_uint; INSERT INTO history_uint SELECT * FROM  history_uint_tmp ON CONFLICT DO NOTHING;
 ALTER TABLE history RENAME TO history_tmp; ALTER TABLE history_old RENAME TO history; INSERT INTO history SELECT * FROM history_tmp ON CONFLICT DO NOTHING;
 ALTER TABLE history_str RENAME TO history_str_tmp; ALTER TABLE history_str_old RENAME TO history_str; INSERT INTO history_str SELECT * FROM history_str_tmp ON CONFLICT DO NOTHING;
 ALTER TABLE history_text RENAME TO history_text_tmp; ALTER TABLE history_text_old RENAME TO history_text; INSERT INTO history_text SELECT * FROM history_text_tmp ON CONFLICT DO NOTHING;
-ALTER TABLE history_log RENAME TO history_log_tmp; ALTER TABLE history_log_old RENAME TO history_log; INSERT INTO history_log SELECT * FROM history_log_tmp ON CONFLICT DO NOTHING;
-# restore
-pg_restore \
-Dbname=DATABASE \<pre><code>Host=HOST \<pre><code>zabbix.dump</code></pre>
-# backup individual historical table
-PGHOST=127.0.0.1 \
+ALTER TABLE history_log RENAME TO history_log_tmp; ALTER TABLE history_log_old RENAME TO history_log; INSERT INTO history_log SELECT * FROM history_log_tmp ON CONFLICT DO NOTHING;</code></pre>
+Restore<pre><code>pg_restore \
+--dbname=DATABASE \
+--host=HOST \
+zabbix.dump</code></pre>
+Backup individual historical table<pre><code>PGHOST=127.0.0.1 \
 PGPORT=5432 \
 PGUSER=postgres \
 PGPASSWORD=zabbix \
 psql --dbname=zabbix \
 -c "COPY (SELECT * FROM history_uint) TO stdout DELIMITER ',' CSV" | \
-xz > /tmp/history_uint.csv.xz
-# restore
-psql zabbix -c "\COPY history_uint FROM PROGRAM 'xzcat /tmp/history_uint.csv.xz' DELIMITER ',' CSV"
+xz > /tmp/history_uint.csv.xz</code></pre>
+Restore<pre><code>psql zabbix -c "\COPY history_uint FROM PROGRAM 'xzcat /tmp/history_uint.csv.xz' DELIMITER ',' CSV"</code></pre>
 <p>Download this section: <a href="src/pg.sh">https://aigarskadikis.github.io/src/pg.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pg.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pg.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="pod"><label for="pod">pod</label><div class="tab">
-# snmpsim
-docker run -v /usr/share/snmpsim/data:/usr/local/snmpsim/data -p 1024:161/udp tandrup/snmpsim
-# postgresql 17 with timescaledb
-podman pull timescale/timescaledb:2.18.1-pg17
+Snmpsim<pre><code>docker run -v /usr/share/snmpsim/data:/usr/local/snmpsim/data -p 1024:161/udp tandrup/snmpsim</code></pre>
+Postgresql 17 with timescaledb<pre><code>podman pull timescale/timescaledb:2.18.1-pg17
 mkdir -p ${HOME}/postgresql/17
 podman run --name pg17ts2181 -t \
 -e PGDATA=/var/lib/postgresql/data/pgdata \
@@ -999,28 +968,22 @@ podman run --name pg17ts2181 -t \
 -e POSTGRES_PASSWORD="zabbix" \
 -e POSTGRES_DB="dummy_db" \
 -p 7417:5432 \
--d timescale/timescaledb:2.18.1-pg17
-# Pod podman unqualified-search. did not resolve to an alias and no unqualified-search registries are defined in "/etc/containers/registries.conf"
-echo 'unqualified-search-registries = ["docker.io"]' | sudo tee /etc/containers/registries.conf
-# reinstall version of zabbix monitoring proxy k8s
-sed -i 's|alpine-7.0.*$|alpine-7.0.9|g' values.yaml
+-d timescale/timescaledb:2.18.1-pg17</code></pre>
+Pod podman unqualified-search. Did not resolve to an alias and no unqualified-search registries are defined in "/etc/containers/registries.conf"<pre><code>echo 'unqualified-search-registries = ["docker.io"]' | sudo tee /etc/containers/registries.conf</code></pre>
+Reinstall version of zabbix monitoring proxy k8s<pre><code>sed -i 's|alpine-7.0.*$|alpine-7.0.9|g' values.yaml
 helm uninstall my-release && helm install my-release -f values.yaml ./
-kubectl get secret zabbix-service-account -n default -o jsonpath={.data.token} | base64 -d
-# enter bash in k8s env
-kubectl exec -it $(kubectl get pods | grep -Eo "zabbix-proxy\S+") -- /bin/bash
-# restart pod (by deleting it) k8s
-kubectl get pods | grep -Eo "zabbix-proxy\S+" | xargs kubectl delete pod
-# tail for block to appier k8s
-kubectl logs -f zabbix-proxy-5d6d97564d-d4sf2 | awk '
+kubectl get secret zabbix-service-account -n default -o jsonpath={.data.token} | base64 -d</code></pre>
+Enter bash in k8s env<pre><code>kubectl exec -it $(kubectl get pods | grep -Eo "zabbix-proxy\S+") -- /bin/bash</code></pre>
+Restart pod (by deleting it) k8s<pre><code>kubectl get pods | grep -Eo "zabbix-proxy\S+" | xargs kubectl delete pod</code></pre>
+Tail for block to appier k8s<pre><code>kubectl logs -f zabbix-proxy-5d6d97564d-d4sf2 | awk '
 /Prometheus raw data start/ { capture=1; data="" }
 capture { data = data ? data ORS $0 : $0 }
-/Prometheus raw data end/ { print data; capture=0; fflush() }'
+/Prometheus raw data end/ { print data; capture=0; fflush() }'</code></pre>
 <p>Download this section: <a href="src/pod.sh">https://aigarskadikis.github.io/src/pod.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pod.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/pod.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="postgres"><label for="postgres">postgres</label><div class="tab">
-# Discard (rename) current data tables from the application layer. Set back an empty table
-DB=zabbix
+Discard (rename) current data tables from the application layer. Set back an empty table<pre><code>DB=zabbix
 OLD=_old
 MIGRATE=_migrate
 echo "
@@ -1042,9 +1005,8 @@ ALTER TABLE $TABLE OWNER TO zabbix;
 CREATE TABLE $TABLE$MIGRATE (LIKE $TABLE$OLD INCLUDING ALL);
 ALTER TABLE $TABLE$MIGRATE OWNER TO zabbix;
 "
-} done
-# download historical data
-DB=zabbix
+} done</code></pre>
+Download historical data<pre><code>DB=zabbix
 date
 echo "
 history_old
@@ -1062,13 +1024,13 @@ date
 echo $TABLE
 PGUSER=postgres \
 psql --dbname=$DB \
-Command="COPY (SELECT * FROM $TABLE) TO stdout DELIMITER E'\t' CSV" |\<pre><code>lz4 > /tmp/$DB.$TABLE.tsv.lz4
+--command="COPY (SELECT * FROM $TABLE) TO stdout DELIMITER E'\t' CSV" |\
+lz4 > /tmp/$DB.$TABLE.tsv.lz4
 } done
 date
 ls -lh /tmp/$DB.*
 cd</code></pre>
-# validate if some data is stored
-DB=zabbix
+Validate if some data is stored<pre><code>DB=zabbix
 echo "
 history_old
 history_uint_old
@@ -1085,9 +1047,8 @@ echo $TABLE
 ls -lh /tmp/$DB.$TABLE.tsv.lz4
 lz4cat /tmp/$DB.$TABLE.tsv.lz4 | head -1
 } done
-cd
-# download current
-DB=zabbix
+cd</code></pre>
+Download current<pre><code>DB=zabbix
 date
 echo "
 history
@@ -1105,13 +1066,13 @@ date
 echo $TABLE
 PGUSER=postgres \
 psql --dbname=$DB \
-Command="COPY (SELECT * FROM $TABLE) TO stdout DELIMITER E'\t' CSV" |\<pre><code>lz4 > /tmp/$DB.$TABLE.tsv.lz4
+--command="COPY (SELECT * FROM $TABLE) TO stdout DELIMITER E'\t' CSV" |\
+lz4 > /tmp/$DB.$TABLE.tsv.lz4
 } done
 ls -lh /tmp/$DB.*
 date
 cd</code></pre>
-# restore all graphs in background
-DB=zabbix
+Restore all graphs in background<pre><code>DB=zabbix
 date
 OLD=_old
 MIGRATE=_migrate
@@ -1138,196 +1099,130 @@ echo "merging all data together inside ${TABLE}${OLD}"
 psql $DB --command="INSERT INTO ${TABLE}${OLD} SELECT * FROM ${TABLE}${MIGRATE} ON CONFLICT DO NOTHING;"
 } done
 date
-cd
+cd</code></pre>
 <p>Download this section: <a href="src/postgres.sh">https://aigarskadikis.github.io/src/postgres.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/postgres.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/postgres.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="sed"><label for="sed">sed</label><div class="tab">
-# reinstall values which have been already customized
-sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
+Reinstall values which have been already customized<pre><code>sed -i 's|^CacheUpdateFrequency=.*|CacheUpdateFrequency=120|' /etc/zabbix/zabbix_server.conf && grep ^CacheUpdateFrequency /etc/zabbix/zabbix_server.conf
 sed -i 's|^ValueCacheSize=.*|ValueCacheSize=768M|' /etc/zabbix/zabbix_server.conf && grep ^ValueCacheSize /etc/zabbix/zabbix_server.conf
 sed -i 's|^TrendCacheSize=.*|TrendCacheSize=256M|' /etc/zabbix/zabbix_server.conf && grep ^TrendCacheSize /etc/zabbix/zabbix_server.conf
-sed -i 's|^StartDiscoverers=.*|StartDiscoverers=20|' /etc/zabbix/zabbix_server.conf && grep ^StartDiscoverers /etc/zabbix/zabbix_server.conf
-# summarize configuration file
-grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort
-# restart and follow log
-systemctl restart zabbix-server && tail -f /var/log/zabbix/zabbix_server.log
+sed -i 's|^StartDiscoverers=.*|StartDiscoverers=20|' /etc/zabbix/zabbix_server.conf && grep ^StartDiscoverers /etc/zabbix/zabbix_server.conf</code></pre>
+Summarize configuration file<pre><code>grep -v "^$\|#" /etc/zabbix/zabbix_server.conf | sort</code></pre>
+Restart and follow log<pre><code>systemctl restart zabbix-server && tail -f /var/log/zabbix/zabbix_server.log</code></pre>
 <p>Download this section: <a href="src/sed.sh">https://aigarskadikis.github.io/src/sed.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sed.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sed.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="selinux"><label for="selinux">selinux</label><div class="tab">
-# list existing context
-ls -lZ /etc/zabbix
-# install context
-sudo chcon system_u:object_r:etc_t:s0 /etc/zabbix/another.conf
-# make it persistent across relabels (like restorecon or policy reloads):
-sudo semanage fcontext -a -t etc_t "/etc/zabbix/another.conf"
-sudo restorecon -v /etc/zabbix/another.conf
-# replicate context from another file
-sudo chcon --reference=/etc/zabbix/zabbix_java_gateway.conf /etc/zabbix/another.conf
+List existing context<pre><code>ls -lZ /etc/zabbix</code></pre>
+Install context<pre><code>sudo chcon system_u:object_r:etc_t:s0 /etc/zabbix/another.conf</code></pre>
+Make it persistent across relabels (like restorecon or policy reloads):<pre><code>sudo semanage fcontext -a -t etc_t "/etc/zabbix/another.conf"
+sudo restorecon -v /etc/zabbix/another.conf</code></pre>
+Replicate context from another file<pre><code>sudo chcon --reference=/etc/zabbix/zabbix_java_gateway.conf /etc/zabbix/another.conf</code></pre>
 <p>Download this section: <a href="src/selinux.sh">https://aigarskadikis.github.io/src/selinux.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/selinux.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/selinux.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="snmptrap"><label for="snmptrap">snmptrap</label><div class="tab">
-# install dependencies on ubuntu 22
-apt install snmp snmptrapd libsnmp-perl snmptt snmp-mibs-downloader -y
-# mimic SNMP traps
-echo "$(date +%Y%m%d.%H%M%S) ZBXTRAP 10.10.10.10
+Install dependencies on ubuntu 22<pre><code>apt install snmp snmptrapd libsnmp-perl snmptt snmp-mibs-downloader -y</code></pre>
+Mimic SNMP traps<pre><code>echo "$(date +%Y%m%d.%H%M%S) ZBXTRAP 10.10.10.10
 2nd line
 3rd line
-4rt line" | tee --append /tmp/zabbix_traps.tmp
-# snmptrapd in foreground
-strace -s 1024 -o /tmp/snmptrapd.strace.log snmptrapd -f -C -Le -Dusm -c /etc/snmp/snmptrapd.conf
-# capture traps traffic
-tcpdump -npi any -s 0 -w /tmp/udp162.pcap udp and host 10.133.112.87
-# send test trap SNMPv3
-snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe08 10.133.80.228 0 1.2.3
-# turn down 'snmpd'. this was installed to solve dependencies
-systemctl stop snmpd && systemctl disable snmpd
-# turn down 'snmptrapd' to reconfigure service
-systemctl stop snmptrapd
-# make a backup of old config, install new
-mv /etc/snmp/snmptrapd.conf /etc/snmp/original.snmptrapd.conf
-# install example config to catpur SNMPv2 traps and SNMPv3 traps
-cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/AhVdADKdCIYUyy9sMvNjsbbzalh2a+CieFE1VBk12M+iJ9k2na4QOO9Ofnui3QKfd3E/1VgKRwkM3Epl5SMnZfJ+Cco4JO/AyUapb6yMjEt3XsUk7BjRRaUGM0uAlufs91DZkXRkomCIZcsUZrGk8QVyxc1g+OrLpcr1Gg25NNexih87iDdzxxXIVJgzVqeurca2iV8PwHaIeBXGVdbKgnDrACTAfUmxOg07Y1YRNqNGilYXa4zP6mlr2G8L/KlkUmJf6ubOEorh1eMX1zWVeyRK1XBCx+6WKTsxTijP20A7rttOg7s/+Z7PVXRdghD91fIRWVby9K35SKcjkn1B7BUNwC4X586M6S04Pqgb+PamryiP9Ct2w7IgMiIUcCrzC4LZuRRpzbOKzLL5NbYeeM5QOxK6/PvsM1MlZwNf+5F3ubEr4eObU517xhW+bSvntYwetQTJm+5bcOTnu+HkJaVinw58QEIsCjOOtAJmqcKkrlvo2nYuobkRW64ME3nA2TdcqJ2BZQ2o5/rKwn7ZKmCKNgxffdMELcji4pRjALX1lC8g/hyEi+ysu34iA/ciq1HJVEO9ulGVAmrr9OdmqbZXWiPs7pg7Epcjr9CKQjsORS3R/3Gsf7umyWtWnCKpex48gClLRQPv2bI2WtGG6V6uXyPyBLUPiHKj6u74SAQJ/235xmovoLNuGl5bQ9DSrp0bzRi7qhc+AAAAALkbuP45VSNNAAGxBIBQAABGKqZmscRn+wIAAAAABFla" | base64 --decode | unxz | tar -xv
-# install example config to catpur SNMPv2 traps and SNMPv3 traps fro Ubuntu 22
-cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/AYNdADKdCIYUyy9sMvNjsbbzalh2a+CieFE1VBk116qSpEChzLfeNm/VMSFs0glXd1kGmtWdaahiXsCj/lmFbJdNPBKh2MwwBi9c7ONuSaWL+cEZOEGH3966HOgmoL6XtkTd0ilQ4in/LDfhRuwL4659LqCUDqASYem/P0OmvYVnLyAIIrIgRl+QwqRYQyGtU8YrjfRJMuGU4djjwWSC2Elx8WEIr1Q12VTLcNoeXeMkOaonxhmtWgZ5mzTedKf+Bydc+lnUQjCe/aDIw2CL3Z89BKaYLh7LlqqdQEEZhzQQhLkfZBx/zsjiZ4hGZFqG+/HOuJ0uKiCSeySmAoTZT/ASHBpWW391kPZsefEjx3ScD6qwVoO7aDC+1i9FnuBNeD/EvLMYhYHlBP2nn4QNd/4RiYE2CYohgf3wATTuzMkQC0PeHq5rojWkOQam7pZIPy395Rahm0fhoyrTGasibCWPNIT0MyBPE9pFOXraL1F9PYoSM+T2a/ZEb0k74EjQwEHZKlYNQAAAtCgAjNz6fkQAAZ8DgFAAABCSIOmxxGf7AgAAAAAEWVo=" | base64 --decode | unxz | tar -xv
-# backup /etc/snmp/snmptrpad.conf
-tar --create --verbose --use-compress-program='xz -9' /etc/snmp/snmptrapd.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | unxz | tar -xv%' && echo
-# start SNMP trap listening service and enable at startup
-systemctl start snmptrapd && systemctl enable snmptrapd
-# check if it listens on UDP 162
-ss --udp --listen --numeric --process | grep 162
-# install official parser from git.zabbix.com
-curl https://git.zabbix.com/projects/ZBX/repos/zabbix/raw/misc/snmptrap/zabbix_trap_receiver.pl?at=refs%2Fheads%2Fmaster -o /usr/local/bin/zabbix_trap_receiver.pl
-# install official parser from gitgub.com
-curl https://raw.githubusercontent.com/zabbix/zabbix/master/misc/snmptrap/zabbix_trap_receiver.pl -o /usr/local/bin/zabbix_trap_receiver.pl
-# install without internet access
-cd / && echo "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" | base64 --decode | unxz | tar -xv
-# non-official with variable binding
-cd / && echo "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" | base64 --decode | unxz | tar -xv
-# bash parser
-cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/AiddADqcyosJgONiHFxK21FYsOmcVPjGP4X64Cl0bFy0Sxh6dQDRjk6f8dQ1bOCTQt37h4nPN7dqU5XiljBY1ISkB57iky9OaCllx2Pvw7ADF5H5hz2M/woIhS5kB6SZzGLqiZ/L4ObszSmHD/zqU/EptJXvrKiRxNPL3vREPA/bxK/iefk//ici0J76T5Pgu6B5JySWc9UrDRuOwLJH8gF+ac4z1dKxDWCbIjxuS28RZQlunU1OAlIr/CyCfBfC1Pp5b+H1lMr4yeBne7oOVqx5ytStJs+J/X+S3ck3O115oqn6NvsvaamKz6hnaSG91RKb+A8fUXoXwpXvTI8fmeOCsi9v9d1XDStnvix0EOqLqRFE9JrRiuKUHlSfkrtd1YAjr+Ab8+SpyXoxkYvt5qIsdJkT7uLhAiEcxHr2xtaZrVus3qsvA9pQ+uMtk9YIIG8auFD6ImlPI/52vUID9uBDVIv5x/1D5fhmBPRE8c9holuN9pWksYmlqewZ2deiPvfKNxpJNGp7ReBDjSh9/koaB8TWMcOKdARr52F498EGjzMeB6P7XNtUoi/gmHjgjpxDLLApKtZyENPXehKqMCUlTCKH03YuyiCezmurGbkkFAPQHKfDKSFJuahsOR/qAHOO7UwvzMluzaQFlIzUq9xpCvZjTLwpfpUnhIVxgY/GZw+9c6gweJWVUnfehDrKGqhvXFmAyjHtgTzjlpry2jgLBP72Dgt3PRLCAACEWwpFaPLuqgABwwSAUAAAjIZMILHEZ/sCAAAAAARZWg==" | base64 --decode | unxz | tar -xv
-# send incorrect SNMPv3 engineID
-snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe07 127.0.0.1 0 1.2.3
-ls /tmp
-# send incorrect SNMPv2 community
-snmptrap -v 1 -c moon 127.0.0.1 '.1.3.6.1.6.3.1.1.5.3' '0.0.0.0' 6 33 '55' .1.3.6.1.6.3.1.1.5.3 s "eth0"
-ls /tmp
-# correct SNMPv3 engineID
-snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe08 127.0.0.1 0 1.2.3
+4rt line" | tee --append /tmp/zabbix_traps.tmp</code></pre>
+Snmptrapd in foreground<pre><code>strace -s 1024 -o /tmp/snmptrapd.strace.log snmptrapd -f -C -Le -Dusm -c /etc/snmp/snmptrapd.conf</code></pre>
+Capture traps traffic<pre><code>tcpdump -npi any -s 0 -w /tmp/udp162.pcap udp and host 10.133.112.87</code></pre>
+Send test trap SNMPv3<pre><code>snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe08 10.133.80.228 0 1.2.3</code></pre>
+Turn down 'snmpd'. This was installed to solve dependencies<pre><code>systemctl stop snmpd && systemctl disable snmpd</code></pre>
+Turn down 'snmptrapd' to reconfigure service<pre><code>systemctl stop snmptrapd</code></pre>
+Make a backup of old config, install new<pre><code>mv /etc/snmp/snmptrapd.conf /etc/snmp/original.snmptrapd.conf</code></pre>
+Install example config to catpur SNMPv2 traps and SNMPv3 traps<pre><code>cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/AhVdADKdCIYUyy9sMvNjsbbzalh2a+CieFE1VBk12M+iJ9k2na4QOO9Ofnui3QKfd3E/1VgKRwkM3Epl5SMnZfJ+Cco4JO/AyUapb6yMjEt3XsUk7BjRRaUGM0uAlufs91DZkXRkomCIZcsUZrGk8QVyxc1g+OrLpcr1Gg25NNexih87iDdzxxXIVJgzVqeurca2iV8PwHaIeBXGVdbKgnDrACTAfUmxOg07Y1YRNqNGilYXa4zP6mlr2G8L/KlkUmJf6ubOEorh1eMX1zWVeyRK1XBCx+6WKTsxTijP20A7rttOg7s/+Z7PVXRdghD91fIRWVby9K35SKcjkn1B7BUNwC4X586M6S04Pqgb+PamryiP9Ct2w7IgMiIUcCrzC4LZuRRpzbOKzLL5NbYeeM5QOxK6/PvsM1MlZwNf+5F3ubEr4eObU517xhW+bSvntYwetQTJm+5bcOTnu+HkJaVinw58QEIsCjOOtAJmqcKkrlvo2nYuobkRW64ME3nA2TdcqJ2BZQ2o5/rKwn7ZKmCKNgxffdMELcji4pRjALX1lC8g/hyEi+ysu34iA/ciq1HJVEO9ulGVAmrr9OdmqbZXWiPs7pg7Epcjr9CKQjsORS3R/3Gsf7umyWtWnCKpex48gClLRQPv2bI2WtGG6V6uXyPyBLUPiHKj6u74SAQJ/235xmovoLNuGl5bQ9DSrp0bzRi7qhc+AAAAALkbuP45VSNNAAGxBIBQAABGKqZmscRn+wIAAAAABFla" | base64 --decode | unxz | tar -xv</code></pre>
+Install example config to catpur SNMPv2 traps and SNMPv3 traps fro Ubuntu 22<pre><code>cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/AYNdADKdCIYUyy9sMvNjsbbzalh2a+CieFE1VBk116qSpEChzLfeNm/VMSFs0glXd1kGmtWdaahiXsCj/lmFbJdNPBKh2MwwBi9c7ONuSaWL+cEZOEGH3966HOgmoL6XtkTd0ilQ4in/LDfhRuwL4659LqCUDqASYem/P0OmvYVnLyAIIrIgRl+QwqRYQyGtU8YrjfRJMuGU4djjwWSC2Elx8WEIr1Q12VTLcNoeXeMkOaonxhmtWgZ5mzTedKf+Bydc+lnUQjCe/aDIw2CL3Z89BKaYLh7LlqqdQEEZhzQQhLkfZBx/zsjiZ4hGZFqG+/HOuJ0uKiCSeySmAoTZT/ASHBpWW391kPZsefEjx3ScD6qwVoO7aDC+1i9FnuBNeD/EvLMYhYHlBP2nn4QNd/4RiYE2CYohgf3wATTuzMkQC0PeHq5rojWkOQam7pZIPy395Rahm0fhoyrTGasibCWPNIT0MyBPE9pFOXraL1F9PYoSM+T2a/ZEb0k74EjQwEHZKlYNQAAAtCgAjNz6fkQAAZ8DgFAAABCSIOmxxGf7AgAAAAAEWVo=" | base64 --decode | unxz | tar -xv</code></pre>
+Backup /etc/snmp/snmptrpad.conf<pre><code>tar --create --verbose --use-compress-program='xz -9' /etc/snmp/snmptrapd.conf | base64 -w0 | sed 's|^|cd / \&\& echo "|' | sed 's%$%" | base64 --decode | unxz | tar -xv%' && echo</code></pre>
+Start SNMP trap listening service and enable at startup<pre><code>systemctl start snmptrapd && systemctl enable snmptrapd</code></pre>
+Check if it listens on UDP 162<pre><code>ss --udp --listen --numeric --process | grep 162</code></pre>
+Install official parser from git.zabbix.com<pre><code>curl https://git.zabbix.com/projects/ZBX/repos/zabbix/raw/misc/snmptrap/zabbix_trap_receiver.pl?at=refs%2Fheads%2Fmaster -o /usr/local/bin/zabbix_trap_receiver.pl</code></pre>
+Install official parser from gitgub.com<pre><code>curl https://raw.githubusercontent.com/zabbix/zabbix/master/misc/snmptrap/zabbix_trap_receiver.pl -o /usr/local/bin/zabbix_trap_receiver.pl</code></pre>
+Install without internet access<pre><code>cd / && echo "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" | base64 --decode | unxz | tar -xv</code></pre>
+Non-official with variable binding<pre><code>cd / && echo "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" | base64 --decode | unxz | tar -xv</code></pre>
+Bash parser<pre><code>cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/AiddADqcyosJgONiHFxK21FYsOmcVPjGP4X64Cl0bFy0Sxh6dQDRjk6f8dQ1bOCTQt37h4nPN7dqU5XiljBY1ISkB57iky9OaCllx2Pvw7ADF5H5hz2M/woIhS5kB6SZzGLqiZ/L4ObszSmHD/zqU/EptJXvrKiRxNPL3vREPA/bxK/iefk//ici0J76T5Pgu6B5JySWc9UrDRuOwLJH8gF+ac4z1dKxDWCbIjxuS28RZQlunU1OAlIr/CyCfBfC1Pp5b+H1lMr4yeBne7oOVqx5ytStJs+J/X+S3ck3O115oqn6NvsvaamKz6hnaSG91RKb+A8fUXoXwpXvTI8fmeOCsi9v9d1XDStnvix0EOqLqRFE9JrRiuKUHlSfkrtd1YAjr+Ab8+SpyXoxkYvt5qIsdJkT7uLhAiEcxHr2xtaZrVus3qsvA9pQ+uMtk9YIIG8auFD6ImlPI/52vUID9uBDVIv5x/1D5fhmBPRE8c9holuN9pWksYmlqewZ2deiPvfKNxpJNGp7ReBDjSh9/koaB8TWMcOKdARr52F498EGjzMeB6P7XNtUoi/gmHjgjpxDLLApKtZyENPXehKqMCUlTCKH03YuyiCezmurGbkkFAPQHKfDKSFJuahsOR/qAHOO7UwvzMluzaQFlIzUq9xpCvZjTLwpfpUnhIVxgY/GZw+9c6gweJWVUnfehDrKGqhvXFmAyjHtgTzjlpry2jgLBP72Dgt3PRLCAACEWwpFaPLuqgABwwSAUAAAjIZMILHEZ/sCAAAAAARZWg==" | base64 --decode | unxz | tar -xv</code></pre>
+Send incorrect SNMPv3 engineID<pre><code>snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe07 127.0.0.1 0 1.2.3
+ls /tmp</code></pre>
+Send incorrect SNMPv2 community<pre><code>snmptrap -v 1 -c moon 127.0.0.1 '.1.3.6.1.6.3.1.1.5.3' '0.0.0.0' 6 33 '55' .1.3.6.1.6.3.1.1.5.3 s "eth0"
+ls /tmp</code></pre>
+Correct SNMPv3 engineID<pre><code>snmptrap -v 3 -n "" -a SHA -A testtest -x AES -X testtest -l authPriv -u SNMPv3username -e 0x80000634b210008894719abe08 127.0.0.1 0 1.2.3
 ls /tmp
 cat /tmp/zabbix_traps.tmp
-rm -rf /tmp/zabbix_traps.tmp
-# correct SNMPv2 community
-snmptrap -v 1 -c earth 127.0.0.1 '.1.3.6.1.6.3.1.1.5.3' '0.0.0.0' 6 33 '55' .1.3.6.1.6.3.1.1.5.3 s "eth0"
+rm -rf /tmp/zabbix_traps.tmp</code></pre>
+Correct SNMPv2 community<pre><code>snmptrap -v 1 -c earth 127.0.0.1 '.1.3.6.1.6.3.1.1.5.3' '0.0.0.0' 6 33 '55' .1.3.6.1.6.3.1.1.5.3 s "eth0"
 ls /tmp
 cat /tmp/zabbix_traps.tmp
-rm -rf /tmp/zabbix_traps.tmp
+rm -rf /tmp/zabbix_traps.tmp</code></pre>
 <p>Download this section: <a href="src/snmptrap.sh">https://aigarskadikis.github.io/src/snmptrap.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/snmptrap.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/snmptrap.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="sudoers"><label for="sudoers">sudoers</label><div class="tab">
-# allow to reload cache from Zabbix frontend
-cd /etc/sudoers.d
+Allow to reload cache from Zabbix frontend<pre><code>cd /etc/sudoers.d
 echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/zabbix_server -R config_cache_reload' | sudo tee zabbix_server_config_cache_reload
-chmod 0440 zabbix_server_config_cache_reload
+chmod 0440 zabbix_server_config_cache_reload</code></pre>
 <p>Download this section: <a href="src/sudoers.sh">https://aigarskadikis.github.io/src/sudoers.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sudoers.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/sudoers.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="supply"><label for="supply">supply</label><div class="tab">
-# listening TCP ports
-ss --tcp --listen --numeric
-# trouble simple
-tail -1000000 /var/log/messages > /tmp/messages.txt
+Listening TCP ports<pre><code>ss --tcp --listen --numeric</code></pre>
+Trouble simple<pre><code>tail -1000000 /var/log/messages > /tmp/messages.txt
 free -h > /tmp/memory.txt
 df -h > /tmp/disk.txt
 dmesg > /tmp/dmesg.txt
-ps -xafuww > /tmp/process.list.tree.txt
-# process saturation and diag info
-while true; do  echo $(date) >> /tmp/process.list.txt && ps -xafuww >> /tmp/process.list.txt && zabbix_server -R diaginfo >> /tmp/process.list.txt && echo "=======" >> /tmp/process.list.txt ; sleep 60; done
-# listening TCP ports with process identification
-ss --tcp --listen --numeric --process
-# ensure service is listening on UDP 162
-ss --udp --listen --numeric --process | grep 162
-# check if tcp port listens. make sure it really listens on destination server before checking
-nc -v servername 3306
-# check if port is open without external tools. if it reports 0, the port is reachable and in the listening state
-{ echo >/dev/tcp/127.0.0.1/3306 ; } 2>/dev/null; echo $?
-# capture all SNMP traps traffic
-tcpdump -i any udp dst port 162 >> /var/log/zabbix/zabbix_traps.tcpdump
-# SNMP traffic and ICMP ping probles
-tcpdump -i any 'port 161 or icmp' -w /tmp/out.pcap
-# replace 127.0.0.1 with real IP
-tcpdump -i any 'port 10051 and (dst 127.0.0.1 and src 127.0.0.1)' -w /tmp/out.pcap
-# UDP traffic
-tcpdump -i any port 161 -w /tmp/out.pcap
-# activity for each block device, pretty-print  device  names, report task creation and system switching activity.
-sar -d -p -w 1
-# 10 seconds of disk usage
-sar -d -wp 1 10 >> /tmp/disk.activity.txt
-# installed packages on EL7 or EL8 system
-rpm -qa > /tmp/installed.packages.txt
-# installed packages on Ubuntu/Debian
-apt list --installed > /tmp/apt.installed.txt
-# OS information
-cat /etc/*release* > /tmp/os.info.txt
-# disk space
-df -h > /tmp/disk.space.txt
-# OS, Memory, CPU, Disk characteristics
-cat /etc/*release* > /tmp/$(hostname).characteristics.txt
+ps -xafuww > /tmp/process.list.tree.txt</code></pre>
+Process saturation and diag info<pre><code>while true; do  echo $(date) >> /tmp/process.list.txt && ps -xafuww >> /tmp/process.list.txt && zabbix_server -R diaginfo >> /tmp/process.list.txt && echo "=======" >> /tmp/process.list.txt ; sleep 60; done</code></pre>
+Listening TCP ports with process identification<pre><code>ss --tcp --listen --numeric --process</code></pre>
+Ensure service is listening on UDP 162<pre><code>ss --udp --listen --numeric --process | grep 162</code></pre>
+Check if tcp port listens. Make sure it really listens on destination server before checking<pre><code>nc -v servername 3306</code></pre>
+Check if port is open without external tools. If it reports 0, the port is reachable and in the listening state<pre><code>{ echo >/dev/tcp/127.0.0.1/3306 ; } 2>/dev/null; echo $?</code></pre>
+Capture all SNMP traps traffic<pre><code>tcpdump -i any udp dst port 162 >> /var/log/zabbix/zabbix_traps.tcpdump</code></pre>
+SNMP traffic and ICMP ping probles<pre><code>tcpdump -i any 'port 161 or icmp' -w /tmp/out.pcap</code></pre>
+Replace 127.0.0.1 with real IP<pre><code>tcpdump -i any 'port 10051 and (dst 127.0.0.1 and src 127.0.0.1)' -w /tmp/out.pcap</code></pre>
+UDP traffic<pre><code>tcpdump -i any port 161 -w /tmp/out.pcap</code></pre>
+Activity for each block device, pretty-print  device  names, report task creation and system switching activity.<pre><code>sar -d -p -w 1</code></pre>
+10 seconds of disk usage<pre><code>sar -d -wp 1 10 >> /tmp/disk.activity.txt</code></pre>
+Installed packages on EL7 or EL8 system<pre><code>rpm -qa > /tmp/installed.packages.txt</code></pre>
+Installed packages on Ubuntu/Debian<pre><code>apt list --installed > /tmp/apt.installed.txt</code></pre>
+OS information<pre><code>cat /etc/*release* > /tmp/os.info.txt</code></pre>
+Disk space<pre><code>df -h > /tmp/disk.space.txt</code></pre>
+OS, Memory, CPU, Disk characteristics<pre><code>cat /etc/*release* > /tmp/$(hostname).characteristics.txt
 cat /proc/meminfo >> /tmp/$(hostname).characteristics.txt
 free -h >> /tmp/$(hostname).characteristics.txt
 cat /proc/cpuinfo >> /tmp/$(hostname).characteristics.txt
-df -h >> /tmp/$(hostname).characteristics.txt
-# Usage of swap:
-for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done >> /tmp/$(hostname).swap.usage.txt
-# process list. top memory. top CPU
-ps auxww > /tmp/process.list.txt
+df -h >> /tmp/$(hostname).characteristics.txt</code></pre>
+Usage of swap:<pre><code>for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done >> /tmp/$(hostname).swap.usage.txt</code></pre>
+Process list. Top memory. top CPU<pre><code>ps auxww > /tmp/process.list.txt
 ps auxww --sort -%mem > /tmp/top.mem.processes.txt
-ps auxww --sort -%cpu > /tmp/top.cpu.processes.txt
-# shared memory segments and semaphore arrays
-ipcs -a > /tmp/shared.memory.segments.and.semaphore.arrays.txt
-# last 1 million lines from messages
-tail -1000000 /var/log/messages > /tmp/messages.txt
-# display all messages from the kernel ring buffer
-dmesg > /tmp/dmesg.txt
-# live kernel settings
-sysctl -a > /tmp/.live.kernel.settings.txt
-# last 1 million lines from /var/log/zabbix/zabbix_proxy.log
-tail -1000000 /var/log/zabbix/zabbix_proxy.log | gzip --best > /tmp/zabbix_proxy.$(date +%Y%m%d.%H%M).log.gz
-# last 1 million lines from /var/log/zabbix/zabbix_server.log
-tail -1000000 /var/log/zabbix/zabbix_server.log | gzip --best > /tmp/zabbix_server.$(date +%Y%m%d.%H%M).log.gz
-# all trapper processes
-watch -n1 'ps auxww | grep -Eo "[:] trapper #.*"'
-# free trapper processes
-watch -n1 'ps auxww | grep -Eo "[:] trapper #.*waiting for connection"'
-# service not booting up
-journalctl -u sshd | tail -100 > /tmp/sshd.txt
-# list of open files:
-lsof > /tmp/list.open.files.txt
-# disk long term throughput, how fast we can create 64GB file
-time dd if=/dev/urandom of=/var/lib/mysql/64GB.file bs=1M count=65536 oflag=direct
+ps auxww --sort -%cpu > /tmp/top.cpu.processes.txt</code></pre>
+Shared memory segments and semaphore arrays<pre><code>ipcs -a > /tmp/shared.memory.segments.and.semaphore.arrays.txt</code></pre>
+Last 1 million lines from messages<pre><code>tail -1000000 /var/log/messages > /tmp/messages.txt</code></pre>
+Display all messages from the kernel ring buffer<pre><code>dmesg > /tmp/dmesg.txt</code></pre>
+Live kernel settings<pre><code>sysctl -a > /tmp/.live.kernel.settings.txt</code></pre>
+Last 1 million lines from /var/log/zabbix/zabbix_proxy.log<pre><code>tail -1000000 /var/log/zabbix/zabbix_proxy.log | gzip --best > /tmp/zabbix_proxy.$(date +%Y%m%d.%H%M).log.gz</code></pre>
+Last 1 million lines from /var/log/zabbix/zabbix_server.log<pre><code>tail -1000000 /var/log/zabbix/zabbix_server.log | gzip --best > /tmp/zabbix_server.$(date +%Y%m%d.%H%M).log.gz</code></pre>
+All trapper processes<pre><code>watch -n1 'ps auxww | grep -Eo "[:] trapper #.*"'</code></pre>
+Free trapper processes<pre><code>watch -n1 'ps auxww | grep -Eo "[:] trapper #.*waiting for connection"'</code></pre>
+Service not booting up<pre><code>journalctl -u sshd | tail -100 > /tmp/sshd.txt</code></pre>
+List of open files:<pre><code>lsof > /tmp/list.open.files.txt</code></pre>
+Disk long term throughput, how fast we can create 64GB file<pre><code>time dd if=/dev/urandom of=/var/lib/mysql/64GB.file bs=1M count=65536 oflag=direct</code></pre>
 <p>Download this section: <a href="src/supply.sh">https://aigarskadikis.github.io/src/supply.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/supply.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/supply.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="udp"><label for="udp">udp</label><div class="tab">
-# print all UPD traffic for eth0
-tcpdump -i eth0 -nn udp
-# print all UDP traffic. second column is EngineID
-tshark -i any -Y '(udp.srcport == 161)' -T fields -e ip.src -e snmp.msgAuthoritativeEngineID -e snmp.msgAuthoritativeEngineTime -e snmp.msgAuthoritativeEngineBoots -e frame.time
-# query one particular engineID
-tshark -i any -Y '(udp.srcport == 161) && (snmp.msgAuthoritativeEngineID == 80:00:3a:8c:04)' -T fields -e ip.src -e snmp.msgAuthoritativeEngineID -e snmp.msgAuthoritativeEngineTime -e snmp.msgAuthoritativeEngineBoots -e frame.time
+Print all UPD traffic for eth0<pre><code>tcpdump -i eth0 -nn udp</code></pre>
+Print all UDP traffic. Second column is EngineID<pre><code>tshark -i any -Y '(udp.srcport == 161)' -T fields -e ip.src -e snmp.msgAuthoritativeEngineID -e snmp.msgAuthoritativeEngineTime -e snmp.msgAuthoritativeEngineBoots -e frame.time</code></pre>
+Query one particular engineID<pre><code>tshark -i any -Y '(udp.srcport == 161) && (snmp.msgAuthoritativeEngineID == 80:00:3a:8c:04)' -T fields -e ip.src -e snmp.msgAuthoritativeEngineID -e snmp.msgAuthoritativeEngineTime -e snmp.msgAuthoritativeEngineBoots -e frame.time</code></pre>
 <p>Download this section: <a href="src/udp.sh">https://aigarskadikis.github.io/src/udp.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/udp.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/udp.sh</a></p>
 </div>
 <input type="radio" name="tabs" id="web"><label for="web">web</label><div class="tab">
-# Zabbix 6.0 frontend module to hide "Templates" column under "Configuration" => "Hosts"
-cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/BIhdADqcyosJxdxJssUvYbZwczCa4NL6WKTOtRi0c554WcmBrkKJ0mJAeAaic7i991X+PJKgUTuAnCLyHef+BXOL1bHqkaZZZr4lBVY4be1LihI2ek87Yq0PoxsOmTJvtFLvNkQuXDQEwdAqs4FwSYnDJRsbo8LnCmjlRabqLk15axqJS9ccv9L4lAHtEWnvKA66Boc2njRgpyJXQUNhKfStLJlmV1gwGUBCH0Iq6bgCAp1B4hCtc7Xc6RdYDfBSEweI7oB7vSaq0PZhm3+Q7MJmw5HO4MGcUZpmeSHcvVQfnaX0AXb7OHtl6QkKs4YOdjqEDxrJ0AlQcs5ikDS8FfVYQPnVXYN0T92UMgNY+24lnNDq5fDw9yOHKvpoOM4hARy3RgSzD3rL+VHGtL5yXmORxrYWGBD0PooiX8hKTPnoQop47TmDrrShiQjSNcio30nj0Tti/MtDClNlSEaboMa1EGjcnNH7Ga4btSeGvbeY3hqTym4HHoU6JFldBtIEPFvCL1SHxSkVL8CBPapJCgmiev1aPK5VGl46hocWHfZ0GSRSf61ykDoITplZ2XU+j6/Vz4zkLh6iLeDV2ts1al+9SiL7fB2kT8LQAD7yOBAsIUzhQ2k5WH6Aa4q6XwDHfK+d63IcsYgKJoNP7qGySE9HrOcYeoWbtymprkltzXAbuRFEZqNxeqBXLPt1DM3Bd+F/QyQrDEA/nsxg+EJ6sLcnFnLDrlYxjSCxkh8KFZZHn1arIz/n1A+4yBOkE8f1f/BidwtLBOGAb7L0ngnm6VtlEw7EApeSPUvahjZXDPf9pfZSbyuLWfb9twZmEzCEa3tUvrLEa6FDibEQtzXmDNEWJIg4NIlw+MW56igfQ0c3pkxo/l78UpL+VborSVzdI46H3IKxY6bF7t9bk6IMiikie60tZbQGxeYVrxYmKdc7FXI8MehxOkOAP7+xL4XgFYCed1vfhxu3/FAKlgiA0ITGTUzXJa+bzEs4tyWPligj3KL1tUaH9UqxDgT8uH99O9jMduja1ZaR6WadsisLXgZ3XNgGwYfbtNZfXqk6ggfOjJCLznozMugf1NiDGUVVIIRCV6esaCrcDRVU06YlOY9SmJsFuC8fApi3ul8qljMMoZHonjshOc03QmaC75XmX26xloDmK8ygeiLGzO4MWHd1REQlhavsxADSLcNM5K/riurHH4+H7MvMMrwlk7e/H6dIiQJQxSzw2kSpprUM70jwoQKRgbthQdWIGyjRmf7BOzs9gdgJ4QVqSAkhvfWIFRTLZVjvpxURMqL2Rp5X4ankwEyAhbvx0mAlWLDv2jpB3MBdBwQbIwODrTZCGPKlBcax+azw5MmGGWFEK0UMeW2w0BvJpjTP6504r/NuKU9SRlZCHC9oykwCT23x1teLxQFo3EGkdVE+AGolBqi3OxNtdUJNMvpbR3La/JetE3JGzjUVp36bwnHcddVKJhmSdeKgIXcwVJWJ+8vCeg2A9EKocxq1QMJliVymitvrnLAxBX21VYmRtto/E00MeOzrQoqoI5RHs832OyUAAPnXuYqgJ3MuAAGkCYBQAADffS3NscRn+wIAAAAABFla" | base64 --decode | unxz | tar -xv
-# On EL8 system allow NGINX to server Zabbix GUI under 127.0.0.1:80. This is useful for Zabbix API
-cd / && echo "H4sIANj39GICA+2VQU/iQBTHOfMpeuCAMdspbEGzxANRVk0UXKgHIzqp7RQmlpnuzNQFF/3sO61QQbDVi8km70fCZDLv/3/T6XtTojzERpRNkcdZYPporFRk1up7pqV/NTPgwnx07+7o1HQjaiZBpc9iaZq2lY6at+P3ZrNRqtn1vUbNbjRsu2TVrbrdLBlW6QuIpXKFYZQE5yovrmj9P0US8UCE8bdsLAipVIQZGftWK1t7CcbMnZB0npVJq1zOgpKDSkYUS4Hk2BUEvRRQ6zWGMp9Ml6MZjaOVtZB7rqKcGQcGCtwHqkvO1H8rW3yNHGHGFQ54zHw950HwutenLY5oi4kSMxzQkMjFvBILmv4h48C27AJDV0qi5BZb1/OIlFhv8WW+trclZBpRkWXW52n5+fmeDTQ0x2pLPp+w2Vr+MCy0quqOHqJ50tPXt0PzZk6ZF8Y+mSdBIdn5bJqsAoiKxUoJFR/jA2E+F1+W79m4vkU3w6Twqmhe2faggSuVN6I40m84mceMTn8gETOkRd+CaLIoalNy7771rlxGIVXaRI0xZQE3bqvmbpp3p4rM3Z3K+8q8FtncpHAnen7UO7w873Qd3O/1nO0tWGQxOOyfXjj45+lZp9s+72xaVLJH8wSNVHoZFNtetJ0T7PTb3cFZ2+kcfdR2w3dRoev+sjj/r8tO/woPnP5p9zjt8t8x0Y0vlaBsVCzvd7TBwMHnHeekd6TlgmgDqfCEqDH3iw0Oe10neTHO1UUnza+bTl+zCqtZRD4u1y/l2DlZkYeEjdQ4pzSojhMe0SdKhOAiu2s4yym9EeOCYC+kSQr3jgv1/h22FOkdMeLpB6ITwmOVrTetnO7Qbb8hSO7B/RyRIO7nRXdxEOgvl6SPZG29Vt+/L1LJt8uGbdQbzVydnC3FqznzVYpMovRThP8IqkgmXFc9lZ/KJQAAAAAAAAAAAAAAAAAAAAAAAAAAAABY5x8NJf5GACgAAA==" | base64 --decode | gunzip | tar -xv
+Zabbix 6.0 frontend module to hide "Templates" column under "Configuration" => "Hosts"<pre><code>cd / && echo "/Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4Cf/BIhdADqcyosJxdxJssUvYbZwczCa4NL6WKTOtRi0c554WcmBrkKJ0mJAeAaic7i991X+PJKgUTuAnCLyHef+BXOL1bHqkaZZZr4lBVY4be1LihI2ek87Yq0PoxsOmTJvtFLvNkQuXDQEwdAqs4FwSYnDJRsbo8LnCmjlRabqLk15axqJS9ccv9L4lAHtEWnvKA66Boc2njRgpyJXQUNhKfStLJlmV1gwGUBCH0Iq6bgCAp1B4hCtc7Xc6RdYDfBSEweI7oB7vSaq0PZhm3+Q7MJmw5HO4MGcUZpmeSHcvVQfnaX0AXb7OHtl6QkKs4YOdjqEDxrJ0AlQcs5ikDS8FfVYQPnVXYN0T92UMgNY+24lnNDq5fDw9yOHKvpoOM4hARy3RgSzD3rL+VHGtL5yXmORxrYWGBD0PooiX8hKTPnoQop47TmDrrShiQjSNcio30nj0Tti/MtDClNlSEaboMa1EGjcnNH7Ga4btSeGvbeY3hqTym4HHoU6JFldBtIEPFvCL1SHxSkVL8CBPapJCgmiev1aPK5VGl46hocWHfZ0GSRSf61ykDoITplZ2XU+j6/Vz4zkLh6iLeDV2ts1al+9SiL7fB2kT8LQAD7yOBAsIUzhQ2k5WH6Aa4q6XwDHfK+d63IcsYgKJoNP7qGySE9HrOcYeoWbtymprkltzXAbuRFEZqNxeqBXLPt1DM3Bd+F/QyQrDEA/nsxg+EJ6sLcnFnLDrlYxjSCxkh8KFZZHn1arIz/n1A+4yBOkE8f1f/BidwtLBOGAb7L0ngnm6VtlEw7EApeSPUvahjZXDPf9pfZSbyuLWfb9twZmEzCEa3tUvrLEa6FDibEQtzXmDNEWJIg4NIlw+MW56igfQ0c3pkxo/l78UpL+VborSVzdI46H3IKxY6bF7t9bk6IMiikie60tZbQGxeYVrxYmKdc7FXI8MehxOkOAP7+xL4XgFYCed1vfhxu3/FAKlgiA0ITGTUzXJa+bzEs4tyWPligj3KL1tUaH9UqxDgT8uH99O9jMduja1ZaR6WadsisLXgZ3XNgGwYfbtNZfXqk6ggfOjJCLznozMugf1NiDGUVVIIRCV6esaCrcDRVU06YlOY9SmJsFuC8fApi3ul8qljMMoZHonjshOc03QmaC75XmX26xloDmK8ygeiLGzO4MWHd1REQlhavsxADSLcNM5K/riurHH4+H7MvMMrwlk7e/H6dIiQJQxSzw2kSpprUM70jwoQKRgbthQdWIGyjRmf7BOzs9gdgJ4QVqSAkhvfWIFRTLZVjvpxURMqL2Rp5X4ankwEyAhbvx0mAlWLDv2jpB3MBdBwQbIwODrTZCGPKlBcax+azw5MmGGWFEK0UMeW2w0BvJpjTP6504r/NuKU9SRlZCHC9oykwCT23x1teLxQFo3EGkdVE+AGolBqi3OxNtdUJNMvpbR3La/JetE3JGzjUVp36bwnHcddVKJhmSdeKgIXcwVJWJ+8vCeg2A9EKocxq1QMJliVymitvrnLAxBX21VYmRtto/E00MeOzrQoqoI5RHs832OyUAAPnXuYqgJ3MuAAGkCYBQAADffS3NscRn+wIAAAAABFla" | base64 --decode | unxz | tar -xv</code></pre>
+On EL8 system allow NGINX to server Zabbix GUI under 127.0.0.1:80. This is useful for Zabbix API<pre><code>cd / && echo "H4sIANj39GICA+2VQU/iQBTHOfMpeuCAMdspbEGzxANRVk0UXKgHIzqp7RQmlpnuzNQFF/3sO61QQbDVi8km70fCZDLv/3/T6XtTojzERpRNkcdZYPporFRk1up7pqV/NTPgwnx07+7o1HQjaiZBpc9iaZq2lY6at+P3ZrNRqtn1vUbNbjRsu2TVrbrdLBlW6QuIpXKFYZQE5yovrmj9P0US8UCE8bdsLAipVIQZGftWK1t7CcbMnZB0npVJq1zOgpKDSkYUS4Hk2BUEvRRQ6zWGMp9Ml6MZjaOVtZB7rqKcGQcGCtwHqkvO1H8rW3yNHGHGFQ54zHw950HwutenLY5oi4kSMxzQkMjFvBILmv4h48C27AJDV0qi5BZb1/OIlFhv8WW+trclZBpRkWXW52n5+fmeDTQ0x2pLPp+w2Vr+MCy0quqOHqJ50tPXt0PzZk6ZF8Y+mSdBIdn5bJqsAoiKxUoJFR/jA2E+F1+W79m4vkU3w6Twqmhe2faggSuVN6I40m84mceMTn8gETOkRd+CaLIoalNy7771rlxGIVXaRI0xZQE3bqvmbpp3p4rM3Z3K+8q8FtncpHAnen7UO7w873Qd3O/1nO0tWGQxOOyfXjj45+lZp9s+72xaVLJH8wSNVHoZFNtetJ0T7PTb3cFZ2+kcfdR2w3dRoev+sjj/r8tO/woPnP5p9zjt8t8x0Y0vlaBsVCzvd7TBwMHnHeekd6TlgmgDqfCEqDH3iw0Oe10neTHO1UUnza+bTl+zCqtZRD4u1y/l2DlZkYeEjdQ4pzSojhMe0SdKhOAiu2s4yym9EeOCYC+kSQr3jgv1/h22FOkdMeLpB6ITwmOVrTetnO7Qbb8hSO7B/RyRIO7nRXdxEOgvl6SPZG29Vt+/L1LJt8uGbdQbzVydnC3FqznzVYpMovRThP8IqkgmXFc9lZ/KJQAAAAAAAAAAAAAAAAAAAAAAAAAAAABY5x8NJf5GACgAAA==" | base64 --decode | gunzip | tar -xv
 nginx -t
-systemctl reload nginx
+systemctl reload nginx</code></pre>
 <p>Download this section: <a href="src/web.sh">https://aigarskadikis.github.io/src/web.sh</a><br />
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/web.sh</a></p>
 </div>
@@ -1448,7 +1343,7 @@ SELECT t.PROCESSLIST_TIME, t.* FROM performance_schema.threads t;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysql.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysql.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="part"><label for="part">part.sql</label><div class="tab">
-Swap tables. This will allow to see oldest data. But the most recent data will be missing<pre><code>RENAME TABLE history TO history_tmp; RENAME TABLE history_old TO history;
+Swap tables. This will allow to see oldest data. but the most recent data will be missing<pre><code>RENAME TABLE history TO history_tmp; RENAME TABLE history_old TO history;
 RENAME TABLE history_uint TO history_uint_tmp; RENAME TABLE history_uint_old TO history_uint;
 RENAME TABLE history_str TO history_str_tmp; RENAME TABLE history_str_old TO history_str;
 RENAME TABLE history_log TO history_log_tmp; RENAME TABLE history_log_old TO history_log;
@@ -1681,7 +1576,7 @@ FROM pg_class c
 LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE relkind = 'r' ) a) a
 ORDER BY 5 DESC LIMIT 500;</code></pre>
-Biggest tables<pre><code>SELECT relname AS table_name, pg_size_pretty(pg_total_relation_size(relid)) AS total_size
+biggest tables<pre><code>SELECT relname AS table_name, pg_size_pretty(pg_total_relation_size(relid)) AS total_size
 FROM pg_catalog.pg_stat_user_tables
 ORDER BY pg_total_relation_size(relid) DESC LIMIT 10;</code></pre>
 Relation between hyper table and table<pre><code>select * from _timescaledb_catalog.hypertable;</code></pre>
@@ -2667,7 +2562,7 @@ Increase the height of widget. Zabbix 6.4<pre><code>UPDATE widget SET height=128
 SELECT dashboard_pageid FROM dashboard_page WHERE dashboardid=327
 );</code></pre>
 Processes MySQL<pre><code>SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;</code></pre>
-Heaviest LLD rules. Most of items. Amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
+Heaviest LLD rules. Most of items. amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
 hosts.host,
 discovery.key_,
 discovery.delay
@@ -3498,7 +3393,7 @@ ORDER BY 2,3;</code></pre>
 Reset scan of network discovery. Zabbix 6.0<pre><code>SELECT * FROM drules;
 UPDATE drules SET nextcheck=0;
 SELECT * FROM drules;</code></pre>
-Mimic information of Zabbix. Extended. Including LLD rules Zabbix 6.0<pre><code>SELECT COUNT(*), CASE hosts.status
+Mimic information of Zabbix. Extended. including LLD rules Zabbix 6.0<pre><code>SELECT COUNT(*), CASE hosts.status
 WHEN 0 THEN 'Active'
 WHEN 1 THEN 'Disabled'
 END AS hostStatus,
@@ -3571,7 +3466,7 @@ AND triggers.status=0
 AND LENGTH(triggers.error)=0
 AND LENGTH(item_rtdata.error)=0
 );</code></pre>
-Delete INTERNAL trigger events for triggers which is healthy at this very second. Since it's healthy now, we can remove old evidence why it was not working. This will allow to concentrate more preciselly on what other things is not working right now. Zabbix 5.0<pre><code>DELETE FROM events
+Delete INTERNAL trigger events for triggers which is healthy at this very second. Since it's healthy now, we can remove old evidence why it was not working. this will allow to concentrate more preciselly on what other things is not working right now. Zabbix 5.0<pre><code>DELETE FROM events
 WHERE source=3 AND object=0
 AND objectid NOT IN (
 SELECT DISTINCT triggers.triggerid
