@@ -1343,7 +1343,7 @@ SELECT t.PROCESSLIST_TIME, t.* FROM performance_schema.threads t;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysql.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysql.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="part"><label for="part">part.sql</label><div class="tab">
-Swap tables. This will allow to see oldest data. but the most recent data will be missing<pre><code>RENAME TABLE history TO history_tmp; RENAME TABLE history_old TO history;
+Swap tables. This will allow to see oldest data. But the most recent data will be missing<pre><code>RENAME TABLE history TO history_tmp; RENAME TABLE history_old TO history;
 RENAME TABLE history_uint TO history_uint_tmp; RENAME TABLE history_uint_old TO history_uint;
 RENAME TABLE history_str TO history_str_tmp; RENAME TABLE history_str_old TO history_str;
 RENAME TABLE history_log TO history_log_tmp; RENAME TABLE history_log_old TO history_log;
@@ -1576,7 +1576,7 @@ FROM pg_class c
 LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE relkind = 'r' ) a) a
 ORDER BY 5 DESC LIMIT 500;</code></pre>
-biggest tables<pre><code>SELECT relname AS table_name, pg_size_pretty(pg_total_relation_size(relid)) AS total_size
+Biggest tables<pre><code>SELECT relname AS table_name, pg_size_pretty(pg_total_relation_size(relid)) AS total_size
 FROM pg_catalog.pg_stat_user_tables
 ORDER BY pg_total_relation_size(relid) DESC LIMIT 10;</code></pre>
 Relation between hyper table and table<pre><code>select * from _timescaledb_catalog.hypertable;</code></pre>
@@ -2562,7 +2562,7 @@ Increase the height of widget. Zabbix 6.4<pre><code>UPDATE widget SET height=128
 SELECT dashboard_pageid FROM dashboard_page WHERE dashboardid=327
 );</code></pre>
 Processes MySQL<pre><code>SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;</code></pre>
-Heaviest LLD rules. Most of items. amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
+Heaviest LLD rules. Most of items. Amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
 hosts.host,
 discovery.key_,
 discovery.delay
@@ -3393,7 +3393,7 @@ ORDER BY 2,3;</code></pre>
 Reset scan of network discovery. Zabbix 6.0<pre><code>SELECT * FROM drules;
 UPDATE drules SET nextcheck=0;
 SELECT * FROM drules;</code></pre>
-Mimic information of Zabbix. Extended. including LLD rules Zabbix 6.0<pre><code>SELECT COUNT(*), CASE hosts.status
+Mimic information of Zabbix. Extended. Including LLD rules Zabbix 6.0<pre><code>SELECT COUNT(*), CASE hosts.status
 WHEN 0 THEN 'Active'
 WHEN 1 THEN 'Disabled'
 END AS hostStatus,
@@ -3466,7 +3466,7 @@ AND triggers.status=0
 AND LENGTH(triggers.error)=0
 AND LENGTH(item_rtdata.error)=0
 );</code></pre>
-Delete INTERNAL trigger events for triggers which is healthy at this very second. Since it's healthy now, we can remove old evidence why it was not working. this will allow to concentrate more preciselly on what other things is not working right now. Zabbix 5.0<pre><code>DELETE FROM events
+Delete INTERNAL trigger events for triggers which is healthy at this very second. Since it's healthy now, we can remove old evidence why it was not working. This will allow to concentrate more preciselly on what other things is not working right now. Zabbix 5.0<pre><code>DELETE FROM events
 WHERE source=3 AND object=0
 AND objectid NOT IN (
 SELECT DISTINCT triggers.triggerid
