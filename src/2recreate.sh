@@ -29,13 +29,27 @@ echo -e "\n##### $FILE #####"
 # this is master block for "TAB"
 echo "<input type=\"radio\" name=\"tabs\" id=\"$NAME\"><label for=\"$NAME\">$NAME</label><div class=\"tab\">" > $NAME.inc
 
+# analyze the original "TEXT" file, blindly remove first 2 lines
+gawk '
+function capitalize_sentences(s,    i) {
+    # Capitalize first letter
+    s = toupper(substr(s,1,1)) substr(s,2)
 
-awk '
+    # Capitalize every letter following ". "
+    for (i = 3; i < length(s); i++) {
+        if (substr(s,i-2,2) == ". ")
+            s = substr(s,1,i-1) toupper(substr(s,i,1)) substr(s,i+1)
+    }
+
+    return s
+}
+
 BEGIN {
     incode = 0
 }
 
 {
+    # Empty line closes code block
     if ($0 == "") {
         if (incode) {
             print "</code></pre>"
@@ -44,24 +58,21 @@ BEGIN {
         next
     }
 
-    if ($0 ~ /^--/) {
+    # Comment line becomes heading
+    if ($0 ~ /^#/) {
         line = $0
-        sub(/^-- ?/, "", line)
+        sub(/^# ?/, "", line)
 
-        line = toupper(substr(line,1,1)) substr(line,2)
-
-        while (match(line, /\. [a-z]/)) {
-            pos = RSTART + 2
-            line = substr(line,1,pos-1) toupper(substr(line,pos,1)) substr(line,pos+1)
-        }
+        line = capitalize_sentences(line)
 
         print line
         print "<pre><code>"
         incode = 1
+        next
     }
-    else {
-        print
-    }
+
+    # Normal code line
+    print
 }
 
 END {
@@ -102,45 +113,36 @@ echo -e "\n##### $FILE #####"
 # this is master block for "TAB"
 echo "<input type=\"radio\" name=\"tabs\" id=\"$NAME\"><label for=\"$NAME\">$FILE</label><div class=\"tab\">" > $NAME.inc
 
-awk '
-BEGIN {
-    incode = 0
-}
+# analyze the original "TEXT" file, blindly remove first 2 lines
+cat $FILE | while IFS= read -r LINE
+do {
+	
+# check empty line
+echo "$LINE" | grep "^$" > /dev/null
+if [ $? -eq 0 ]; then
+# echo -e "\nempty"
+echo "</code></pre>" >> $NAME.inc
+else
 
-{
-    if ($0 == "") {
-        if (incode) {
-            print "</code></pre>"
-            incode = 0
-        }
-        next
-    }
+# check if the line is having comment
+echo "$LINE" | grep "^--" > /dev/null
+if [ $? -eq 0 ]; then
+# echo comment
+# If sentence endis with dot and space '. ', then uppercase the letter of next sentence
+OUT=$(echo "$LINE" | sed 's|^--||' | sed 's/\. ./\U&/')
+# convert line first letter to uppercase
+echo -e "${OUT^}\n<pre><code>" >> $NAME.inc
+else
+# blindly assume this is line having useful code
+echo -n '.'
+# echo -n "$LINE" >> $NAME.inc
+echo "$LINE" >> $NAME.inc
 
-    if ($0 ~ /^--/) {
-        line = $0
-        sub(/^-- ?/, "", line)
+fi
 
-        line = toupper(substr(line,1,1)) substr(line,2)
+fi
 
-        while (match(line, /\. [a-z]/)) {
-            pos = RSTART + 2
-            line = substr(line,1,pos-1) toupper(substr(line,pos,1)) substr(line,pos+1)
-        }
-
-        print line
-        print "<pre><code>"
-        incode = 1
-    }
-    else {
-        print
-    }
-}
-
-END {
-    if (incode)
-        print "</code></pre>"
-}
-' "$FILE" >> "$NAME.inc"
+} done
 
 echo "<p>Download this section: <a href=\"src/$FILE\">https://aigarskadikis.github.io/src/$FILE</a><br />" >> $NAME.inc
 echo "Fancy syntax highlighter? Read same page on GitHub: <a href=\"https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/$FILE\" target=\"_blank\">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/$FILE</a></p>" >> $NAME.inc

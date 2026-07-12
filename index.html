@@ -407,8 +407,8 @@ Show how much data generate in a specific date<pre><code>ls -lb /var/lib/mysql/z
 Backup etc to home directory in deadable format<pre><code>cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
 List biggest partitions<pre><code>ls --sort=size -lh | grep '#' | tac</code></pre>
 Send all UDP 162 traffic into a human readable log<pre><code>tcpdump -l -i any udp dst port 162 -x -vv 1>&2 >/tmp/udp162.log</code></pre>
-Transport data. On destination server go to directory where files must be places. set to listen on port 1234<pre><code>nc -l 1234 | tar -xvf -</code></pre>
-Transport data. On source server. start sending. replace x.y.z.w with real IP address<pre><code>tar cf - . | nc x.y.z.w 1234</code></pre>
+Transport data. On destination server go to directory where files must be places. Set to listen on port 1234<pre><code>nc -l 1234 | tar -xvf -</code></pre>
+Transport data. On source server. Start sending. Replace x.y.z.w with real IP address<pre><code>tar cf - . | nc x.y.z.w 1234</code></pre>
 Compress /var/lib/mysql by using lz4<pre><code>dnf install lz4
 tar --create --verbose --use-compress-program='lz4' --file=/tmp/var.lib.mysql.tar.lz4 /var/lib/mysql</code></pre>
 Restore<pre><code>rm /var/lib/mysql/* -rf
@@ -711,7 +711,7 @@ Create backup with a purpose to set up master to master replication<pre><code>my
 --ignore-table=zabbix.trends \
 --ignore-table=zabbix.trends_uint | gzip --fast > /tmp/backup.sql.gz
 chmod 777 /tmp/backup.sql.gz</code></pre>
-Schema dump for historical tables only. Backup schema for 7 historical tables. usefull if need to repair replication as fast as possible<pre><code>mysqldump --set-gtid-purged=OFF --no-data zabbix history history_uint history_str history_log history_text trends trends_uint > empty.data.tables.with.partitions.sql</code></pre>
+Schema dump for historical tables only. Backup schema for 7 historical tables. Usefull if need to repair replication as fast as possible<pre><code>mysqldump --set-gtid-purged=OFF --no-data zabbix history history_uint history_str history_log history_text trends trends_uint > empty.data.tables.with.partitions.sql</code></pre>
 Data backup with gz compression<pre><code>mysqldump \
 --defaults-file=/root/.my.cnf \
 --set-gtid-purged=OFF \
@@ -1194,7 +1194,7 @@ free -h >> /tmp/$(hostname).characteristics.txt
 cat /proc/cpuinfo >> /tmp/$(hostname).characteristics.txt
 df -h >> /tmp/$(hostname).characteristics.txt</code></pre>
 Usage of swap:<pre><code>for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done >> /tmp/$(hostname).swap.usage.txt</code></pre>
-Process list. Top memory. top CPU<pre><code>ps auxww > /tmp/process.list.txt
+Process list. Top memory. Top CPU<pre><code>ps auxww > /tmp/process.list.txt
 ps auxww --sort -%mem > /tmp/top.mem.processes.txt
 ps auxww --sort -%cpu > /tmp/top.cpu.processes.txt</code></pre>
 Shared memory segments and semaphore arrays<pre><code>ipcs -a > /tmp/shared.memory.segments.and.semaphore.arrays.txt</code></pre>
