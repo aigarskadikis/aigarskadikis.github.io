@@ -1601,6 +1601,17 @@ WHERE e.source = 0 AND e.object = 0 AND NOT EXISTS (
 SELECT 1 FROM triggers t WHERE t.triggerid = e.objectid
 ) LIMIT 50000
 );</code></pre>
+Query orphaned events<pre><code>SELECT e.name FROM events e
+WHERE e.source = 0 AND e.object = 0 AND NOT EXISTS (
+SELECT 1 FROM triggers t WHERE t.triggerid = e.objectid
+) LIMIT 10;</code></pre>
+Delete orphaned events. PostgreSQL/MySQL compatible<pre><code>DELETE FROM events
+WHERE eventid IN (SELECT eventid FROM (
+SELECT e.eventid FROM events e
+WHERE e.source = 0 AND e.object = 0 AND NOT EXISTS (
+SELECT 1 FROM triggers t WHERE t.triggerid = e.objectid
+) LIMIT 10
+) AS x);</code></pre>
 Problems history time selector, Zabbix 7.0, 8.0<pre><code>SELECT users.username, users.refresh, profiles.idx, profiles.value_str
 FROM profiles,users
 WHERE users.userid=profiles.userid

@@ -24,6 +24,21 @@ SELECT 1 FROM triggers t WHERE t.triggerid = e.objectid
 ) LIMIT 50000
 );
 
+--query orphaned events
+SELECT e.name FROM events e
+WHERE e.source = 0 AND e.object = 0 AND NOT EXISTS (
+SELECT 1 FROM triggers t WHERE t.triggerid = e.objectid
+) LIMIT 10;
+
+--delete orphaned events. PostgreSQL/MySQL compatible
+DELETE FROM events
+WHERE eventid IN (SELECT eventid FROM (
+SELECT e.eventid FROM events e
+WHERE e.source = 0 AND e.object = 0 AND NOT EXISTS (
+SELECT 1 FROM triggers t WHERE t.triggerid = e.objectid
+) LIMIT 10
+) AS x);
+
 --Problems history time selector, Zabbix 7.0, 8.0
 SELECT users.username, users.refresh, profiles.idx, profiles.value_str
 FROM profiles,users
