@@ -407,8 +407,8 @@ Show how much data generate in a specific date<pre><code>ls -lb /var/lib/mysql/z
 Backup etc to home directory in deadable format<pre><code>cd /etc && mkdir -p ~/backup${PWD} && cp -a * ~/backup${PWD}</code></pre>
 List biggest partitions<pre><code>ls --sort=size -lh | grep '#' | tac</code></pre>
 Send all UDP 162 traffic into a human readable log<pre><code>tcpdump -l -i any udp dst port 162 -x -vv 1>&2 >/tmp/udp162.log</code></pre>
-Transport data. On destination server go to directory where files must be places. Set to listen on port 1234<pre><code>nc -l 1234 | tar -xvf -</code></pre>
-Transport data. On source server. Start sending. Replace x.y.z.w with real IP address<pre><code>tar cf - . | nc x.y.z.w 1234</code></pre>
+Transport data. On destination server go to directory where files must be places. set to listen on port 1234<pre><code>nc -l 1234 | tar -xvf -</code></pre>
+Transport data. On source server. start sending. replace x.y.z.w with real IP address<pre><code>tar cf - . | nc x.y.z.w 1234</code></pre>
 Compress /var/lib/mysql by using lz4<pre><code>dnf install lz4
 tar --create --verbose --use-compress-program='lz4' --file=/tmp/var.lib.mysql.tar.lz4 /var/lib/mysql</code></pre>
 Restore<pre><code>rm /var/lib/mysql/* -rf
@@ -711,7 +711,7 @@ Create backup with a purpose to set up master to master replication<pre><code>my
 --ignore-table=zabbix.trends \
 --ignore-table=zabbix.trends_uint | gzip --fast > /tmp/backup.sql.gz
 chmod 777 /tmp/backup.sql.gz</code></pre>
-Schema dump for historical tables only. Backup schema for 7 historical tables. Usefull if need to repair replication as fast as possible<pre><code>mysqldump --set-gtid-purged=OFF --no-data zabbix history history_uint history_str history_log history_text trends trends_uint > empty.data.tables.with.partitions.sql</code></pre>
+Schema dump for historical tables only. Backup schema for 7 historical tables. usefull if need to repair replication as fast as possible<pre><code>mysqldump --set-gtid-purged=OFF --no-data zabbix history history_uint history_str history_log history_text trends trends_uint > empty.data.tables.with.partitions.sql</code></pre>
 Data backup with gz compression<pre><code>mysqldump \
 --defaults-file=/root/.my.cnf \
 --set-gtid-purged=OFF \
@@ -1194,7 +1194,7 @@ free -h >> /tmp/$(hostname).characteristics.txt
 cat /proc/cpuinfo >> /tmp/$(hostname).characteristics.txt
 df -h >> /tmp/$(hostname).characteristics.txt</code></pre>
 Usage of swap:<pre><code>for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done >> /tmp/$(hostname).swap.usage.txt</code></pre>
-Process list. Top memory. Top CPU<pre><code>ps auxww > /tmp/process.list.txt
+Process list. Top memory. top CPU<pre><code>ps auxww > /tmp/process.list.txt
 ps auxww --sort -%mem > /tmp/top.mem.processes.txt
 ps auxww --sort -%cpu > /tmp/top.cpu.processes.txt</code></pre>
 Shared memory segments and semaphore arrays<pre><code>ipcs -a > /tmp/shared.memory.segments.and.semaphore.arrays.txt</code></pre>
@@ -1343,7 +1343,7 @@ SELECT t.PROCESSLIST_TIME, t.* FROM performance_schema.threads t;</code></pre>
 Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysql.sql" target="_blank">https://github.com/aigarskadikis/aigarskadikis.github.io/blob/main/src/mysql.sql</a></p>
 </div>
 <input type="radio" name="tabs" id="part"><label for="part">part.sql</label><div class="tab">
-Swap tables. This will allow to see oldest data. But the most recent data will be missing<pre><code>RENAME TABLE history TO history_tmp; RENAME TABLE history_old TO history;
+Swap tables. This will allow to see oldest data. but the most recent data will be missing<pre><code>RENAME TABLE history TO history_tmp; RENAME TABLE history_old TO history;
 RENAME TABLE history_uint TO history_uint_tmp; RENAME TABLE history_uint_old TO history_uint;
 RENAME TABLE history_str TO history_str_tmp; RENAME TABLE history_str_old TO history_str;
 RENAME TABLE history_log TO history_log_tmp; RENAME TABLE history_log_old TO history_log;
@@ -1576,7 +1576,7 @@ FROM pg_class c
 LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE relkind = 'r' ) a) a
 ORDER BY 5 DESC LIMIT 500;</code></pre>
-Biggest tables<pre><code>SELECT relname AS table_name, pg_size_pretty(pg_total_relation_size(relid)) AS total_size
+biggest tables<pre><code>SELECT relname AS table_name, pg_size_pretty(pg_total_relation_size(relid)) AS total_size
 FROM pg_catalog.pg_stat_user_tables
 ORDER BY pg_total_relation_size(relid) DESC LIMIT 10;</code></pre>
 Relation between hyper table and table<pre><code>select * from _timescaledb_catalog.hypertable;</code></pre>
@@ -1588,6 +1588,11 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 To remove not recovered problems you can run this query<pre><code>DELETE FROM problem WHERE source = 3 AND r_eventid IS NULL;</code></pre>
+Biggest host object by SNMP aggregations<pre><code>SELECT hosts.host, COUNT(*)
+FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND hosts.flags IN (0,4) AND hosts.status=0 AND items.status=0 AND items.flags IN (0,4) AND items.type=20
+GROUP BY 1 ORDER BY 2 DESC LIMIT 20;</code></pre>
 For the orphaned events<pre><code>DELETE FROM events
 WHERE eventid IN (
 SELECT e.eventid
@@ -2562,7 +2567,7 @@ Increase the height of widget. Zabbix 6.4<pre><code>UPDATE widget SET height=128
 SELECT dashboard_pageid FROM dashboard_page WHERE dashboardid=327
 );</code></pre>
 Processes MySQL<pre><code>SELECT LEFT(info, 140), LENGTH(info), time, state FROM INFORMATION_SCHEMA.PROCESSLIST where time>0 and command<>"Sleep" ORDER BY time;</code></pre>
-Heaviest LLD rules. Most of items. Amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
+Heaviest LLD rules. Most of items. amount of items per LLD. Zabbix 6.0<pre><code>SELECT COUNT(discovery.key_),
 hosts.host,
 discovery.key_,
 discovery.delay
@@ -3393,7 +3398,7 @@ ORDER BY 2,3;</code></pre>
 Reset scan of network discovery. Zabbix 6.0<pre><code>SELECT * FROM drules;
 UPDATE drules SET nextcheck=0;
 SELECT * FROM drules;</code></pre>
-Mimic information of Zabbix. Extended. Including LLD rules Zabbix 6.0<pre><code>SELECT COUNT(*), CASE hosts.status
+Mimic information of Zabbix. Extended. including LLD rules Zabbix 6.0<pre><code>SELECT COUNT(*), CASE hosts.status
 WHEN 0 THEN 'Active'
 WHEN 1 THEN 'Disabled'
 END AS hostStatus,
@@ -3466,7 +3471,7 @@ AND triggers.status=0
 AND LENGTH(triggers.error)=0
 AND LENGTH(item_rtdata.error)=0
 );</code></pre>
-Delete INTERNAL trigger events for triggers which is healthy at this very second. Since it's healthy now, we can remove old evidence why it was not working. This will allow to concentrate more preciselly on what other things is not working right now. Zabbix 5.0<pre><code>DELETE FROM events
+Delete INTERNAL trigger events for triggers which is healthy at this very second. Since it's healthy now, we can remove old evidence why it was not working. this will allow to concentrate more preciselly on what other things is not working right now. Zabbix 5.0<pre><code>DELETE FROM events
 WHERE source=3 AND object=0
 AND objectid NOT IN (
 SELECT DISTINCT triggers.triggerid
