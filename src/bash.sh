@@ -7,6 +7,12 @@ zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+
 # pss consumptions with service user zabbix
 sudo -u zabbix zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"
 
+# from proxy to server, run on proxy
+tcpdump -npi any -s0 -w /tmp/proxyToServer.pcap 'host ip.of.zabbix.server and tcp port 10051'
+
+# run on central server, from proxy to server
+tcpdump -npi any -s0 -w /tmp/serverAcceptsFromProxy.pcap 'src host ip.of.zabbix.proxy and dst port 10051 and tcp'
+
 # rotate between values
 echo "
 one
