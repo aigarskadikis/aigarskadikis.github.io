@@ -7,6 +7,16 @@ SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY s
 --to remove not recovered problems you can run this query
 DELETE FROM problem WHERE source = 3 AND r_eventid IS NULL;
 
+--amount of passive zabbix agent checks per proxy
+SELECT hosts.host, items.delay, COUNT(*)
+FROM items
+JOIN hosts ON (hosts.hostid=items.hostid)
+LEFT JOIN hosts proxy ON (hosts.proxy_hostid=proxy.hostid)
+WHERE hosts.status=0 AND items.status=0 AND hosts.flags IN (0,4) AND items.flags IN (0,4)
+AND proxy.host = 'z60prx' AND items.type = 0
+GROUP BY 1,2
+ORDER BY 1,3;
+
 --biggest host object by SNMP aggregations
 SELECT hosts.host, COUNT(*)
 FROM items, hosts
