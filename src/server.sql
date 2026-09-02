@@ -7,6 +7,20 @@ SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY s
 --to remove not recovered problems you can run this query
 DELETE FROM problem WHERE source = 3 AND r_eventid IS NULL;
 
+--IT services. Zabbix 7.0
+SELECT service_alarms.clock,CASE service_alarms.value
+WHEN -1 THEN 'Ok'
+WHEN 0 THEN 'notClass'
+WHEN 1 THEN 'info'
+WHEN 2 THEN 'warning'
+WHEN 3 THEN 'average'
+WHEN 4 THEN 'high'
+WHEN 5 THEN 'disaster'
+END AS "value",services.name from service_alarms, services
+WHERE services.serviceid=service_alarms.serviceid
+ORDER BY service_alarms.clock DESC
+LIMIT 9;
+
 --amount of passive zabbix agent checks per proxy
 SELECT hosts.host, items.delay, COUNT(*)
 FROM items
