@@ -7,6 +7,29 @@ SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY s
 --to remove not recovered problems you can run this query
 DELETE FROM problem WHERE source = 3 AND r_eventid IS NULL;
 
+--trigger functions in use
+SELECT functions.name, functions.parameter, COUNT(*)
+FROM functions
+JOIN items ON (items.itemid=functions.itemid)
+JOIN hosts ON (items.hostid=hosts.hostid)
+JOIN triggers ON (triggers.triggerid=functions.triggerid)
+WHERE hosts.status=0
+AND items.status=0
+AND triggers.status=0
+AND items.flags IN (0,4) AND hosts.flags IN (0,4) AND triggers.flags IN (0,4)
+GROUP BY 1,2
+ORDER BY 1,2;
+
+--scan for calculated item
+SELECT DISTINCT items.params, COUNT(*) FROM items, hosts
+WHERE hosts.hostid=items.hostid
+AND params like '%//%'
+AND params like (SELECT CONCAT('%',key_,'%') FROM items WHERE itemid=763146)
+AND hosts.status=0 AND items.status=0 AND items.flags IN (0,4) AND hosts.flags IN (0,4)
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 99;
+
 --IT services. Zabbix 7.0
 SELECT service_alarms.clock,CASE service_alarms.value
 WHEN -1 THEN 'Ok'
