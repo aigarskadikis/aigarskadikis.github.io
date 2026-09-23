@@ -20,6 +20,19 @@ AND items.flags IN (0,4) AND hosts.flags IN (0,4) AND triggers.flags IN (0,4)
 GROUP BY 1,2
 ORDER BY 1,2;
 
+--big time frame in Graph widget. Zabbix 6.0
+SELECT dashboard.name,
+widget_field.widgetid,
+widget_field.name,
+widget_field.value_int,
+widget_field.value_str
+FROM widget, widget_field, dashboard_page, dashboard
+WHERE widget_field.widgetid=widget.widgetid
+AND dashboard_page.dashboard_pageid=widget.dashboard_pageid
+AND dashboard.dashboardid=dashboard_page.dashboardid
+AND widget.type='svggraph'
+AND widget_field.name IN ('time_from','source','time_to');
+
 --scan for calculated item
 SELECT DISTINCT items.params, COUNT(*) FROM items, hosts
 WHERE hosts.hostid=items.hostid
