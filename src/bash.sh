@@ -4,6 +4,12 @@ ps -eo pcpu,pmem,pid,ppid,user,stat,args | sort -k 1 -r | head -6 | sed 's/$/\n/
 # pss consumtions with root user
 zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"
 
+# summarize zabbix_server config
+grep -r '^[[:space:]]*[A-Z].*' /etc/zabbix/zabbix_server.conf /etc/zabbix/zabbix_server.d | sort
+
+# summarize zabbix_proxy config
+grep -r '^[[:space:]]*[A-Z].*' /etc/zabbix/zabbix_proxy.conf /etc/zabbix/zabbix_proxy.d | sort
+
 # pss consumptions with service user zabbix
 sudo -u zabbix zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"
 

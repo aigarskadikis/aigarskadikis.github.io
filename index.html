@@ -148,6 +148,8 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 <input type="radio" name="tabs" id="bash"><label for="bash">bash</label><div class="tab">
 Hog processes, hog<pre><code>ps -eo pcpu,pmem,pid,ppid,user,stat,args | sort -k 1 -r | head -6 | sed 's/$/\n/'</code></pre>
 Pss consumtions with root user<pre><code>zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"</code></pre>
+Summarize zabbix_server config<pre><code>grep -r '^[[:space:]]*[A-Z].*' /etc/zabbix/zabbix_server.conf /etc/zabbix/zabbix_server.d | sort</code></pre>
+Summarize zabbix_proxy config<pre><code>grep -r '^[[:space:]]*[A-Z].*' /etc/zabbix/zabbix_proxy.conf /etc/zabbix/zabbix_proxy.d | sort</code></pre>
 Pss consumptions with service user zabbix<pre><code>sudo -u zabbix zabbix_agent2 -t 'proc.get[zabbix_server]' | grep -Eo "[^\{]+: trapper #2 [^\}]+"</code></pre>
 From proxy to server, run on proxy<pre><code>tcpdump -npi any -s0 -w /tmp/proxyToServer.pcap 'host ip.of.zabbix.server and tcp port 10051'</code></pre>
 Run on central server, from proxy to server<pre><code>tcpdump -npi any -s0 -w /tmp/serverAcceptsFromProxy.pcap 'src host ip.of.zabbix.proxy and dst port 10051 and tcp'</code></pre>
@@ -1604,7 +1606,7 @@ ORDER BY 1,2;</code></pre>
 Scan for calculated item<pre><code>SELECT DISTINCT items.params, COUNT(*) FROM items, hosts
 WHERE hosts.hostid=items.hostid
 AND params like '%//%'
-AND params like (SELECT CONCAT('%',key_,'%') FROM items WHERE itemid=763146)
+AND params like (SELECT CONCAT('%',key_,'%') FROM items WHERE itemid=47917)
 AND hosts.status=0 AND items.status=0 AND items.flags IN (0,4) AND hosts.flags IN (0,4)
 GROUP BY 1
 ORDER BY 2 DESC

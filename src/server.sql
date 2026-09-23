@@ -24,7 +24,7 @@ ORDER BY 1,2;
 SELECT DISTINCT items.params, COUNT(*) FROM items, hosts
 WHERE hosts.hostid=items.hostid
 AND params like '%//%'
-AND params like (SELECT CONCAT('%',key_,'%') FROM items WHERE itemid=763146)
+AND params like (SELECT CONCAT('%',key_,'%') FROM items WHERE itemid=47917)
 AND hosts.status=0 AND items.status=0 AND items.flags IN (0,4) AND hosts.flags IN (0,4)
 GROUP BY 1
 ORDER BY 2 DESC
