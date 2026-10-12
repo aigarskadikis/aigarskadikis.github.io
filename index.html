@@ -1592,6 +1592,11 @@ Fancy syntax highlighter? Read same page on GitHub: <a href="https://github.com/
 How many user groups has debug mode 1. Zabbix 5.0, 5.2<pre><code>SELECT COUNT(*) FROM usrgrp WHERE debug_mode=1;</code></pre>
 Active problems including internal. Zabbix 4.0, 5.0, 6.0, 6.2<pre><code>SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY severity;</code></pre>
 To remove not recovered problems you can run this query<pre><code>DELETE FROM problem WHERE source = 3 AND r_eventid IS NULL;</code></pre>
+How many even records per day. PostgreSQL<pre><code>SELECT to_timestamp(clock)::date, COUNT(*) AS Total, COUNT(*) FILTER (WHERE name LIKE '%Proxy%')
+FROM events
+WHERE source = 0 AND object = 0 AND value = 1
+AND clock > EXTRACT(epoch FROM NOW() - INTERVAL '20 days')::int
+GROUP BY 1 ORDER BY 1;</code></pre>
 Trigger functions in use<pre><code>SELECT functions.name, functions.parameter, COUNT(*)
 FROM functions
 JOIN items ON (items.itemid=functions.itemid)
@@ -1603,6 +1608,23 @@ AND triggers.status=0
 AND items.flags IN (0,4) AND hosts.flags IN (0,4) AND triggers.flags IN (0,4)
 GROUP BY 1,2
 ORDER BY 1,2;</code></pre>
+Which templates have triggers in Multiple mode<pre><code>SELECT DISTINCT h.host, t.description
+FROM triggers t
+JOIN functions f ON f.triggerid = t.triggerid
+JOIN items i ON i.itemid = f.itemid
+JOIN hosts h ON h.hostid = i.hostid
+WHERE h.status = 3 AND t.type = 1;</code></pre>
+Shows the hosts and trigger settings for open problems<pre><code>SELECT h.host, t.triggerid, t.description, t.type, t.recovery_mode, COUNT(*)
+FROM problem p
+JOIN triggers t ON t.triggerid = p.objectid
+JOIN functions f ON f.triggerid = t.triggerid
+JOIN items i ON i.itemid = f.itemid
+JOIN hosts h ON h.hostid = i.hostid
+WHERE p.source = 0 AND p.object = 0 AND p.r_eventid IS NULL
+GROUP BY 1,2,3,4,5
+ORDER BY 6 DESC
+LIMIT 50;</code></pre>
+Housekeeper remaster defragment. PostgreSQL<pre><code>BEGIN; ALTER TABLE housekeeper RENAME TO housekeeper_old; ALTER INDEX housekeeper_pkey RENAME TO housekeeper_old_pkey; CREATE TABLE housekeeper (LIKE housekeeper_old INCLUDING ALL); COMMIT; INSERT INTO housekeeper SELECT * FROM housekeeper_old WHERE tablename NOT IN ('history','history_uint','history_str','history_log','history_text','history_bin','trends','trends_uint');</code></pre>
 Big time frame in Graph widget. Zabbix 6.0<pre><code>SELECT dashboard.name,
 widget_field.widgetid,
 widget_field.name,

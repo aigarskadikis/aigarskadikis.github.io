@@ -7,6 +7,13 @@ SELECT COUNT(*), source, object, severity FROM problem GROUP BY 2,3,4 ORDER BY s
 --to remove not recovered problems you can run this query
 DELETE FROM problem WHERE source = 3 AND r_eventid IS NULL;
 
+--how many even records per day. PostgreSQL
+SELECT to_timestamp(clock)::date, COUNT(*) AS Total, COUNT(*) FILTER (WHERE name LIKE '%Proxy%')
+FROM events
+WHERE source = 0 AND object = 0 AND value = 1
+AND clock > EXTRACT(epoch FROM NOW() - INTERVAL '20 days')::int
+GROUP BY 1 ORDER BY 1;
+
 --trigger functions in use
 SELECT functions.name, functions.parameter, COUNT(*)
 FROM functions
@@ -19,6 +26,29 @@ AND triggers.status=0
 AND items.flags IN (0,4) AND hosts.flags IN (0,4) AND triggers.flags IN (0,4)
 GROUP BY 1,2
 ORDER BY 1,2;
+
+--which templates have triggers in Multiple mode
+SELECT DISTINCT h.host, t.description
+FROM triggers t
+JOIN functions f ON f.triggerid = t.triggerid
+JOIN items i ON i.itemid = f.itemid
+JOIN hosts h ON h.hostid = i.hostid
+WHERE h.status = 3 AND t.type = 1;
+
+--shows the hosts and trigger settings for open problems
+SELECT h.host, t.triggerid, t.description, t.type, t.recovery_mode, COUNT(*)
+FROM problem p
+JOIN triggers t ON t.triggerid = p.objectid
+JOIN functions f ON f.triggerid = t.triggerid
+JOIN items i ON i.itemid = f.itemid
+JOIN hosts h ON h.hostid = i.hostid
+WHERE p.source = 0 AND p.object = 0 AND p.r_eventid IS NULL
+GROUP BY 1,2,3,4,5
+ORDER BY 6 DESC
+LIMIT 50;
+
+--housekeeper remaster defragment. PostgreSQL
+BEGIN; ALTER TABLE housekeeper RENAME TO housekeeper_old; ALTER INDEX housekeeper_pkey RENAME TO housekeeper_old_pkey; CREATE TABLE housekeeper (LIKE housekeeper_old INCLUDING ALL); COMMIT; INSERT INTO housekeeper SELECT * FROM housekeeper_old WHERE tablename NOT IN ('history','history_uint','history_str','history_log','history_text','history_bin','trends','trends_uint');
 
 --big time frame in Graph widget. Zabbix 6.0
 SELECT dashboard.name,
