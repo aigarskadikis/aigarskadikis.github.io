@@ -14,6 +14,23 @@ WHERE source = 0 AND object = 0 AND value = 1
 AND clock > EXTRACT(epoch FROM NOW() - INTERVAL '20 days')::int
 GROUP BY 1 ORDER BY 1;
 
+--alerts per day
+SELECT TO_TIMESTAMP(alerts.clock)::date, COUNT(*) AS count, actions.name AS actionName, media_type.name AS mediaName, events.objectid,
+CASE alerts.status
+WHEN 0 THEN 'NOT_SENT'
+WHEN 1 THEN 'SENT'
+WHEN 2 THEN 'FAILED'
+WHEN 3 THEN 'NEW'
+END AS "alertStatus"
+FROM alerts
+JOIN actions ON (actions.actionid=alerts.actionid)
+JOIN events ON (events.eventid=alerts.eventid)
+JOIN media_type ON (media_type.mediatypeid=alerts.mediatypeid)
+LEFT JOIN users ON (users.userid=alerts.userid)
+WHERE alerts.clock > EXTRACT(EPOCH FROM NOW() - INTERVAL '20 days')::int
+GROUP BY 1,3,4,5,6
+ORDER BY 1,2 DESC;
+
 --trigger functions in use
 SELECT functions.name, functions.parameter, COUNT(*)
 FROM functions
